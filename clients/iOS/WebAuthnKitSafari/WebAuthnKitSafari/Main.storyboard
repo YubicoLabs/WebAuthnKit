@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina5_5" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="WebAuthnKitSafari" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Welcome to WebAuthn Starter Kit" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hBT-zX-IXl">
+                                <rect key="frame" x="0.0" y="25" width="414" height="63"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="63" id="dAZ-WT-CfY"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap Safari Icon to Login" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ohe-cz-Q9Q">
+                                <rect key="frame" x="0.0" y="404" width="414" height="63"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="63" id="pbN-M1-4yY"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleAspectFit" misplaced="YES" contentHorizontalAlignment="trailing" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6A3-Yn-4eU">
+                                <rect key="frame" x="65" y="288" width="285" height="258"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="258" id="xh1-sz-naA"/>
+                                </constraints>
+                                <state key="normal" backgroundImage="safarivc.png">
+                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="default"/>
+                                </state>
+                                <connections>
+                                    <action selector="btnLaunchSafariVC:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ugg-VI-mE8"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Ohe-cz-Q9Q" secondAttribute="bottom" constant="269" id="1Ba-wa-cV5"/>
+                            <constraint firstItem="hBT-zX-IXl" firstAttribute="leading" secondItem="Ohe-cz-Q9Q" secondAttribute="leading" id="4PS-nt-lUe"/>
+                            <constraint firstItem="6A3-Yn-4eU" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="65" id="5Z1-Ku-G0N"/>
+                            <constraint firstItem="hBT-zX-IXl" firstAttribute="trailing" secondItem="Ohe-cz-Q9Q" secondAttribute="trailing" id="8uD-JR-XEV"/>
+                            <constraint firstItem="hBT-zX-IXl" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="937-qo-cwO"/>
+                            <constraint firstItem="6A3-Yn-4eU" firstAttribute="centerX" secondItem="Ohe-cz-Q9Q" secondAttribute="centerX" id="EYC-zC-f70"/>
+                            <constraint firstItem="hBT-zX-IXl" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Jj6-Ye-bHJ"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="6A3-Yn-4eU" secondAttribute="bottom" constant="316" id="Mkt-aR-0Kx"/>
+                            <constraint firstItem="hBT-zX-IXl" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="25" id="jyW-mw-deh"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="btnLaunch" destination="6A3-Yn-4eU" id="KlN-vh-f2X"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="134.78260869565219" y="126.5625"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="safarivc.png" width="1200" height="1195"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

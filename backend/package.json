@@ -1,0 +1,11 @@
+{
+  "name": "webauthn",
+  "version": "1.0.0",
+  "description": "This is the source code used to build the Yubico WebAuthn Kit solution. The backend is built as a SAM template to be deployed via the [AWS Serverless Application Repository](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-publishing-applications.html). The clients will be used to demonstrate the WebAuthn flow to the serverless backend.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

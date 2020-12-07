@@ -1,0 +1,22 @@
+{
+    "AwsCliProfile": "",
+    "AwsRegion":"",
+    "S3BucketName":"",
+    "CfStackName":"",
+    "Suffix":"",
+    "UserPoolName":"",
+    "DatabaseName":"",
+    "DatabaseMasterUsername":"",
+    "DatabaseMasterPassword":"",
+    "DefineAuthChallengeFuncName":"",
+    "CreateAuthChallengeFuncName":"",
+    "VerifyAuthChallengeFuncName":"",
+    "WebAuthnKitApiName":"",
+    "WebAuthnKitApiFuncName":"",
+    "PreSignUpFuncName":"",
+    "JavaWebAuthnLibFuncName":"",
+    "CreateDatabaseSchemaFuncName":"",
+    "CreateDatabaseSchemaCallerFuncName":"",
+    "AmplifyHostingAppName":"",
+    "AmplifyBranchName":""
+}

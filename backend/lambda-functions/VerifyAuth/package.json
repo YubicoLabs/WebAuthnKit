@@ -1,0 +1,19 @@
+{
+  "name": "ll",
+  "version": "1.0.0",
+  "description": "",
+  "main": "VerifyAuthChallengeFIDO2.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "base64url": "^3.0.1",
+    "bcryptjs": "^2.4.3",
+    "cbor": "^5.1.0",
+    "crypto": "^1.0.1",
+    "data-api-client": "^1.1.0",
+    "validate.js": "^0.13.1"
+  }
+}
