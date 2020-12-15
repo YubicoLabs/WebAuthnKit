@@ -1,7 +1,18 @@
-# Initial creation: October 1, 2020
-# Last update: November 5, 2020
+# Last update: December 14, 2020
+# Description: Dockerized Windows PowerShell script for deploying Yubico WebAuthn Starter Kit to AWS Cloud
 
-### Region Functions ###
+# [Requirements]
+# Prerequisites for deploying the Yubico WebAuthn Starter Kit to AWS Cloud:
+#   1. AWS CLI - installed and configured
+#   2. Docker installed and running
+
+# [Get Started]
+#   1. (Optional) Modify the .\deployStarterKitPs.json with your AWS Profile, Region, etc...
+#   2. Run > .\deployStarterKit.ps1
+
+##################
+### Functions ####
+##################
 
 # Create the suffix for the deployment. It must be max five alphanumeric lower-case characters long.
 function Get-Suffix($suffix) {
@@ -42,9 +53,11 @@ function Get-DatabaseMasterPassword($databaseMasterPassword) {
    else { return $databaseMasterPassword }
 }
 
-### Region Parameters ###
+#######################
+##### Parameters ######
+#######################
 
-# Referencing the constants file deployStarterKit.config in this directory
+# Referencing the constants file deployStarterKitPs.json in this directory
 # All custom name changes should be made to deployStarterKitPs.json
 $configFile = "deployStarterKitPs.json"
 $configFileJson = Get-Content -Path $configFile | ConvertFrom-Json
@@ -137,66 +150,99 @@ Write-Host "WebAuthnKit backend folder:" $webAuthnKitBackendFolder
 $webAuthnKitClientFolder = $webAuthnKitRootFolder + "\clients\web\react\"
 Write-Host "WebAuthnKit client folder:" $webAuthnKitClientFolder
 
-### Perform the AWS deployment ###
+# Path to the User HOME folder
+$userHomeFolder = powershell echo $ENV:UserProfile
+Write-Host "User HOME folder:" $userHomeFolder
 
-# Set the active folder to the WebAuthnKit backend folder
-Set-Location -Path $webAuthnKitBackendFolder
+# Set the active folder to this script folder
+Set-Location -Path .
 
-# Create an Amazon S3 bucket used for SAM deployment
-Write-Host "Create an Amazon S3 bucket used for SAM deployment"
+####################################
+######### Docker Build #############
+####################################
+docker build -t starterkit:dev .
+Write-Host "Docker image is ready!"
+
+#1 Clean install of Java Function
+Write-Host "Step 1 [Pre-Deployment] Running mvn clean install of the JavaWebAuthnLib (Java) Lambda function..."
+docker run -w /webauthnkit/backend/lambda-functions/JavaWebAuthnLib --volume=$webAuthnKitRootFolder':'/webauthnkit starterkit:dev mvn clean install 2>&1>$null
+Write-Host "mvn clean install: COMPLETE"
+
+#2 Create an Amazon S3 bucket used for SAM deployment
+Write-Host "Step 2 [Pre-Deployment] Creating Amazon S3 bucket for staged deployment"
 aws s3 mb s3://$s3BucketName --region $awsRegion --endpoint-url https://s3.$awsRegion.amazonaws.com --profile $awsCliProfile
 
-# Call AWS SAM build and package
-Write-Host "Call AWS SAM build and package"
-sam build --use-container --skip-pull-image ; sam package --s3-bucket $s3BucketName --profile $awsCliProfile
+####################################################
+######### SAM Build | Package | Deploy #############
+####################################################
 
-# Call AWS SAM Deploy
-Write-Host "Call AWS SAM Deploy"
-sam deploy --s3-bucket $s3BucketName --stack-name $cfStackName --profile $awsCliProfile --region $awsRegion --capabilities CAPABILITY_IAM --parameter-overrides UserPoolName=$userPoolName DatabaseName=$databaseName MasterUserName=$databaseMasterUsername MasterUserPassword=$databaseMasterPassword DefineAuthChallengeFuncName=$defineAuthChallengeFuncName CreateAuthChallengeFuncName=$createAuthChallengeFuncName VerifyAuthChallengeFuncName=$verifyAuthChallengeFuncName WebAuthnKitAPIFuncName=$webAuthnKitApiFuncName PreSignUpFuncName=$preSignUpFuncName JavaWebAuthnFuncName=$javaWebAuthnLibFuncName WebAuthnKitAPIName=$webAuthnKitApiName CreateDBSchemaFuncName=$createDatabaseSchemaFuncName CreateDBSchemaCallerFuncName=$createDatabaseSchemaCallerFuncName AmplifyHostingAppName=$amplifyHostingAppName
+#3 SAM Build 
+Write-Host "Step 3 [Deployment] Running SAM build...(~1 minute) "
+docker run -w /webauthnkit/backend --volume=$webAuthnKitRootFolder':'/webauthnkit starterkit:dev /home/developer/.local/bin/sam build 2>&1>$null
+
+#4 SAM Package 
+Write-Host "Step 4 [Deployment] Running SAM package..."
+docker run -w /webauthnkit/backend --volume=$webAuthnKitRootFolder':'/webauthnkit starterkit:dev /home/developer/.local/bin/sam package 2>&1>$null
+
+#5 SAM Deploy
+Write-Host "Step 5 [Deployment] Running SAM deploy..."
+docker run -w /webauthnkit/backend --volume=$webAuthnKitRootFolder':'/webauthnkit --volume=$webAuthnKitRootFolder':'/webauthnkit --volume=$userHomeFolder\.aws:/home/developer/.aws:ro starterkit:dev /home/developer/.local/bin/sam deploy --s3-bucket $s3BucketName --stack-name $cfStackName --profile $awsCliProfile --region $awsRegion --capabilities CAPABILITY_IAM --parameter-overrides UserPoolName=$userPoolName DatabaseName=$databaseName MasterUserName=$databaseMasterUsername MasterUserPassword=$databaseMasterPassword DefineAuthChallengeFuncName=$defineAuthChallengeFuncName CreateAuthChallengeFuncName=$createAuthChallengeFuncName VerifyAuthChallengeFuncName=$verifyAuthChallengeFuncName WebAuthnKitAPIFuncName=$webAuthnKitApiFuncName PreSignUpFuncName=$preSignUpFuncName JavaWebAuthnFuncName=$javaWebAuthnLibFuncName WebAuthnKitAPIName=$webAuthnKitApiName CreateDBSchemaFuncName=$createDatabaseSchemaFuncName CreateDBSchemaCallerFuncName=$createDatabaseSchemaCallerFuncName AmplifyHostingAppName=$amplifyHostingAppName
 
 # Wait for the CloudFormation Stack to complete
-Write-Host "Waiting on stack creation..."
+Write-Host "Step 5 [Deployment] Waiting for CloudFormation deployment...(~6 minutes)"
 $cfResults = $(aws cloudformation wait stack-create-complete --stack-name $cfStackName --region $awsRegion --profile $awsCliProfile)
 Write-Host $cfResults
 
-#1 Retrieves the awsexports from CloudFormation Output and save results to the ~/src/aws-exports.js file for React Web App 
-Write-Host "Retrieving the awsexports from CloudFormation and writing constants to ~/clients/web/react/src/aws-export.js"
-
+#6 Retrieves the awsexports from CloudFormation Output and save results to the ~\src\aws-exports.js file for React Web App 
+Write-Host "Retrieving the awsexports from CloudFormation and writing constants to ~\clients\web\react\src\aws-export.js"
 $awsExports = aws cloudformation --region $awsRegion describe-stacks --stack-name $cfStackName --profile $awsCliProfile --query "Stacks[0].Outputs[?OutputKey=='AWSExports'].OutputValue" --output text
-
 New-Item -Path $webAuthnKitClientFolder\src\ -Name "aws-exports.js" -ItemType "file" -Value $awsExports -Force
 
-#2 Install and build React app
-Write-Host "Installing and building React App"
-Set-Location -Path $webAuthnKitClientFolder
-npm install
-npm run build
+#7 Install and Build React Web App Client
+Write-Host "Step 7 [Web Client] Building and installing React Web Client..."
+Write-Host "Running npm install...(~2 minutes)"
+docker run -w /webauthnkit/clients/web/react --volume=$webAuthnKitRootFolder':'/webauthnkit starterkit:dev npm install 2>&1>$null
 
-#3  Zip up all the files under /dist directory
-Write-Host "Zipping up the React app for Amplify"
+Write-Host "Step 7 [Web Client] Running npm run build....(~1 minute)"
+docker run -w /webauthnkit/clients/web/react --volume=$webAuthnKitRootFolder':'/webauthnkit starterkit:dev npm run build 2>&1>$null
+
+#8 Archive React Web App 
+# Zip up all the files under React  ~\dist directory, but not the directory itself
+Write-Host "Step 8 [Web Client] Zipping up the React app for Amplify Hosting"
 Set-Location -Path $webAuthnKitClientFolder\dist\
 compress-archive -Path index.html, main.js -DestinationPath Archive.zip -Force
 
-#4 Upload zip file to S3
-Write-Host "Uploading Amplify zip file to S3"
+#9 Upload zip file to S3
+Write-Host "Step 9 [Web Client] Uploading Web Client to S3 for staging..."
 aws s3 cp $webAuthnKitClientFolder\dist\Archive.zip s3://$s3BucketName --profile $awsCliProfile
 
-#5 Start deployment to AWS Amplify Hosting dev branch using zip file just uploaded to S3
-Write-Host "Triggering Amplify deployment..."
-
-#6 Get the Amplify App Id and store it in $amplifyAppId
+#10 Amplify Deployment (hosting) of React Web Client 
+Write-Host "Step 10 [Web Client] Deploying React Web App to Amplify (hosting) via CloudFormation..."
 $amplifyAppId = $(aws cloudformation --region $awsRegion describe-stacks --stack-name $cfStackName --profile $awsCliProfile --query "Stacks[0].Outputs[?OutputKey=='AmplifyHostingAppId'].OutputValue" --output text)
 
-Write-Host "AmplifyAppId:" $amplifyAppId
-
-#7 Call start-deployment of the client web app by passing in the zip file to the previously created Amplify Hosting dev branch
+#11 Deploy React App to AWS Amplify Hosting
+# Call start-deployment of the client web app by passing in the zip file to the previously created Amplify Hosting AMPLIFY_HOSTING_BRANCH_NAME branch 
+Write-Host "Step 11 [Web Client] Deploying React Web Client to Amplify Hosting"
 Set-Location -Path $webAuthnKitClientFolder
 aws amplify start-deployment --app-id $amplifyAppId --branch-name $amplifyBranchName --source-url s3://$s3BucketName/Archive.zip --region $awsRegion --profile $awsCliProfile
 
-# DONE Open hosted web app
+#12 Launch Amplify Hosting Endpoint in Browser
+Write-Host "Step 12 [DEPLOYMENT COMPLETED] Launching Web Client in browser"
 $amplifyHostingEndpoint = $(aws cloudformation --region $awsRegion describe-stacks --stack-name $cfStackName --profile $awsCliProfile --query "Stacks[0].Outputs[?OutputKey=='AmplifyHostingEndpoint'].OutputValue" --output text) 
-
-Write-Host "AmplifyHostingEndpoint:" $amplifyHostingEndpoint
 Write-Host "DONE"
-
+Write-Host "Launching web client at:" $amplifyHostingEndpoint
+# Pause for 7 seconds to let the web app to refresh
+Start-Sleep -Seconds 7
 start $amplifyHostingEndpoint
+
+#13 Show CloudFormation Console Link to view AWS resources
+Write-Host "Step 13 [Review] Click here to see the output of your CloudFormation Stack"
+$stackID=$(aws cloudformation describe-stacks --stack-name $cfStackName --region $awsRegion --profile $awsCliProfile --query "Stacks[0].StackId" --output text)
+Write-Host "https://console.aws.amazon.com/cloudformation/home?region=$awsRegion#/stacks/outputs?stackId=$stackID"
+
+#14 TEARDOWN (Optional)
+Write-Host "Step 14 [Teardown (Optional)] If you want to DELETE (nearly) everything you just deployed and/or start over, run these commands:"
+Write-Host "Removes the CloudFormation Stack which removes (nearly) all the resources it created"
+Write-Host "> aws cloudformation delete-stack --stack-name $cfStackName --region $awsRegion --profile $awsCliProfile"
+Write-Host "Removes the S3 bucket used only for deploying the WebAuthn Starter Kit"
+Write-Host "> aws s3 rb s3://$s3BucketName --force --region $awsRegion --profile $awsCliProfile"

@@ -21,9 +21,8 @@ WebAuthn Starter Kit utilizes the AWS Serverless Application Model (AWS SAM) tem
 ### Prerequisites
 1. [Install the AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 2. [Setup AWS CLI Credentials](https://github.com/awsdocs/aws-sam-developer-guide/blob/master/doc_source/serverless-getting-started-set-up-credentials.md)
-3. [Install the AWS SAM CLI + Docker](https://github.com/awsdocs/aws-sam-developer-guide/blob/master/doc_source/serverless-sam-cli-install.md)
-4. [Node.js](https://nodejs.org/en/download/current/) <sub><sup>*you automatically get npm with Node install</sup></sub>
-
+3. Install Docker ([Mac](https://hub.docker.com/editions/community/docker-ce-desktop-mac/) |
+[Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows/))
 
 ## Deployment
 In this section, we'll clone (or download .zip release) the WebAuthn Starter Kit repository and execute the platform-specific script to automatically deploy the backend resources to your AWS account.
@@ -41,34 +40,6 @@ Choose the platform of your workstation that is deploying the backend. If you ar
 ### 3. Configure Deployment Script (Optional)
 Each of the platform-specific scripts read from a configuration file that specifies deployment specific details like AWS region, AWS CLI profile name, and other custom naming options. You don't need to modify the config file if you wish to deploy with all default values.
 
-Here's what you can expect to (optionally) configure before deployment:
-
-<small>
-
-`{
-    "AwsCliProfile": "","AwsRegion":"us-east-1",
-    "S3BucketName":"",
-    "CfStackName":"",
-    "Suffix":"",
-    "UserPoolName":"",
-    "DatabaseName":"",
-    "DatabaseMasterUsername":"",
-    "DatabaseMasterPassword":"",
-    "DefineAuthChallengeFuncName":"",
-    "CreateAuthChallengeFuncName":"",
-    "VerifyAuthChallengeFuncName":"",
-    "WebAuthnKitApiName":"",
-    "WebAuthnKitApiFuncName":"",
-    "PreSignUpFuncName":"",
-    "JavaWebAuthnLibFuncName":"",
-    "CreateDatabaseSchemaFuncName":"",
-    "CreateDatabaseSchemaCallerFuncName":"",
-    "AmplifyHostingAppName":"",
-    "AmplifyBranchName":""
-}`
-
-</small>
-
 [Notes about the configuration files]
 
 - If the `Suffix` parameter is not set, the script will set this to a random six digit numeric value.
@@ -80,7 +51,7 @@ Here's what you can expect to (optionally) configure before deployment:
 - If a parameter is declared in the configuration file, it will be used by the  script exactly as declared, without appending any suffix.
 
 ### Mac/Linux Script Config
-`~\WebAuthnKit\scripts\Mac-Linux\deployStarterKit.json` 
+`~/WebAuthnKit/scripts/Mac-Linux/deployStarterKit.json` 
 
 ### Windows PowerShell Script Config
 `~\WebAuthnKit\scripts\PowerShell\deployStarterKitPs.json`
