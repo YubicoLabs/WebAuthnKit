@@ -81,7 +81,3 @@ The deployment scripts are just wrappers of an AWS SAM template which relies on 
 To delete the CloudFormation Stack, launch [CloudFormation Management Console](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringText=&filteringStatus=active&viewNested=true&hideStacks=false) and delete the stack with the name you provided or the default name webauthn-[suffix].
 
 The teardown should take about 7-10 minutes. Once the stack has been deleted, you should no longer incur any costs for the WebAuthn Starter Kit.
-
-## License Summary
-
-This code is not licensed yet.
