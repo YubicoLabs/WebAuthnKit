@@ -106,9 +106,9 @@ Conditions:
 Resources:
   # RDS Aurora Serverless Cluster - Encryption enabled by default
   # Warning: NOT FREE TIER - Aurora Serverless does not support free tier instance class
-  # We have reduced capacity to max of 1 and allow database to shutoff after 2hrs
-  # to reduce costs. This could impact performance. Set AutoPause: false if you want to keep
-  # the database running and to avoid any cold starts after 2hrs of inactivity. 
+  # We have reduced capacity to max of 1 but turned off AutoPause to avoid cold starts
+  # To reduce costs: You can set AutoPause: true and uncomment (SecondsUntilAutoPause)
+  # or delete the CloudFormation Stack entirely. You can always start over and redeploy later
   RDSAuroraServerlessCluster:
     Type: AWS::RDS::DBCluster
     DeletionPolicy: Delete
@@ -126,10 +126,10 @@ Resources:
       EnableHttpEndpoint: true
       StorageEncrypted: true
       ScalingConfiguration:
-        AutoPause: true
+        AutoPause: false
         MaxCapacity: 1
         MinCapacity: 1
-        SecondsUntilAutoPause: 7200
+        #SecondsUntilAutoPause: 7200
   # Create a SecretsManager to manage the Aurora Serverless credentials
   RDSAuroraClusterMasterSecret:
     Type: 'AWS::SecretsManager::Secret'
