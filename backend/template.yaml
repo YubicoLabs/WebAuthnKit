@@ -143,8 +143,12 @@ Resources:
             "username": "${MasterUserName}",
             "password": "${MasterUserPassword}"
           }
-  # IAM Role and Policy for the Lambda functions to call Aurora Serverless DB via Data API 
-  WebAuthnKitLambdaExecutionRole: 
+  
+  #############
+  # IAM Roles #
+  #############
+
+  CreateDBSchemaLambdaExecutionRole: 
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
@@ -176,7 +180,6 @@ Resources:
                   - "logs:PutLogEvents"
                 Resource:
                   - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
-              
         -
           PolicyName: "LambdaToRDSAuroraServerless"
           PolicyDocument: 
@@ -204,24 +207,263 @@ Resources:
                 Resource: 
                   - !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
                   - !Join ['', [!Ref RDSAuroraClusterMasterSecret, ':*']]
-        - 
-          PolicyName: "LambdaToLambda"
+
+  CreateDBSchemaCallerLambdaExecutionRole: 
+    Type: "AWS::IAM::Role"
+    DependsOn:
+    - CreateDBSchemaFunction
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/" 
+      Policies: 
+        -
+          PolicyName: "LambdaToCloudWatchLogs"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement:
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':*']]
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
+        -
+          PolicyName: LambdaToCreateDBSchemaPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource:
+                  - !Join ['', ['arn:aws:lambda:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':function:', !Ref CreateDBSchemaFuncName]]
+          
+  JavaLibLambdaExecutionRole: 
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/" 
+      Policies: 
+        -
+          PolicyName: "LambdaToCloudWatchLogs"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement:
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':*']]
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
+        -
+          PolicyName: "LambdaToRDSAuroraServerless"
           PolicyDocument: 
             Version: "2012-10-17"
             Statement: 
               - 
                 Effect: "Allow"
-                Action: "lambda:InvokeFunction"
-                Resource: "*"
+                Action: 
+                  - "rds-data:DeleteItems"
+                  - "rds-data:ExecuteStatement"
+                  - "rds-data:GetItems"
+                  - "rds-data:InsertItems"
+                  - "rds-data:UpdateItems"
+                Resource: 
+                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster]]
+                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster, ':*']]
         - 
-          PolicyName: "LambdaToCognitoAdmin"
+          PolicyName: "LambdaToAWSSecrets"
           PolicyDocument: 
             Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: "secretsmanager:GetSecretValue"
+                Resource: 
+                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret, ':*']]
+        
+  APILambdaExecutionRole: 
+    Type: "AWS::IAM::Role"
+    DependsOn:
+    - JavaWebAuthnFunction
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/" 
+      Policies: 
+        -
+          PolicyName: "LambdaToCloudWatchLogs"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement:
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':*']]
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
+        -
+          PolicyName: "LambdaToRDSAuroraServerless"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: 
+                  - "rds-data:DeleteItems"
+                  - "rds-data:ExecuteStatement"
+                  - "rds-data:GetItems"
+                  - "rds-data:InsertItems"
+                  - "rds-data:UpdateItems"
+                Resource: 
+                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster]]
+                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster, ':*']]
+        - 
+          PolicyName: "LambdaToAWSSecrets"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: "secretsmanager:GetSecretValue"
+                Resource: 
+                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret, ':*']]
+        -
+          PolicyName: LambdaToWebAuthnLibPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource:
+                  - !Join ['', ['arn:aws:lambda:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':function:', !Ref JavaWebAuthnFuncName]]
+       
+  CreateVerifyLambdaExecutionRole: 
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/" 
+      Policies: 
+        -
+          PolicyName: "LambdaToCloudWatchLogs"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement:
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':*']]
+              - 
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
+        -
+          PolicyName: "LambdaToRDSAuroraServerless"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: 
+                  - "rds-data:DeleteItems"
+                  - "rds-data:ExecuteStatement"
+                  - "rds-data:GetItems"
+                  - "rds-data:InsertItems"
+                  - "rds-data:UpdateItems"
+                Resource: 
+                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster]]
+                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster, ':*']]
+        - 
+          PolicyName: "LambdaToAWSSecrets"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: "secretsmanager:GetSecretValue"
+                Resource: 
+                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret, ':*']]
+        -
+          PolicyName: LambdaToWebAuthnLibPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement: 
+              - 
+                Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource:
+                  - !Join ['', ['arn:aws:lambda:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':function:', !Ref JavaWebAuthnFuncName]]
+        -
+          PolicyName: CognitoAdminPolicy
+          PolicyDocument:
+            Version: 2012-10-17
             Statement: 
               - 
                 Effect: "Allow"
                 Action: "cognito-idp:AdminUpdateUserAttributes"
                 Resource: "*"
+
   # Lambda function triggers for Cognito Custom Auth Flow
   DefineAuthChallenge:
     Type: AWS::Serverless::Function
@@ -254,7 +496,7 @@ Resources:
           WebAuthnLibFunction: !Ref JavaWebAuthnFuncName
       Role: 
         Fn::GetAtt: 
-          - "WebAuthnKitLambdaExecutionRole"
+          - "CreateVerifyLambdaExecutionRole"
           - "Arn"
 
   # Verify Auth Challenge - Function trigger
@@ -280,7 +522,7 @@ Resources:
           WebAuthnLibFunction: !Ref JavaWebAuthnFuncName
       Role: 
         Fn::GetAtt: 
-          - "WebAuthnKitLambdaExecutionRole"
+          - "CreateVerifyLambdaExecutionRole"
           - "Arn"
   
   # PreSignUp - Function trigger
@@ -316,7 +558,7 @@ Resources:
           WebAuthnLibFunction: !Ref JavaWebAuthnFuncName
       Role: 
         Fn::GetAtt: 
-          - "WebAuthnKitLambdaExecutionRole"
+          - "APILambdaExecutionRole"
           - "Arn"
   # Database Schema Creation Function
   CreateDBSchemaFunction:
@@ -340,7 +582,7 @@ Resources:
           DBSecretsStoreArn: !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
       Role: 
         Fn::GetAtt: 
-          - "WebAuthnKitLambdaExecutionRole"
+          - "CreateDBSchemaLambdaExecutionRole"
           - "Arn"
   
   # AWS Amplify Hosting - Service Role
@@ -442,13 +684,15 @@ Resources:
                   - "DefaultDomain"
       Role: 
         Fn::GetAtt: 
-          - "WebAuthnKitLambdaExecutionRole"
+          - "JavaLibLambdaExecutionRole"
           - "Arn"
 
   # Create DB Schema Creation Function CALLER
   # This function is called by CF which executes the db schema creation function
   CreateDBSchemaFunctionCaller:
     Type: AWS::Serverless::Function
+    DependsOn:
+    - CreateDBSchemaFunction
     Properties:
       FunctionName: 
         Ref: CreateDBSchemaCallerFuncName
@@ -482,8 +726,9 @@ Resources:
       Timeout: 20
       Role: 
         Fn::GetAtt: 
-          - "WebAuthnKitLambdaExecutionRole"
+          - "CreateDBSchemaCallerLambdaExecutionRole"
           - "Arn"
+          
   # Amazon Cognito User Pool as our identity provider
   UserPool:
     Type: "AWS::Cognito::UserPool"
