@@ -4,17 +4,18 @@ Description:
   WebAuthn Starter Kit - Backend Serverless Deployment
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: yubico-webauthn-kit
+    Name: yubico-webauthn-starter-kit
     Description:
       Custom authentication using Amazon Cognito, AWS Lambda, API Gateway, Aurora Serverless (DB), and a YubiKey
-    Author: Yubico
-    SpdxLicenseId: MIT
+    Author: Yubico AB
+    SpdxLicenseId: BSD-2-Clause
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
-    Labels: ['passwordless', 'YubiKey', 'WebAuthn', 'serverless', 'FIDO2']
-    HomepageUrl: https://github.com/Yubico/WebAuthnKit
-    SemanticVersion: 10.08.2020
-    SourceCodeUrl: https://github.com/Yubico/WebAuthnKit
+    Labels: ['passwordless', 'YubiKey', 'WebAuthn', 'serverless', 'FIDO2', 
+    'Yubico']
+    HomepageUrl: https://github.com/YubicoLabs/WebAuthnKit
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/YubicoLabs/WebAuthnKit
 
 Globals:
   Function:

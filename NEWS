@@ -1,3 +1,9 @@
+== Version 1.0.0 ==
+
+GA release
+
+* Added Docker deployment
+
 == Version 0.0.6 ==
 
 Beta release
@@ -12,7 +18,7 @@ Beta release
 Beta release
 
 * Initial iOS app commit
-* Code cleanup (remove magic numbers, internal vairable naming, etc.)
+* Code cleanup (remove magic numbers, internal variable naming, etc.)
 * Update dependencies
 * Add more sanity checks to scripts
 

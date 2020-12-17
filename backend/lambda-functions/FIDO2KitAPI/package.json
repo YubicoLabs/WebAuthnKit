@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Yubico AB",
+  "license": "BSD-2-Clause",
   "dependencies": {
     "base64url": "^3.0.1",
     "bcryptjs": "^2.4.3",

@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Yubico AB",
+  "license": "BSD-2-Clause",
   "dependencies": {
     "data-api-client": "^1.1.0"
   }

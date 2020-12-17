@@ -32,17 +32,15 @@ The WebAuthn Starter Kit relies on Cognito User Pools to store user information 
 
 ✅  Four AWS Lambda Functions used as custom triggers with Cognito User Pool.
 
-✅  One AWS Lambda Function (Java) as the WebAuthn Relying Party library - (IN DEVELOPMENT).
+✅  One AWS Lambda Function (Yubico Java WebAuthn Server Library) as the WebAuthn Relying Party library.
 
 ✅  One Amazon RDS Database - Aurora Serverless (MySQL compatible database used to store user credential attributes.
 
-✅  One Amazon API Gateway as our RESTful API regional endpoint.
+✅  One Amazon API Gateway as our RESTful API endpoint.
 
 ## Backend
 
 Deploy the backend as outlined in [backend](./backend/README.md).
-
-Once you deploy the backend, you can setup one of the provided clients below.
 
 ## Clients ##
 
@@ -52,6 +50,14 @@ Once you build and deploy the backend, you can use one of the clients below to c
 
 [iOS Client (Swift)](https://github.com/Yubico/WebAuthnKit/tree/master/clients/iOS)
 
+### Cost Considerations
+
+We have done our best to reduce the cost of running the Yubico WebAuthn Starter Kit on AWS, however, you are responsible the AWS service fees while running the WebAuthn Starter Kit reference deployment. There is no additional cost for using the WebAuthn Starter Kit reference deployment.
+
+The WebAuthn Starter Kit utilizes an AWS SAM template for quick deployment. This template includes configuration parameters that you can customize to fit your needs and budget. Some of these settings, such as RDS Aurora database, affect the cost of deployment. For cost estimates, see the pricing pages for each AWS service used.
+
+Cost Analysis: After you deploy the WebAuthn Starter Kit to your AWS environment, you can create a [AWS Cost and Usage Report](https://docs.aws.amazon.com/cur/latest/userguide/what-is-cur.html) to track costs associated with this deployment. This report will deliver billing metrics (cost estimates based on usage) to an Amazon S3 bucket in your own account.
+
 ### License Summary
 
-This projects has not been licensed yet.
+This project is licensed under the [BSD-2-Clause](https://github.com/YubicoLabs/WebAuthnKit/blob/main/COPYING).
