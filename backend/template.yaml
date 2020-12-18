@@ -163,7 +163,7 @@ Resources:
           - sts:AssumeRole
       Path: "/" 
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       Policies: 
         -
           PolicyName: "LambdaToRDSAuroraServerless"
@@ -207,7 +207,7 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   # IAM Role and Policy for the FIDO2 API function
   APILambdaExecutionRole: 
     Type: "AWS::IAM::Role"
@@ -224,7 +224,7 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   # IAM Role and Policy for the CreateAuth and VerifyAuth functions
   CreateVerifyLambdaExecutionRole: 
     Type: "AWS::IAM::Role"
@@ -241,8 +241,8 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
   ################
   # IAM Policies #
   ################
