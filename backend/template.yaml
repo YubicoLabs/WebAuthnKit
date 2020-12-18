@@ -162,25 +162,9 @@ Resources:
           Action:
           - sts:AssumeRole
       Path: "/" 
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies: 
-        -
-          PolicyName: "LambdaToCloudWatchLogs"
-          PolicyDocument: 
-            Version: "2012-10-17"
-            Statement:
-              - 
-                Effect: "Allow"
-                Action:
-                  - "logs:CreateLogGroup"
-                Resource:
-                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':*']]
-              - 
-                Effect: "Allow"
-                Action:
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                Resource:
-                  - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
         -
           PolicyName: "LambdaToRDSAuroraServerless"
           PolicyDocument: 
@@ -222,7 +206,8 @@ Resources:
             - lambda.amazonaws.com
           Action:
           - sts:AssumeRole
-
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
   # IAM Role and Policy for the FIDO2 API function
   APILambdaExecutionRole: 
     Type: "AWS::IAM::Role"
@@ -238,7 +223,8 @@ Resources:
             - lambda.amazonaws.com
           Action:
           - sts:AssumeRole
-         
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
   # IAM Role and Policy for the CreateAuth and VerifyAuth functions
   CreateVerifyLambdaExecutionRole: 
     Type: "AWS::IAM::Role"
@@ -254,37 +240,12 @@ Resources:
             - lambda.amazonaws.com
           Action:
           - sts:AssumeRole
-
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        
   ################
   # IAM Policies #
   ################
-
-  # IAM Policy for Lambda functions posting to CloudWatch Logs
-  LambdaToCloudWatchLogsPolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName: LambdaToCloudWatchLogsPolicy
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - 
-            Effect: "Allow"
-            Action:
-              - "logs:CreateLogGroup"
-            Resource:
-              - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':*']]
-          - 
-            Effect: "Allow"
-            Action:
-              - "logs:CreateLogStream"
-              - "logs:PutLogEvents"
-            Resource:
-              - !Join ['', ['arn:aws:logs:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':log-group:/aws/lambda/*']]
-      Roles:
-        - !Ref CreateDBSchemaCallerLambdaExecutionRole
-        - !Ref JavaLibLambdaExecutionRole
-        - !Ref APILambdaExecutionRole
-        - !Ref CreateVerifyLambdaExecutionRole
 
   # IAM Policy for LambdaToWebAuthnLib
   LambdaToWebAuthnLibPolicy:
