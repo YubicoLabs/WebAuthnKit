@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Yubico AB",
-  "license": "BSD-2-Clause",
+  "license": "Apache-2.0",
   "dependencies": {
     "base64url": "^3.0.1",
     "bcryptjs": "^2.4.3",
