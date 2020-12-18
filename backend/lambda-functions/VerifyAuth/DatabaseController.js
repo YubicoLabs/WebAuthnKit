@@ -1,6 +1,6 @@
 // ### Last Updated ##
-// Nov 11, 2020
-// Updated networkPin to serverVerifiedPin
+// December 17, 2020
+// Removed unused functions
 
 'use strict';
 
@@ -10,7 +10,7 @@ const saltRounds = 5;
 const windowPeriod = 20*60000; // 20 minutes in milliseconds
 const maxAttempts = 8;
 
-module.exports = { saveCredentials, getUserIdFromUserName, updateCredentials, getUserChallenge, updateUser, insertPin, validateRecoveryCode, verifyServerPinCode };
+module.exports = { saveCredentials, updateCredentials, updateUser, insertPin, validateRecoveryCode, verifyServerPinCode };
 
 // Using npmjs.com/package/data-api-client package for accessing an Aurora Serverless Database with Data API enabled
 const dbConfig = require('data-api-client')({
@@ -18,13 +18,6 @@ const dbConfig = require('data-api-client')({
     resourceArn: process.env.DBAuroraClusterArn,
     database: process.env.DatabaseName
 });
-
-// Get database user 'id' from username
-async function getUserIdFromUserName(userName) {
-     // Get id from [user] table based on userName
-    let userId = await dbConfig.query('SELECT id FROM user WHERE userName = :userName', { userName: userName });
-    return userId.records[0].id;
-}
 
 // Update the [credential] table with the new credential
 async function saveCredentials(webAuthnResponse, credPublicKeyPWK, userName, signatureCounter){
@@ -49,12 +42,6 @@ async function updateCredentials(credentialId, signatureCounter){
     console.log('Entered updateCredentials. Updating credentialId: ' + credentialId);
     let currentUTC = getCurrentTimeStampUTC();
     await dbConfig.query('UPDATE credential SET signatureCount = :signatureCount, lastUsedDate = :currentUTC WHERE credentialId = :credentialId', { credentialId: credentialId, signatureCount: signatureCounter, currentUTC: currentUTC  });
-}
-
-// Get current user 'challenge' from [user] table in database 
-async function getUserChallenge(userName) {
-    let storedChallenge = await dbConfig.query('SELECT challenge FROM user WHERE userName = :userName', { userName: userName });
-    return storedChallenge.records[0].challenge;
 }
 
 // Update user table with last successful login timestamp
