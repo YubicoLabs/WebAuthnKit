@@ -50,9 +50,15 @@ Once you build and deploy the backend, you can use one of the clients below to c
 
 [iOS Client (Swift)](https://github.com/Yubico/WebAuthnKit/tree/master/clients/iOS)
 
+<<<<<<< HEAD
 ## Cost Considerations ##
 
 We have done our best to reduce the cost of running the Yubico WebAuthn Starter Kit on AWS, however, you are responsible the AWS service fees while running the WebAuthn Starter Kit reference deployment.
+=======
+### Cost Considerations
+
+We have done our best to reduce the cost of running the Yubico WebAuthn Starter Kit on AWS, however, you are responsible the AWS service fees while running the WebAuthn Starter Kit reference deployment. There is no additional cost for using the WebAuthn Starter Kit reference deployment.
+>>>>>>> main
 
 The WebAuthn Starter Kit utilizes an AWS SAM template for quick deployment. This template includes configuration parameters that you can customize to fit your needs and budget. Some of these settings, such as RDS Aurora database, affect the cost of deployment. For cost estimates, see the pricing pages for each AWS service used.
 
