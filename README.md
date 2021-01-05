@@ -12,6 +12,10 @@ The starter kit solution utilizes Amazon Cognito User Pools as an identity provi
 
 The solution will be provided as an Amazon SAM template that includes the creation of a Amazon Cognito User Pool, coded AWS Lambda functions, an Amazon Aurora database, an Amazon API Gateway endpoint, and necessary permissions to create, execute, and delete these resources in your own AWS account.
 
+## Documentation ##
+
+Check out our [Yubico WebuAthn Starter Kit Documentation](https://developers.yubico.com/Developer_Program/WebAuthn_Starter_Kit/) for more detailed design, architecture overview, installation guide(s), and documented WebAuthn authentication flows. 
+
 ## Backend Resources ##
 
 These resources will be created, configured, and deployed in your own AWS environment using the provided [SAM template](https://github.com/YubicoLabs/WebAuthnKit/blob/master/backend/template.yaml). These services provide registration, authentication, WebAuthn Relying Party, and OPEN ID Connect provider solutions.

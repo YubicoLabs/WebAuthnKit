@@ -25,7 +25,9 @@ WebAuthn Starter Kit utilizes the AWS Serverless Application Model (AWS SAM) tem
 [Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows/))
 
 ## Deployment
-In this section, we'll clone (or download .zip release) the WebAuthn Starter Kit repository and execute the platform-specific script to automatically deploy the backend resources to your AWS account.
+In this section, we'll clone (or download .zip release) the WebAuthn Starter Kit repository and execute the platform-specific script to automatically deploy the backend resources to your AWS account. 
+
+For more detailed instructions, check out our [Installation Documentation](https://developers.yubico.com/Developer_Program/WebAuthn_Starter_Kit/Installation/Automated_Webauthkit_Deployment/Automated_Deployment.html).
 
 ### 1. Clone Yubico WebAuthn Starter Kit Repository
 
