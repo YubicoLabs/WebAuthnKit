@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Closeables;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -19,6 +20,15 @@ import com.yubico.webauthn.RelyingParty;
 import com.yubico.webauthn.StartAssertionOptions;
 import com.yubico.webauthn.StartRegistrationOptions;
 import com.yubico.webauthn.attestation.Attestation;
+import com.yubico.webauthn.attestation.AttestationResolver;
+import com.yubico.webauthn.attestation.MetadataObject;
+import com.yubico.webauthn.attestation.MetadataService;
+import com.yubico.webauthn.attestation.StandardMetadataService;
+import com.yubico.webauthn.attestation.TrustResolver;
+import com.yubico.webauthn.attestation.resolver.CompositeAttestationResolver;
+import com.yubico.webauthn.attestation.resolver.CompositeTrustResolver;
+import com.yubico.webauthn.attestation.resolver.SimpleAttestationResolver;
+import com.yubico.webauthn.attestation.resolver.SimpleTrustResolverWithEquality;
 import com.yubico.webauthn.data.AttestationConveyancePreference;
 import com.yubico.webauthn.data.AuthenticatorSelectionCriteria;
 import com.yubico.webauthn.data.ByteArray;
@@ -32,9 +42,14 @@ import com.yubicolabs.data.AssertionResponse;
 import com.yubicolabs.data.CredentialRegistration;
 import com.yubicolabs.data.RegistrationRequest;
 import com.yubicolabs.data.RegistrationResponse;
+import java.security.cert.CertificateException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,15 +74,69 @@ public class App implements RequestHandler<Object, Object> {
     private final RegistrationRequestStorage registerRequestStorage = new RegistrationRequestStorage();
     private final RegistrationStorage userStorage = new RDSRegistrationStorage();
 
+    private static final String METADATA_PATH = "/metadata.json";
+
+    private final TrustResolver trustResolver =
+        new CompositeTrustResolver(
+            Arrays.asList(
+                StandardMetadataService.createDefaultTrustResolver(), createExtraTrustResolver()));
+  
+    private final MetadataService metadataService =
+        new StandardMetadataService(
+            new CompositeAttestationResolver(
+                Arrays.asList(
+                    StandardMetadataService.createDefaultAttestationResolver(trustResolver),
+                    createExtraMetadataResolver(trustResolver))));
+
     private final RelyingParty rp = RelyingParty.builder()
         .identity(Config.getRpIdentity())
         .credentialRepository(this.userStorage)
         .origins(Config.getOrigins())
         .attestationConveyancePreference(Optional.of(AttestationConveyancePreference.DIRECT))
+        .metadataService(Optional.of(metadataService))
         .allowUnrequestedExtensions(true)
         .allowUntrustedAttestation(true)
         .validateSignatureCounter(true)
         .build();
+
+    private static MetadataObject readMetadata() {
+        InputStream is = App.class.getResourceAsStream(METADATA_PATH);
+        try {
+            return JacksonCodecs.json().readValue(is, MetadataObject.class);
+        } catch (IOException e) {
+            log.error("Failed to read metadata from " + METADATA_PATH, e);
+            return e;
+        } finally {
+            Closeables.closeQuietly(is);
+        }
+    }
+
+    /**
+     * Create a {@link TrustResolver} that accepts attestation certificates that are
+     * directly recognised as trust anchors.
+     */
+    private static TrustResolver createExtraTrustResolver() {
+        try {
+            MetadataObject metadata = readMetadata();
+            return new SimpleTrustResolverWithEquality(metadata.getParsedTrustedCertificates());
+        } catch (CertificateException e) {
+            log.error("Failed to read trusted certificate(s)", e);
+            return e;
+        }
+    }
+
+    /**
+     * Create a {@link AttestationResolver} with additional metadata for YubiKey devices.
+     */
+    private static AttestationResolver createExtraMetadataResolver(TrustResolver trustResolver) {
+        try {
+            MetadataObject metadata = readMetadata();
+            return new SimpleAttestationResolver(Collections.singleton(metadata), trustResolver);
+        } catch (CertificateException e) {
+            log.error("Failed to read trusted certificate(s)", e);
+            return e;
+        }
+    }
 
     public App() {
         jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
