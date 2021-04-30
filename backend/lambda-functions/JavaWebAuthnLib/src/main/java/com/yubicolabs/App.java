@@ -76,17 +76,10 @@ public class App implements RequestHandler<Object, Object> {
 
     private static final String METADATA_PATH = "/metadata.json";
 
-    private final TrustResolver trustResolver =
-        new CompositeTrustResolver(
-            Arrays.asList(
-                StandardMetadataService.createDefaultTrustResolver(), createExtraTrustResolver()));
+    private final TrustResolver trustResolver = createTrustResolver();
   
-    private final MetadataService metadataService =
-        new StandardMetadataService(
-            new CompositeAttestationResolver(
-                Arrays.asList(
-                    StandardMetadataService.createDefaultAttestationResolver(trustResolver),
-                    createExtraMetadataResolver(trustResolver))));
+    private final MetadataService metadataService = createMetaDataService();
+    
 
     private final RelyingParty rp = RelyingParty.builder()
         .identity(Config.getRpIdentity())
@@ -105,9 +98,33 @@ public class App implements RequestHandler<Object, Object> {
             return JacksonCodecs.json().readValue(is, MetadataObject.class);
         } catch (IOException e) {
             log.error("Failed to read metadata from " + METADATA_PATH, e);
-            return e;
+            throw new RuntimeException(e.getMessage());
         } finally {
             Closeables.closeQuietly(is);
+        }
+    }
+
+    private TrustResolver createTrustResolver() {
+        try {
+            return new CompositeTrustResolver(
+            Arrays.asList(
+                StandardMetadataService.createDefaultTrustResolver(), createExtraTrustResolver()));
+        } catch (CertificateException e) {
+            log.error("Failed to read trusted certificate(s)", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private MetadataService createMetaDataService() {
+        try {
+            return new StandardMetadataService(
+                new CompositeAttestationResolver(
+                    Arrays.asList(
+                        StandardMetadataService.createDefaultAttestationResolver(trustResolver),
+                        createExtraMetadataResolver(trustResolver))));
+        } catch (CertificateException e) {
+            log.error("Failed to read trusted certificate(s)", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -121,7 +138,7 @@ public class App implements RequestHandler<Object, Object> {
             return new SimpleTrustResolverWithEquality(metadata.getParsedTrustedCertificates());
         } catch (CertificateException e) {
             log.error("Failed to read trusted certificate(s)", e);
-            return e;
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -134,7 +151,7 @@ public class App implements RequestHandler<Object, Object> {
             return new SimpleAttestationResolver(Collections.singleton(metadata), trustResolver);
         } catch (CertificateException e) {
             log.error("Failed to read trusted certificate(s)", e);
-            return e;
+            throw new RuntimeException(e.getMessage());
         }
     }
 

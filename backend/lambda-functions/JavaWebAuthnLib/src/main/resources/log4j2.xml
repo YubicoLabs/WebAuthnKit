@@ -12,5 +12,6 @@
         </Root>
         <Logger name="software.amazon.awssdk" level="WARN" />
         <Logger name="software.amazon.awssdk.request" level="DEBUG" />
+        <Logger name="com.yubico" level="DEBUG" />
     </Loggers>
 </Configuration>
