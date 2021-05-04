@@ -111,7 +111,7 @@ function RegisterPage() {
                 if(uv == false) {
                     dispatch(credentialActions.getUV(challengeResponse));
                 } else {
-                    console.log("sendCustomChallengeAnswer: ", user);
+                    console.log("handleWebAuthn:sendCustomChallengeAnswer: ", cognitoUser);
                     // to send the answer of the custom challenge
                     const user = await Auth.sendCustomChallengeAnswer(cognitoUser, JSON.stringify(challengeResponse))
                     .then(user => {
@@ -214,7 +214,7 @@ function RegisterPage() {
             
             Auth.sendCustomChallengeAnswer(cognitoUser, JSON.stringify(challengeResponse))
             .then(user => {
-                console.log("uv sendCustomChallengeAnswer: ", user);
+                console.log("uv finishUVResponse sendCustomChallengeAnswer: ", user);
 
                 Auth.currentSession()
                 .then(data => {
@@ -236,7 +236,7 @@ function RegisterPage() {
 
             })
             .catch(err => {
-                console.log("sendCustomChallengeAnswer error: ", err);
+                console.log("uv finishUVResponse sendCustomChallengeAnswer error: ", err);
                 let message = "Invalid PIN";
                 dispatch(alertActions.error(message));
                 setSubmitted(false);

@@ -86,6 +86,7 @@ function HomePage() {
         const [show, setShow] = useState(false);
         const [nickname, setNickname] = useState('');
         const [credential, setCredential] = useState('');
+        const [attestationMetadata, setAttestationMetadata] = useState('');
         const [invalidNickname, setInvalidNickname] = useState(undefined);
         const [submitted, setSubmitted] = useState(false);
         const defaultInvalidPIN = -1;
@@ -120,6 +121,7 @@ function HomePage() {
         const handleShow = (credential) => {
             setNickname(credential.credentialNickname.value);
             setCredential(credential);
+            setAttestationMetadata(credential.attestationMetadata.value);
             setShow(true);
         }
         const handleChange = (e) => {
@@ -242,8 +244,9 @@ function HomePage() {
                                 handleSave();
                                 ev.preventDefault();
                             }
-                        }}/></label>
+                        }}/></label><br/>
                         { invalidNickname ? <Alert variant="danger">{invalidNickname}</Alert> : null }
+                        <img src={attestationMetadata ? attestationMetadata.deviceProperties.imageUrl : ''} width="25" height="25"/>&nbsp;&nbsp;<label>{attestationMetadata ? attestationMetadata.deviceProperties.displayName : ''}</label><br/>
                         <label><em>Usernameless a.k.a. Client-Side Discoverable Credential:</em> {credential.registrationRequest ? credential.registrationRequest.requireResidentKey.toString() : ''}</label><br/>
                         <label><em>Last Used Time:</em> {credential.lastUsedTime ? new Date(credential.lastUsedTime.seconds*1000).toLocaleString() : ''}</label><br/>
                         <label><em>Last Updated Time:</em> {credential.lastUpdatedTime ? new Date(credential.lastUpdatedTime.seconds*1000).toLocaleString() : ''}</label><br/>
