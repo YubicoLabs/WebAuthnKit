@@ -10,6 +10,7 @@ import { HomePage } from '../HomePage';
 import { LoginPage } from '../LoginPage';
 import { LoginWithSecurityKeyPage } from '../LoginWithSecurityKeyPage';
 import { RegisterPage } from '../RegisterPage';
+import { IdentifierFirstFlowProto } from '../IdentifierFirstFlowProto';
 
 import Amplify from 'aws-amplify';
 import aws_exports from '../aws-exports';
@@ -42,6 +43,7 @@ function App() {
                                 <Route path="/login" component={LoginPage} />
                                 <Route path="/loginWithSecurityKey" component={LoginWithSecurityKeyPage} />
                                 <Route path="/register" component={RegisterPage} />
+                                <Route path="/identifierfirstflowproto" component={IdentifierFirstFlowProto} />
                                 <Redirect from="*" to="/" />
                             </Switch>
                         </Router>
