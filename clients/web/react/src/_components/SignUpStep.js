@@ -5,8 +5,8 @@ import styles from "./component.module.css";
 
 const SignUpStep = ({ setForm, formData, navigation }) => {
 
-  const loginStep = (step) => {
-    navigation.go('LoginStep');
+  const LogInStep = (step) => {
+    navigation.go('LogInStep');
   }
   const registerSvPinStep = (step) => {
     navigation.go('RegisterSvPinStep');
@@ -50,7 +50,7 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
             <hr></hr>
           </div>
           <div>
-            <center>Already have an account? <span onClick={loginStep} className="btn-link">Log In</span></center>
+            <center>Already have an account? <span onClick={LogInStep} className="btn-link">Log In</span></center>
           </div>
         </div>
       </div>

@@ -5,8 +5,8 @@ import styles from "./component.module.css";
 
 const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
 
-  const loginStep = (step) => {
-    navigation.go('LoginStep');
+  const LogInStep = (step) => {
+    navigation.go('LogInStep');
   }
   const registerSvPinStep = (step) => {
     navigation.go('RegisterSvPinStep');

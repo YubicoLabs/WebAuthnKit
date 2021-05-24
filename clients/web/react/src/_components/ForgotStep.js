@@ -4,8 +4,8 @@ import { Button, InputGroup, FormControl, Card } from 'react-bootstrap';
 import styles from "./component.module.css";
 
 const ForgotStep = ({ setForm, formData, navigation }) => {
-  const loginStep = () => {
-    navigation.go('LoginStep');
+  const LogInStep = () => {
+    navigation.go('LogInStep');
   }
 
   return (
@@ -36,7 +36,7 @@ const ForgotStep = ({ setForm, formData, navigation }) => {
             <hr></hr>
           </div>
           <div>
-            <center><span onClick={loginStep} className="btn-link">Back to Log In</span></center>
+            <center><span onClick={LogInStep} className="btn-link">Back to Log In</span></center>
           </div>
         </div>
       </div>

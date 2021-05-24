@@ -3,7 +3,7 @@ import { Button, InputGroup, FormControl, Card } from 'react-bootstrap';
 
 import styles from "./component.module.css";
 
-const LoginStep = ({ setForm, formData, navigation }) => {
+const LogInStep = ({ setForm, formData, navigation }) => {
 
     const promptSvPinStep = () => {
         navigation.go('PromptSvPinStep');
@@ -13,6 +13,9 @@ const LoginStep = ({ setForm, formData, navigation }) => {
     }
     const forgotStep = () => {
         navigation.go('ForgotStep');
+    }
+    const logInTrustedDeviceStep = () => {
+        navigation.go('LogInTrustedDeviceStep');
     }
 
     return (
@@ -44,7 +47,7 @@ const LoginStep = ({ setForm, formData, navigation }) => {
                         <span className={styles['text-divider']}>OR</span>
                     </div>
                     <div>
-                        <Button variant="light btn-block mt-3">Continue with Trusted Device</Button>
+                        <Button onClick={logInTrustedDeviceStep} variant="light btn-block mt-3">Continue with Trusted Device or Security Key</Button>
                     </div>
                     <div className="mt-5">
                         <hr></hr>
@@ -58,4 +61,4 @@ const LoginStep = ({ setForm, formData, navigation }) => {
     );
 };
 
-export default LoginStep;
+export default LogInStep;

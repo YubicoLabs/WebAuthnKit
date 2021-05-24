@@ -4,8 +4,8 @@ import { Button, InputGroup, FormControl, Card } from 'react-bootstrap';
 import styles from "./component.module.css";
 
 const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
-  const LoginStep = () => {
-    navigation.go('LoginStep');
+  const LogInStep = () => {
+    navigation.go('LogInStep');
   }
 
   return (
@@ -46,7 +46,7 @@ const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
             <hr></hr>
           </div>
           <div>
-            <center>Already have an account? <span onClick={LoginStep} className="btn-link">Log In</span></center>
+            <center>Already have an account? <span onClick={LogInStep} className="btn-link">Log In</span></center>
           </div>
         </div>
       </div>

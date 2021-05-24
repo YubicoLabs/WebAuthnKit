@@ -1,20 +1,22 @@
 import React from "react";
 import { useForm, useStep } from "react-hooks-helper";
 
-import LoginStep from "./LoginStep";
+import LogInStep from "./LogInStep";
 import SignUpStep from "./SignUpStep";
 import RegisterSvPinStep from "./RegisterSvPinStep";
 import ForgotStep from "./ForgotStep";
 import PromptSvPinStep from "./PromptSvPinStep";
 import RegisterTrustedDeviceStep from "./RegisterTrustedDeviceStep";
+import LogInTrustedDeviceStep from "./LogInTrustedDeviceStep";
 
 const steps = [
-    { id: "LoginStep" },
+    { id: "LogInStep" },
     { id: "SignUpStep" },
     { id: "RegisterSvPinStep" },
     { id: "ForgotStep" },
     { id: "PromptSvPinStep" },
-    { id: "RegisterTrustedDeviceStep" }
+    { id: "RegisterTrustedDeviceStep" },
+    { id: "LogInTrustedDeviceStep" }
 ];
 
 const defaultData = {
@@ -38,8 +40,8 @@ export const IdentifierFirstFlow = ({ images }) => {
 
     const renderSwitch = (id) => {
         switch (id) {
-            case "LoginStep":
-                return <LoginStep {...props} />;
+            case "LogInStep":
+                return <LogInStep {...props} />;
             case "SignUpStep":
                 return <SignUpStep {...props} />;
             case "RegisterSvPinStep":
@@ -50,6 +52,8 @@ export const IdentifierFirstFlow = ({ images }) => {
                 return <PromptSvPinStep {...props} />;
             case "RegisterTrustedDeviceStep":
                 return <RegisterTrustedDeviceStep {...props} />;
+            case "LogInTrustedDeviceStep":
+                return <LogInTrustedDeviceStep {...props} />;
             default:
                 return null;
         }
