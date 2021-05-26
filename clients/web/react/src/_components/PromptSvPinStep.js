@@ -13,8 +13,6 @@ const PromptSvPinStep = ({ setForm, formData, navigation }) => {
 
   return (
     <>
-      <div style={styles['rcourners']}>
-        <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
         <center>
           <h2>Welcome</h2>
           <label>Log in to the WebAuthn Starter Kit to continue</label>
@@ -42,7 +40,6 @@ const PromptSvPinStep = ({ setForm, formData, navigation }) => {
             <center><span onClick={LogInStep} className="btn-link">Try Another Method</span></center>
           </div>
         </div>
-      </div>
     </>
   );
 };

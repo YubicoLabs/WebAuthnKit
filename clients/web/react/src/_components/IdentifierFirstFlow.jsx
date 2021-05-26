@@ -1,4 +1,5 @@
 import React from "react";
+import { Card } from 'react-bootstrap';
 import { useStep } from "react-hooks-helper";
 
 import LogInStep from "./LogInStep";
@@ -10,6 +11,7 @@ import RegisterTrustedDeviceStep from "./RegisterTrustedDeviceStep";
 import LogInTrustedDeviceStep from "./LogInTrustedDeviceStep";
 import RegisterKeySuccessStep from "./RegisterKeySuccessStep";
 import RegisterDeviceSuccessStep from "./RegisterDeviceSuccessStep";
+import AccountSecurityStep from "./AccountSecurityStep";
 
 const steps = [
     { id: "LogInStep" },
@@ -20,7 +22,8 @@ const steps = [
     { id: "RegisterTrustedDeviceStep" },
     { id: "LogInTrustedDeviceStep" },
     { id: "RegisterKeySuccessStep" },
-    { id: "RegisterDeviceSuccessStep" }
+    { id: "RegisterDeviceSuccessStep" },
+    { id: "AccountSecurityStep" }
 ];
 
 export const IdentifierFirstFlow = ({ images }) => {
@@ -52,6 +55,8 @@ export const IdentifierFirstFlow = ({ images }) => {
                 return <RegisterKeySuccessStep {...props} />;
             case "RegisterDeviceSuccessStep":
                 return <RegisterDeviceSuccessStep {...props} />;
+            case "AccountSecurityStep":
+                return <AccountSecurityStep {...props} />;
             default:
                 return null;
         }
@@ -59,7 +64,13 @@ export const IdentifierFirstFlow = ({ images }) => {
 
     return (
         <>
-        {renderSwitch(id)}
+        <Card>
+            <Card.Body>
+                <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
+                {renderSwitch(id)}
+            </Card.Body>
+        </Card>
+        
         </>
     );
 

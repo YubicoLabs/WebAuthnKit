@@ -4,11 +4,12 @@ import { Button, InputGroup, FormControl, } from 'react-bootstrap';
 import styles from "./component.module.css";
 
 const RegisterDeviceSuccessStep = ({ setForm, formData, navigation }) => {
+  const accountSecurityStep = () => {
+    navigation.go('AccountSecurityStep');
+  }
 
   return (
     <>
-      <div style={styles['rcourners']}>
-        <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
         <center>
           <h2>Device Added</h2>
           <label>You have successfully registered your trusted device.</label>
@@ -27,10 +28,9 @@ const RegisterDeviceSuccessStep = ({ setForm, formData, navigation }) => {
             </InputGroup>
           </div>
           <div>
-            <Button variant="primary btn-block mt-3">Continue</Button>
+            <Button onClick={accountSecurityStep} variant="primary btn-block mt-3">Continue</Button>
           </div>
         </div>
-      </div>
     </>
   );
 };

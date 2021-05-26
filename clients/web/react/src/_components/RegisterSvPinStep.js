@@ -4,14 +4,12 @@ import { Button, InputGroup, FormControl, Card } from 'react-bootstrap';
 import styles from "./component.module.css";
 
 const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
-  const LogInStep = () => {
-    navigation.go('LogInStep');
+  const accountSecurityStep = () => {
+    navigation.go('AccountSecurityStep');
   }
 
   return (
     <>
-      <div style={styles['rcourners']}>
-        <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
         <center>
           <h2>Create your Server-Verified PIN</h2>
           <label>Your account requires a Server-Verified PIN. Treat this PIN like your account's password.</label>
@@ -40,10 +38,9 @@ const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
             </InputGroup>
           </div>
           <div>
-            <Button variant="primary btn-block mt-3">Continue</Button>
+            <Button onClick={accountSecurityStep} variant="primary btn-block mt-3">Continue</Button>
           </div>
         </div>
-      </div>
     </>
   );
 };

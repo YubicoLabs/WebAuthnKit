@@ -76,8 +76,6 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
 
   return (
     <>
-      <div style={styles['rcourners']}>
-        <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
         <center>
           <h2>Welcome</h2>
           <label>Sign up to the WebAuthn Starter Kit to continue</label>
@@ -121,7 +119,6 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
         <div>
           <center>Already have an account? <span onClick={LogInStep} className="btn-link">Log In</span></center>
         </div>
-      </div>
     </>
   );
 };

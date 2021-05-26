@@ -11,8 +11,6 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
 
   return (
     <>
-      <div style={styles['rcourners']}>
-        <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
         <center>
           <h2>Security Key Added</h2>
           <label>You have successfully registered your security key.</label>
@@ -35,7 +33,6 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
             <Button onClick={() => registerSvPinStep()} variant="primary btn-block mt-3">Continue</Button>
           </div>
         </div>
-      </div>
     </>
   );
 };
