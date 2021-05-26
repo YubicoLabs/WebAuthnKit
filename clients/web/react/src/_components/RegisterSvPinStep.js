@@ -13,8 +13,8 @@ const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
       <div style={styles['rcourners']}>
         <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
         <center>
-          <h2>Welcome</h2>
-          <label>Sign up to the WebAuthn Starter Kit to continue</label>
+          <h2>Create your Server-Verified PIN</h2>
+          <label>Your account requires a Server-Verified PIN. Treat this PIN like your account's password.</label>
         </center>
         <div className="form mt-2">
           <div>
@@ -41,12 +41,6 @@ const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
           </div>
           <div>
             <Button variant="primary btn-block mt-3">Continue</Button>
-          </div>
-          <div className="mt-5">
-            <hr></hr>
-          </div>
-          <div>
-            <center>Already have an account? <span onClick={LogInStep} className="btn-link">Log In</span></center>
           </div>
         </div>
       </div>

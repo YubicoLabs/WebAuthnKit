@@ -1,15 +1,21 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, InputGroup, FormControl, Card } from 'react-bootstrap';
 
 import styles from "./component.module.css";
 
 const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
 
-  const LogInStep = (step) => {
-    navigation.go('LogInStep');
+  const setTrustedDevice = (value) => {
+    localStorage.setItem('trustedDevice', value);
   }
-  const registerSvPinStep = (step) => {
-    navigation.go('RegisterSvPinStep');
+
+  const registerDeviceSuccessStep = () => {
+    navigation.go('RegisterDeviceSuccessStep');
+  }
+
+  const next = () => {
+    setTrustedDevice(true);
+    registerDeviceSuccessStep();
   }
 
   return (
@@ -22,22 +28,10 @@ const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
         </center>
         <div className="form mt-2">
           <div>
-            <InputGroup className="mb-3">
-              <InputGroup.Prepend>
-                <InputGroup.Text id="basic-addon1"><img src="https://www.yubico.com/wp-content/uploads/2021/01/illus-fingerprint-r1-dk-teal-1.svg" width="20" height="20"></img>&nbsp;&nbsp;Device Name</InputGroup.Text>
-              </InputGroup.Prepend>
-              <FormControl
-                placeholder="Jan's iPhone"
-                aria-label="Device Nickname"
-                aria-describedby="basic-addon1"
-              />
-            </InputGroup>
-          </div>
-          <div>
-            <Button variant="primary btn-block mt-3">Add this device now</Button>
+            <Button onClick={() => next()} variant="primary btn-block mt-3">Add this device now</Button>
             <hr></hr>
             <center><label>Already registered this device before?</label></center>
-            <Button variant="light btn-block mt-2">Confirm Trusted Device</Button>
+            <Button onClick={() => setTrustedDevice(true)} variant="light btn-block mt-2">Confirm Trusted Device</Button>
           </div>
           <div className="mt-3">
             <hr></hr>
@@ -46,7 +40,7 @@ const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
               Don't want to register this device?
               <ul>
                 <li><span className="btn-link">Ask me later</span></li>
-                <li><span className="btn-link">Never ask me to register this device</span></li>
+                <li><span onClick={() => setTrustedDevice(false)} className="btn-link">Never ask me to register this device</span></li>
               </ul>
           </div>
         </div>

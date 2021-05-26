@@ -20,7 +20,7 @@ const LogInTrustedDeviceStep = ({ setForm, formData, navigation }) => {
                 </center>
                 <div className="form mt-2">
                     <div>
-                        <center><label>Username here</label></center>
+                        <center><label>{localStorage.getItem('username')}</label></center>
                     </div>
                     <div>
                         <Button variant="primary btn-block mt-3">Continue with Trusted Device or Security Key</Button>

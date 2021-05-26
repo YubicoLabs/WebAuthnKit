@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, useStep } from "react-hooks-helper";
+import { useStep } from "react-hooks-helper";
 
 import LogInStep from "./LogInStep";
 import SignUpStep from "./SignUpStep";
@@ -8,6 +8,8 @@ import ForgotStep from "./ForgotStep";
 import PromptSvPinStep from "./PromptSvPinStep";
 import RegisterTrustedDeviceStep from "./RegisterTrustedDeviceStep";
 import LogInTrustedDeviceStep from "./LogInTrustedDeviceStep";
+import RegisterKeySuccessStep from "./RegisterKeySuccessStep";
+import RegisterDeviceSuccessStep from "./RegisterDeviceSuccessStep";
 
 const steps = [
     { id: "LogInStep" },
@@ -16,27 +18,19 @@ const steps = [
     { id: "ForgotStep" },
     { id: "PromptSvPinStep" },
     { id: "RegisterTrustedDeviceStep" },
-    { id: "LogInTrustedDeviceStep" }
+    { id: "LogInTrustedDeviceStep" },
+    { id: "RegisterKeySuccessStep" },
+    { id: "RegisterDeviceSuccessStep" }
 ];
 
-const defaultData = {
-    firstName: "Jane",
-    lastName: "Doe",
-    nickName: "Jan",
-    address: "200 South Main St",
-    city: "Anytown",
-    state: "CA",
-    zip: "90505",
-    email: "email@domain.com",
-    phone: "+61 4252 454 332"
-};
-
 export const IdentifierFirstFlow = ({ images }) => {
-    const [formData, setForm] = useForm(defaultData);
-    const { step, navigation } = useStep({ initialStep: 0, steps });
+    let trustedDevice = localStorage.getItem('trustedDevice');
+    const _initialStep = trustedDevice === "true" ? 6 : 0;
+    const { step, navigation } = useStep({ initialStep: _initialStep, steps });
+
     const { id } = step;
 
-    const props = { formData, setForm, navigation };
+    const props = { navigation };
 
     const renderSwitch = (id) => {
         switch (id) {
@@ -54,6 +48,10 @@ export const IdentifierFirstFlow = ({ images }) => {
                 return <RegisterTrustedDeviceStep {...props} />;
             case "LogInTrustedDeviceStep":
                 return <LogInTrustedDeviceStep {...props} />;
+            case "RegisterKeySuccessStep":
+                return <RegisterKeySuccessStep {...props} />;
+            case "RegisterDeviceSuccessStep":
+                return <RegisterDeviceSuccessStep {...props} />;
             default:
                 return null;
         }
