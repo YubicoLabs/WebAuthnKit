@@ -6,7 +6,9 @@ import styles from "./component.module.css";
 
 const LogInStep = ({ navigation }) => {
     const [inputs, setInputs] = useState({
-        username: localStorage.getItem('username')
+        username: localStorage.getItem('username'),
+        forgotStep: false,
+        continue: false
     });
     const [errors, setErrors] = useState({
         username: ''
@@ -41,6 +43,16 @@ const LogInStep = ({ navigation }) => {
         navigation.go('AccountSecurityStep');
     }
 
+    const forgotClickHandler = () => {
+        setInputs(inputs => ({ ...inputs, ["continue"]: false }));
+        setInputs(inputs => ({ ...inputs, ["forgotStep"]: true }));
+    }
+
+    const continueClickHandler = () => {
+        setInputs(inputs => ({ ...inputs, ["continue"]: true }));
+        setInputs(inputs => ({ ...inputs, ["forgotStep"]: false }));
+    }
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setInputs(inputs => ({ ...inputs, [name]: value }));
@@ -50,7 +62,6 @@ const LogInStep = ({ navigation }) => {
         const result = validate({ username: value }, constraints);
         if (result) {
             setErrors(errors => ({ ...errors, [name]: result.username.join(". ") }));
-            return;
         } else {
             setErrors(errors => ({ ...errors, [name]: undefined }));
         }
@@ -67,7 +78,13 @@ const LogInStep = ({ navigation }) => {
 
         if(isUsernameValid()) {
             setValidated(true);
-            promptSvPinStep();
+            localStorage.setItem('username', inputs.username);
+            if(inputs.continue === true) {
+                promptSvPinStep();
+            } else if (inputs.forgotStep === true) {
+                forgotStep();
+            }
+            
         } else {
             setValidated(false);
         }
@@ -109,8 +126,9 @@ const LogInStep = ({ navigation }) => {
                             </Form.Control.Feedback>
                         </InputGroup>
                     </Form.Group>
-                    <div onClick={forgotStep} className="btn-link mt-2 text-right">Forgot Your Security Key?</div>
-                    <Button type="submit" variant="primary btn-block mt-3">Continue</Button>
+                    
+                    <Button type="submit" onClick={continueClickHandler} value="continue" variant="primary" block>Continue</Button>
+                    <Button type="submit" onClick={forgotClickHandler} variant="link" className="float-right">Forgot Your Security Key?</Button><br></br>
                 </Form>
                 <div className="mt-3">
                     <span className={styles['text-divider']}>OR</span>

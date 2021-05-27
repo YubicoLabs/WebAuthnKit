@@ -7,7 +7,7 @@ const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
 
   const setTrustedDevice = (value) => {
     localStorage.setItem('trustedDevice', value);
-    accountSecurityStep();
+    registerDeviceSuccessStep();
   }
 
   const registerDeviceSuccessStep = () => {
@@ -16,11 +16,6 @@ const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
 
   const accountSecurityStep = () => {
     navigation.go('AccountSecurityStep');
-  }
-
-  const next = () => {
-    setTrustedDevice(true);
-    registerDeviceSuccessStep();
   }
 
   return (

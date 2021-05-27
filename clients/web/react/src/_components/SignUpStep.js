@@ -7,7 +7,7 @@ import styles from "./component.module.css";
 const SignUpStep = ({ setForm, formData, navigation }) => {
 
   const [inputs, setInputs] = useState({
-    username: ''
+    username: localStorage.getItem('username')
   });
   const [errors, setErrors] = useState({
     username: ''
