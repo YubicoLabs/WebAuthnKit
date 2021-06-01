@@ -97,6 +97,7 @@ const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
             placeholder="PIN"
             aria-label="PIN"
             aria-describedby="basic-addon1"
+            type="password"
             onChange={handleChange}
             isInvalid={!isInputValid()}
             isValid={isInputValid()}
@@ -115,6 +116,7 @@ const RegisterSvPinStep = ({ setForm, formData, navigation }) => {
             placeholder="PIN"
             aria-label="PIN"
             aria-describedby="basic-addon1"
+            type="password"
             onChange={handleChange}
             isInvalid={!isInputValid()}
             isValid={isInputValid()}

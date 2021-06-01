@@ -57,6 +57,7 @@ const ForgotStep = ({ setForm, formData, navigation }) => {
             placeholder="Enter Recovery Code"
             aria-label="Recovery Code"
             aria-describedby="basic-addon1"
+            type="password"
             onChange={handleChange}
             required
           />

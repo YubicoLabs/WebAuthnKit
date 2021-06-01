@@ -47,7 +47,6 @@ function App() {
                                 <Redirect from="*" to="/" />
                             </Switch>
                         </Router>
-                
                 </div>
             </div>
         </div>
