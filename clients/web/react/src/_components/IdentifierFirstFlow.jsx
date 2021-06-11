@@ -63,14 +63,8 @@ export const IdentifierFirstFlow = ({ images }) => {
     };
 
     return (
-        <>
-        <Card>
-            <Card.Body>
-                <img src="https://avatars.githubusercontent.com/u/25739468?s=100&v=4" alt="YubicoLabs" className="rounded mx-auto d-block" />
-                {renderSwitch(id)}
-            </Card.Body>
-        </Card>
-        
+        <>    
+            {renderSwitch(id)}    
         </>
     );
 
