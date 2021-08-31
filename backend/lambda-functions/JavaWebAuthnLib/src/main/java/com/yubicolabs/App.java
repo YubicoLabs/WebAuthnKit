@@ -301,7 +301,7 @@ public class App implements RequestHandler<Object, Object> {
                     request
                 );
             } catch (RegistrationFailedException e) {
-                log.debug("Registration failed!", e);
+                log.error("Registration failed!", e);
                 return e;
             } catch (Exception e) {
                 log.error("Registration failed unexpectedly; this is likely a bug.", e);
