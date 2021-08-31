@@ -8,6 +8,7 @@ import { alertActions } from '../_actions';
 import { PrivateRoute } from '../_components';
 import { HomePage } from '../HomePage';
 import { LoginPage } from '../LoginPage';
+import { IdentifierFirstLoginFlowPage } from '../LoginPage';
 import { LoginWithSecurityKeyPage } from '../LoginWithSecurityKeyPage';
 import { RegisterPage } from '../RegisterPage';
 import { IdentifierFirstFlowProto } from '../IdentifierFirstFlowProto';
@@ -44,7 +45,7 @@ function App() {
                         <Router history={history}>
                             <Switch>
                                 <PrivateRoute exact path="/" component={HomePage} />
-                                <Route path="/login" component={LoginPage} />
+                                <Route path="/login" component={IdentifierFirstLoginFlowPage} />
                                 <Route path="/loginWithSecurityKey" component={LoginWithSecurityKeyPage} />
                                 <Route path="/register" component={RegisterPage} />
                                 <Route path="/identifierfirstflowproto" component={IdentifierFirstFlowProto} />
