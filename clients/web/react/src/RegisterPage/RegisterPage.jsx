@@ -111,7 +111,7 @@ function RegisterPage() {
                 if(uv == false) {
                     dispatch(credentialActions.getUV(challengeResponse));
                 } else {
-                    console.log("sendCustomChallengeAnswer: ", user);
+                    console.log("sendCustomChallengeAnswer: ", cognitoUser);
                     // to send the answer of the custom challenge
                     const user = await Auth.sendCustomChallengeAnswer(cognitoUser, JSON.stringify(challengeResponse))
                     .then(user => {
