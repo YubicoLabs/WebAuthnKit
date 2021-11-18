@@ -4,8 +4,20 @@ import { Button, Card, InputGroup, FormControl, Table } from 'react-bootstrap';
 import styles from "./component.module.css";
 
 const AccountSecurityStep = ({ setForm, formData, navigation }) => {
+
+  //TODO Get trusted devices
+
+  //TODO Get Security Keys
+
+  //TODO Change SV-PIN
+
+  //TODO Generate recovery codes
+
+  //TODO Delete account
+
+  //TODO Logout
   const logOut = () => {
-    window.location.reload();
+    navigation.go('LogOutStep')
   }
 
   return (

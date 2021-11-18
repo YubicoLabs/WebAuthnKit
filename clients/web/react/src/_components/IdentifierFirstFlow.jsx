@@ -12,6 +12,7 @@ import LogInTrustedDeviceStep from "./LogInTrustedDeviceStep";
 import RegisterKeySuccessStep from "./RegisterKeySuccessStep";
 import RegisterDeviceSuccessStep from "./RegisterDeviceSuccessStep";
 import AccountSecurityStep from "./AccountSecurityStep";
+import LogOutStep from "./LogoutStep";
 
 const steps = [
     { id: "LogInStep" },
@@ -23,7 +24,8 @@ const steps = [
     { id: "LogInTrustedDeviceStep" },
     { id: "RegisterKeySuccessStep" },
     { id: "RegisterDeviceSuccessStep" },
-    { id: "AccountSecurityStep" }
+    { id: "AccountSecurityStep" },
+    { id: "LogOutStep"}
 ];
 
 export const IdentifierFirstFlow = ({ images }) => {
@@ -57,6 +59,8 @@ export const IdentifierFirstFlow = ({ images }) => {
                 return <RegisterDeviceSuccessStep {...props} />;
             case "AccountSecurityStep":
                 return <AccountSecurityStep {...props} />;
+            case "LogOutStep":
+                return <LogOutStep {...props} />;
             default:
                 return null;
         }
