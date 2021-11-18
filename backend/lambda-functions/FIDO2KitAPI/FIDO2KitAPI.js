@@ -424,6 +424,12 @@ async function finishRegisterFIDO2Credential(userName, body) {
         console.log("response: ", response);
         let payload = JSON.parse(response.Payload);
         console.log("response payload: ", payload);
+
+         // exceptions will have a message property
+        if(payload.message !== undefined) {
+            console.log("error: "+ payload.message);
+            return error(new Error(payload.message));
+        }
         
         return ok(payload);
     } catch (err) {

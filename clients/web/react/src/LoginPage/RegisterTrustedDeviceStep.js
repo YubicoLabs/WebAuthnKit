@@ -34,6 +34,7 @@ const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
       console.error("RegisterTrustedDeviceStep register error");
       console.error(err);
       dispatch(alertActions.error(err.message));
+      return;
     }
     */
     registerDeviceSuccessStep();
@@ -65,6 +66,7 @@ const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
       console.error("RegisterTrustedDeviceStep authenticate error");
       console.error(err);
       dispatch(alertActions.error(err.message));
+      return;
     }
 
     continueStep();

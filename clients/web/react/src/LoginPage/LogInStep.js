@@ -94,7 +94,7 @@ const LogInStep = ({ navigation }) => {
 
             if (cognitoUser.challengeName === 'CUSTOM_CHALLENGE' && cognitoUser.challengeParam.type === 'webauthn.create') {
                 dispatch(alertActions.error("Please Sign Up"));
-                history.push('/login');
+                history.push('/register');
                 return;
             } else if (cognitoUser.challengeName === 'CUSTOM_CHALLENGE' && cognitoUser.challengeParam.type === 'webauthn.get') {
 

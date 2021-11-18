@@ -1,7 +1,9 @@
-import { get, supported } from '@github/webauthn-json';
+import { get, create, supported } from '@github/webauthn-json';
 import base64url from 'base64url';
+import cbor from 'cbor';
 import { Auth } from 'aws-amplify';
 import axios from 'axios';
+import validate from 'validate.js';
 
 import aws_exports from '../aws-exports';
 
@@ -9,18 +11,28 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 
 export const WebAuthnClient = {
     getAuthChallegeResponse,
+    getCurrentAuthenticatedUser,
     getPublicKeyRequestOptions,
     getUsernamelessAuthChallegeResponse,
     getUVFromAssertion,
     sendChallengeAnswer,
     signIn,
-    signUp
+    signUp,
+    updateCredential,
+    validateCredentialNickname
 };
 
 const defaultInvalidPIN = -1;
 const webAuthnClientExceptionName = 'WebAuthnClientException';
 const ERROR_CODE = "ERROR_CODE";
 const INVALID_CHALLENGE_TYPE = "INVALID_CHALLENGE_TYPE";
+const constraints = {
+    nickname: {
+        length: {
+            maximum: 20
+        }
+    }
+  };
 
 function WebAuthnClientException(message, code = ERROR_CODE) {
     const error = new Error(message);
@@ -215,38 +227,41 @@ async function sendChallengeAnswer(cognitoUser, challengeResponse, pin = default
     challengeResponse.pinCode = parseInt(pin);
     console.log("WebAuthnClient sendChallengeAnswer(): ", challengeResponse);
 
-    Auth.sendCustomChallengeAnswer(cognitoUser, JSON.stringify(challengeResponse))
-        .then(user => {
-            console.log(user);
+    let userData = undefined;
 
-            Auth.currentSession()
-                .then(data => {
-                    //TODO move dispatch to UI logic
-                    //dispatch(alertActions.success('Authentication successful'));
-                    let userData = {
-                        id: 1,
-                        username: user.attributes.name,
-                        token: data.getAccessToken().getJwtToken()
-                    }
-                    localStorage.setItem('user', JSON.stringify(userData));
-                    console.log("userData ", localStorage.getItem('user'));
+    try {
+        let user = await Auth.sendCustomChallengeAnswer(cognitoUser, JSON.stringify(challengeResponse));
+        console.log("WebAuthnClient sendChallengeAnswer user: ", user);
 
-                    return userData;
-                })
-                .catch(err => {
-                    console.error("WebAuthnClient sendChallengeAnswer currentSession() error: ", err);
-                    //TODO move dispatch to UI logic
-                    //dispatch(alertActions.error("Something went wrong. ", err.message));
-                    throw err;
-                });
-
-        })
-        .catch(error => {
-            console.error("WebAuthnClient sendCustomChallengeAnswer() error: ", error);
-            //TODO move dispatch to UI logic
-            //dispatch(alertActions.error(err.message));
-            throw error;
+        let currentUser = await Auth.currentAuthenticatedUser({
+            bypassCache: true  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
         });
+        console.log("WebAuthnClient sendChallengeAnswer() currentAuthenticatedUser", currentUser);
+
+        //let userSession = await Auth.userSession(user);
+        //console.log("WebAuthnClient sendChallengeAnswer() userSession", userSession);
+        window.location.reload();
+        
+
+        let data = await Auth.currentSession();
+        console.log("WebAuthnClient sendChallengeAnswer data: ", data);
+        userData = {
+            id: 1,
+            username: user.username,
+            credential: challengeResponse.credential,
+            token: data.getAccessToken().getJwtToken() 
+        }
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log("WebAuthnClient sendChallengeAnswer userData: ", localStorage.getItem('user'));
+
+    } catch (error) {
+        console.error("WebAuthnClient sendCustomChallengeAnswer() error: ", error);
+        //TODO move dispatch to UI logic
+        //dispatch(alertActions.error(err.message));
+        throw error;
+    }
+
+    return userData;
 }
 
 
@@ -259,7 +274,7 @@ async function signUp(name, requestUV) {
     const password = randomString(14);
     const username = name.toLocaleLowerCase();
     localStorage.setItem('username', username);
-    const attributes = { "name": username };
+    const attributes = { name: username };
 
     try {
         const { user } = await Auth.signUp({
@@ -311,4 +326,60 @@ async function signUp(name, requestUV) {
         throw error;
     }
 
+}
+
+//todo move to user action/service
+async function getCurrentAuthenticatedUser() {
+    let userData = undefined;
+
+    try {
+        let currentUser = await Auth.currentAuthenticatedUser({
+            bypassCache: true  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
+        });
+        console.log("getCurrentAuthenticatedUser currentAuthenticatedUser", currentUser);
+    
+        let data = await Auth.currentSession();
+        console.log("getCurrentAuthenticatedUser data: ", data);
+        userData = {
+            id: 1,
+            username: currentUser.username,
+            credential: JSON.parse(localStorage.getItem('credential')),
+            token: data.getIdToken().getJwtToken() 
+        }
+        localStorage.setItem('user', JSON.stringify(userData));
+        axios.defaults.headers.common['Authorization'] = userData.token;
+        console.log("getCurrentAuthenticatedUser userData: ", localStorage.getItem('user'));
+    } catch (error) {
+        console.error("getCurrentAuthenticatedUser error: ", error);
+        throw error;
+    }
+
+      return userData;
+}
+
+//todo remove, alreayd exists in credential action/service
+async function updateCredential(credential, credentialNickname) {
+    console.log("WebAuthnClient updateCredential() credential=", credential);
+    console.log("WebAuthnClient updateCredential() credentialNickname=", credentialNickname);
+
+    try {
+        let data = await Auth.currentSession();
+
+        let jwt = data.getIdToken().getJwtToken();
+        console.log("updateCredential jwt", jwt);
+        axios.defaults.headers.common['Authorization'] = jwt;
+
+        const response = await axios.put('/users/credentials/fido2', {credential: { credentialId: { base64: credential.id}}, credentialNickname: { value: credentialNickname }});
+        console.log(response);
+        return response.data;
+    } catch (error) {
+        console.error("WebAuthnClient updateCredential() error: ", error);
+        throw error;
+    }
+
+}
+
+//todo move to credential action/service
+function validateCredentialNickname(nickname) {
+    return validate({nickname: nickname}, constraints);
 }

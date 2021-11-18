@@ -246,7 +246,7 @@ function HomePage() {
                             }
                         }}/></label><br/>
                         { invalidNickname ? <Alert variant="danger">{invalidNickname}</Alert> : null }
-                        <img src={attestationMetadata ? attestationMetadata.deviceProperties.imageUrl : ''} width="25" height="25"/>&nbsp;&nbsp;<label>{attestationMetadata ? attestationMetadata.deviceProperties.displayName : ''}</label><br/>
+                        <img src={attestationMetadata && attestationMetadata.deviceProperties ? attestationMetadata.deviceProperties.imageUrl : ''} width="25" height="25"/>&nbsp;&nbsp;<label>{attestationMetadata && attestationMetadata.deviceProperties ? attestationMetadata.deviceProperties.displayName : ''}</label><br/>
                         <label><em>Usernameless a.k.a. Client-Side Discoverable Credential:</em> {credential.registrationRequest ? credential.registrationRequest.requireResidentKey.toString() : ''}</label><br/>
                         <label><em>Last Used Time:</em> {credential.lastUsedTime ? new Date(credential.lastUsedTime.seconds*1000).toLocaleString() : ''}</label><br/>
                         <label><em>Last Updated Time:</em> {credential.lastUpdatedTime ? new Date(credential.lastUpdatedTime.seconds*1000).toLocaleString() : ''}</label><br/>
@@ -450,6 +450,10 @@ function HomePage() {
         );
     }
 
+    const logout = () => {
+        Auth.signOut();
+    }
+
     return (
         <>
             <h1>Hi {userInfo.attributes.name}!</h1>
@@ -459,7 +463,7 @@ function HomePage() {
             <ServerVerifiedPin {...svpinChangeProps}/>
             <RecoveryCodes />
             <DeleteUser />
-            <Link to="/login">Logout</Link>
+            <Link onClick={logout} to="/login">Logout</Link>
         </>
     );
 }
