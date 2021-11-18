@@ -24,3 +24,20 @@
   border-radius: 25px;
   background-color: white;
 }
+
+.security-key-image {
+  max-height: 70px;
+  border: 3px #e7e7e7 solid;
+  padding: 5px;
+  background-color: #9aca3c;
+}
+
+.security-key-image-col {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.section-divider {
+  border-top: 2px #e7e7e7 solid;
+}

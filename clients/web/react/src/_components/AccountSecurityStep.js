@@ -1,13 +1,61 @@
-import React from "react";
-import { Button, Card, InputGroup, FormControl, Table } from 'react-bootstrap';
+import React, { useState, useEffect, useRef, Profiler } from 'react';
+import { Button, Card, InputGroup, FormControl, Table, ListGroup, Image, Container, Row, Col } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { userActions, credentialActions, alertActions } from '../_actions';
+import { WebAuthnClient } from './WebAuthnClient';
 
 import styles from "./component.module.css";
 
 const AccountSecurityStep = ({ setForm, formData, navigation }) => {
+  //Initialize User information
+  const [userData, setUserData] = useState({
+    username: '',
+    token: '',
+    credential: ''
+  });
+  const credentials = useSelector(state => state.credentials);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    setUserData(WebAuthnClient.getCurrentAuthenticatedUser() || undefined);
+    console.log(`Username: ${userData.username}`);
+    console.log(`Token: ${userData.token}`);
+    console.log(`Credential: ${userData.credential}`);
+  }, []);
+
+  useEffect(() => {
+    if(userData.token) {
+      console.log(`JWT: ${userData.token}`);
+      dispatch(credentialActions.getAll(jwt));
+    }
+  }, [alert])
 
   //TODO Get trusted devices
 
   //TODO Get Security Keys
+  //TODO - Modal for Edit
+  //TODO - Format date from response
+  //TODO - Use Metadata to determine if YubiKey (and what image do we use for non-YubiKey?)
+  function credentialDisplay(credential) {
+    return (
+      <>
+        <Row className={"justify-content-md-center " + styles['security-key-image-col']}>
+          <Col sm={12} md={4} lg={2}>
+            <Image className={styles['security-key-image']} src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" roundedCircle />
+          </Col>
+          <Col sm={12} md={8} lg={6}>
+            <h5>{credential.credentialNickname.value}</h5>
+            <h6>YubiKey 5NFC</h6>
+            <p>{credential.lastUsedTime}</p>
+          </Col>
+          <Col sm={12} md={12} lg={3}>
+            <Button variant="secondary">Edit</Button>
+          </Col>
+        </Row>
+        <hr className={styles['section-divider']} />
+      </>
+    );
+  }
 
   //TODO Change SV-PIN
 
@@ -15,7 +63,6 @@ const AccountSecurityStep = ({ setForm, formData, navigation }) => {
 
   //TODO Delete account
 
-  //TODO Logout
   const logOut = () => {
     navigation.go('LogOutStep')
   }
@@ -53,25 +100,48 @@ const AccountSecurityStep = ({ setForm, formData, navigation }) => {
           <Card>
             <Card.Header><h5>Security Keys</h5></Card.Header>
             <Card.Body>
-              <Table hover responsive>
-                <tbody>
-                  <tr>
-                    <td><img src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" width="20" height="20" /></td>
-                    <td>YubiKey 5. Last used: May 26, 2021</td>
-                    <td> <Button variant="secondary">Edit</Button></td>
-                  </tr>
-                  <tr>
-                    <td><img src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" width="20" height="20" /></td>
-                    <td>YubiKey 4. Last used: April 26, 2021</td>
-                    <td> <Button variant="secondary">Edit</Button></td>
-                  </tr>
-                  <tr>
-                    <td><img src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" width="20" height="20" /></td>
-                    <td>YubiKey 6. Last used: March 26, 2021</td>
-                    <td> <Button variant="secondary">Edit</Button></td>
-                  </tr>
-                </tbody>
-              </Table>
+              <Row className={"justify-content-md-center " + styles['security-key-image-col']}>
+                <Col sm={12} md={4} lg={3}>
+                  <Image className={styles['security-key-image']} src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" roundedCircle />
+                </Col>
+                <Col sm={12} md={8} lg={6}>
+                  <h5>Credential Nickname 1</h5>
+                  <h6>YubiKey 5NFC</h6>
+                  <p>Last Login: Aug 25, 2021</p>
+                </Col>
+                <Col sm={12} md={12} lg={3}>
+                  <Button variant="secondary">Edit</Button>
+                </Col>
+              </Row>
+              <hr className={styles['section-divider']} />
+              <Row className={"justify-content-md-center " + styles['security-key-image-col']}>
+                <Col sm={12} md={4} lg={3}>
+                  <Image className={styles['security-key-image']} src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" roundedCircle />
+                </Col>
+                <Col sm={12} md={8} lg={6}>
+                  <h5>Credential Nickname 2</h5>
+                  <h6>YubiKey 5NFC</h6>
+                  <p>Last Login: Aug 25, 2021</p>
+                </Col>
+                <Col sm={12} md={12} lg={3}>
+                  <Button variant="secondary">Edit</Button>
+                </Col>
+              </Row>
+              <hr className={styles['section-divider']} />
+              <Row className={"justify-content-md-center " + styles['security-key-image-col']}>
+                <Col sm={12} md={4} lg={3}>
+                  <Image className={styles['security-key-image']} src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png" roundedCircle />
+                </Col>
+                <Col sm={12} md={8} lg={6}>
+                  <h5>Credential Nickname 3</h5>
+                  <h6>YubiKey 5NFC</h6>
+                  <p>Last Login: Aug 25, 2021</p>
+                </Col>
+                <Col sm={12} md={12} lg={3}>
+                  <Button variant="secondary">Edit</Button>
+                </Col>
+              </Row>
+              <hr className={styles['section-divider']} />
               <Button variant="secondary">Add Security Key</Button>
             </Card.Body>
           </Card>
