@@ -1,7 +1,7 @@
 import { credentialConstants } from '../_constants';
 import { credentialService } from '../_services';
 import { alertActions } from '.';
-import { history } from '../_helpers';
+import validate from 'validate.js';
 
 export const credentialActions = {
     generateRecoveryCodes,
@@ -13,8 +13,17 @@ export const credentialActions = {
     getAll,
     getUV,
     completeUV,
-    delete: _delete
+    delete: _delete,
+    validateCredentialNickname
 };
+
+const constraints = {
+    nickname: {
+        length: {
+            maximum: 20
+        }
+    }
+  };
 
 function generateRecoveryCodes() {
     return dispatch => {
@@ -24,7 +33,6 @@ function generateRecoveryCodes() {
             .then(
                 data => { 
                     dispatch(success(data));
-                    //dispatch(alertActions.success('Recovery Code generation successful'));
                 },
                 error => {
                     dispatch(failure(error.toString()));
@@ -46,7 +54,6 @@ function listRecoveryCodes() {
             .then(
                 count => { 
                     dispatch(success(count));
-                    //dispatch(alertActions.success('Recovery Code generation successful'));
                 },
                 error => {
                     dispatch(failure(error.toString()));
@@ -132,8 +139,14 @@ function registerFinish(registration) {
         credentialService.registerFinish(registration)
             .then(
                 registration => { 
-                    dispatch(success(registration));
-                    dispatch(alertActions.success('Registration successful'));
+                    console.log("credential.actions registerFinish registration: ", registration);
+                    if (registration === undefined) {
+                        dispatch(failure('Registration failed'));
+                        dispatch(alertActions.error('Registration failed'));
+                    } else {
+                        dispatch(success(registration));
+                        dispatch(alertActions.success('Registration successful'));
+                    }
                 },
                 error => {
                     dispatch(failure(error.toString()));
@@ -208,7 +221,6 @@ function _delete(id) {
                 },
                 error => {
                     dispatch(failure(id, error.toString()));
-                    //dispatch(alertActions.error(error.toString()));
                 }
             );
     };
@@ -218,3 +230,25 @@ function _delete(id) {
     function failure(id, error) { return { type: credentialConstants.DELETE_FAILURE, id, error } }
 }
 
+function validateCredentialNickname(nickname) {
+    return dispatch => {
+        dispatch(request(nickname));
+
+        let result = validate({nickname: nickname}, constraints);
+
+        if(result) {
+
+            let error = result.nickname.join(". ");
+            dispatch(failure(error.toString()));
+            dispatch(alertActions.error(error.toString()));
+      
+          } else {
+            dispatch(success(nickname));
+          }
+
+    };
+
+    function request(nickname) { return { type: credentialConstants.NICKNAME_REQUEST, nickname } }
+    function success(nickname) { return { type: credentialConstants.NICKNAME_SUCCESS, nickname } }
+    function failure(nickname, error) { return { type: credentialConstants.NICKNAME_FAILURE, nickname, error } }
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef, Profiler } from 'react';
 import { Button, InputGroup, FormControl, } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -11,46 +11,56 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
 
   const dispatch = useDispatch();
 
+  const validNickname = useSelector(state => state.credentials.validNickname);
+  const updateComplete = useSelector(state => state.credentials.updateComplete);
+
+  useEffect(() => {
+    if (validNickname){
+      updateCredential(validNickname);
+    }
+  },[validNickname]);
+
+  useEffect(() => {
+    if (updateComplete) {
+      history.push('/');
+    }
+  },[updateComplete]);
+
   const { username, pin, nickname, credential } = formData;
 
-  async function continueStep() {
-    let result = WebAuthnClient.validateCredentialNickname(nickname);
+  async function updateCredential(nickname){
+    console.log("RegisterKeySuccessStep updateCredential() nickname:", nickname);
+    try {
+      await WebAuthnClient.getCurrentAuthenticatedUser();   // Get the jwt token after signup
+      let ls_credential = JSON.parse(localStorage.getItem('credential'));
+      console.log("RegisterKeySuccessStep updateCredential() ls_credential:", ls_credential);
 
-    if(result) {
-
-      console.error("RegisterKeySuccessStep validateCredentialNickname error");
-      let message = result.nickname.join(". ");
-      console.error(message);
-      dispatch(alertActions.error(message));
-
-    } else {
-      try {
-        await WebAuthnClient.getCurrentAuthenticatedUser();
-        let ls_credential = JSON.parse(localStorage.getItem('credential'));
-
-        let credentialToUpdate = {
-          credential: { 
-            credentialId: { 
-              base64: ls_credential.id
-            }
-          }, 
-          credentialNickname: { 
-            value: nickname 
+      let credentialToUpdate = {
+        credential: { 
+          credentialId: { 
+            base64: ls_credential.id
           }
+        }, 
+        credentialNickname: { 
+          value: nickname 
         }
-
-        dispatch(credentialActions.update(credentialToUpdate));
-
-      } catch (err) {
-
-        console.error("RegisterKeySuccessStep continueStep() error");
-        console.error(err);
-        dispatch(alertActions.error(err.message));
-
       }
+
+      dispatch(credentialActions.update(credentialToUpdate));
+
+    } catch (err) {
+
+      console.error("RegisterKeySuccessStep continueStep() error");
+      console.error(err);
+      dispatch(alertActions.error(err.message));
+
     }
     localStorage.removeItem('credential');
-    history.push('/');
+
+  }
+
+  function continueStep() {
+    dispatch(credentialActions.validateCredentialNickname(nickname));
   }
 
   return (

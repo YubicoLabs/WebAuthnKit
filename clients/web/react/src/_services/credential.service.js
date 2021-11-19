@@ -17,6 +17,7 @@ export const credentialService = {
     delete: _delete
 };
 
+
 async function generateRecoveryCodes() {
     try {
         const response = await axios.delete('/users/credentials/codes');
