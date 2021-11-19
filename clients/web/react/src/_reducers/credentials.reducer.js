@@ -78,6 +78,22 @@ export function credentials(state = {}, action) {
       return { 
         error: action.error
       };
+    case credentialConstants.NICKNAME_SUCCESS:
+      return { 
+        validNickname: action.nickname
+      };
+    case credentialConstants.NICKNAME_FAILURE:
+      return { 
+        error: action.error
+      };
+    case credentialConstants.UPDATE_SUCCESS:
+      return { 
+        updateComplete: action.type
+      };
+    case credentialConstants.UPDATE_FAILURE:
+      return { 
+        updateComplete: action.type
+      };
     default:
       return state
   }

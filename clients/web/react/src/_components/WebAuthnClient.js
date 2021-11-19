@@ -3,7 +3,6 @@ import base64url from 'base64url';
 import cbor from 'cbor';
 import { Auth } from 'aws-amplify';
 import axios from 'axios';
-import validate from 'validate.js';
 
 import aws_exports from '../aws-exports';
 
@@ -11,28 +10,19 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 
 export const WebAuthnClient = {
     getAuthChallegeResponse,
-    getCurrentAuthenticatedUser,
     getPublicKeyRequestOptions,
     getUsernamelessAuthChallegeResponse,
     getUVFromAssertion,
     sendChallengeAnswer,
     signIn,
-    signUp,
-    updateCredential,
-    validateCredentialNickname
+    signUp
 };
 
 const defaultInvalidPIN = -1;
 const webAuthnClientExceptionName = 'WebAuthnClientException';
 const ERROR_CODE = "ERROR_CODE";
 const INVALID_CHALLENGE_TYPE = "INVALID_CHALLENGE_TYPE";
-const constraints = {
-    nickname: {
-        length: {
-            maximum: 20
-        }
-    }
-  };
+
 
 function WebAuthnClientException(message, code = ERROR_CODE) {
     const error = new Error(message);
@@ -326,60 +316,4 @@ async function signUp(name, requestUV) {
         throw error;
     }
 
-}
-
-//todo move to user action/service
-async function getCurrentAuthenticatedUser() {
-    let userData = undefined;
-
-    try {
-        let currentUser = await Auth.currentAuthenticatedUser({
-            bypassCache: true  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-        });
-        console.log("getCurrentAuthenticatedUser currentAuthenticatedUser", currentUser);
-    
-        let data = await Auth.currentSession();
-        console.log("getCurrentAuthenticatedUser data: ", data);
-        userData = {
-            id: 1,
-            username: currentUser.username,
-            credential: JSON.parse(localStorage.getItem('credential')),
-            token: data.getIdToken().getJwtToken() 
-        }
-        localStorage.setItem('user', JSON.stringify(userData));
-        axios.defaults.headers.common['Authorization'] = userData.token;
-        console.log("getCurrentAuthenticatedUser userData: ", localStorage.getItem('user'));
-    } catch (error) {
-        console.error("getCurrentAuthenticatedUser error: ", error);
-        throw error;
-    }
-
-      return userData;
-}
-
-//todo remove, alreayd exists in credential action/service
-async function updateCredential(credential, credentialNickname) {
-    console.log("WebAuthnClient updateCredential() credential=", credential);
-    console.log("WebAuthnClient updateCredential() credentialNickname=", credentialNickname);
-
-    try {
-        let data = await Auth.currentSession();
-
-        let jwt = data.getIdToken().getJwtToken();
-        console.log("updateCredential jwt", jwt);
-        axios.defaults.headers.common['Authorization'] = jwt;
-
-        const response = await axios.put('/users/credentials/fido2', {credential: { credentialId: { base64: credential.id}}, credentialNickname: { value: credentialNickname }});
-        console.log(response);
-        return response.data;
-    } catch (error) {
-        console.error("WebAuthnClient updateCredential() error: ", error);
-        throw error;
-    }
-
-}
-
-//todo move to credential action/service
-function validateCredentialNickname(nickname) {
-    return validate({nickname: nickname}, constraints);
 }
