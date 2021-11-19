@@ -1,15 +1,11 @@
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { userActions } from '../_actions';
 
 import { Spinner } from 'react-bootstrap';
 
 const LogOutStep = ({ navigation }) => {
-  const dispatch = useDispatch();
   useEffect(() => {
     setTimeout(function () {
-      console.log('Called into logout');
-      dispatch(userActions.logout());
+      console.log('Called into loader');
       navigation.go('LogInStep');
     }, 1000);
   }, []);

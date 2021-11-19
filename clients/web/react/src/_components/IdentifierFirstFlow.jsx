@@ -35,7 +35,7 @@ export const IdentifierFirstFlow = ({ images }) => {
 
     const { id } = step;
 
-    const props = { navigation };
+    const props = { navigation, step };
 
     const renderSwitch = (id) => {
         switch (id) {
