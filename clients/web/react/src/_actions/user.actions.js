@@ -7,7 +7,8 @@ export const userActions = {
     webAuthnStart,
     logout,
     exists,
-    delete: _delete
+    delete: _delete,
+    getCurrentAuthenticatedUser
 };
 
 function webAuthnStart() {
@@ -77,4 +78,24 @@ function _delete(jwt) {
     function request() { return { type: userConstants.DELETE_REQUEST } }
     function success() { return { type: userConstants.DELETE_SUCCESS } }
     function failure(error) { return { type: userConstants.DELETE_FAILURE, error } }
+}
+
+function getCurrentAuthenticatedUser() {
+    return dispatch => {
+        dispatch(request());
+
+        userService.getCurrentAuthenticatedUser()
+            .then(
+                user => { 
+                    dispatch(success(user));
+                },
+                error => {
+                    dispatch(failure(error));
+                }
+            );
+    };
+
+    function request() { return { type: userConstants.CURRENT_USER_REQUEST } }
+    function success(user) { return { type: userConstants.CURRENT_USER_SUCCESS, user } }
+    function failure(error) { return { type: userConstants.CURRENT_USER_FAILURE, error } }
 }

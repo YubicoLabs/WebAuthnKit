@@ -3,7 +3,6 @@ import { Button, InputGroup, FormControl, } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { history } from '../_helpers';
-import { WebAuthnClient } from '../_components';
 import { userActions, credentialActions, alertActions } from '../_actions';
 
 
@@ -13,6 +12,10 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
 
   const validNickname = useSelector(state => state.credentials.validNickname);
   const updateComplete = useSelector(state => state.credentials.updateComplete);
+
+  useEffect(() => {
+    dispatch(userActions.getCurrentAuthenticatedUser());  // Get the jwt token after signup
+  }, []);
 
   useEffect(() => {
     if (validNickname){
@@ -31,7 +34,6 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
   async function updateCredential(nickname){
     console.log("RegisterKeySuccessStep updateCredential() nickname:", nickname);
     try {
-      await WebAuthnClient.getCurrentAuthenticatedUser();   // Get the jwt token after signup
       let ls_credential = JSON.parse(localStorage.getItem('credential'));
       console.log("RegisterKeySuccessStep updateCredential() ls_credential:", ls_credential);
 

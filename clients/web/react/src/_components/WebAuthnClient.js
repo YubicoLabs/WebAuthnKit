@@ -10,7 +10,6 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 
 export const WebAuthnClient = {
     getAuthChallegeResponse,
-    getCurrentAuthenticatedUser,
     getPublicKeyRequestOptions,
     getUsernamelessAuthChallegeResponse,
     getUVFromAssertion,
@@ -317,33 +316,4 @@ async function signUp(name, requestUV) {
         throw error;
     }
 
-}
-
-//todo move to user action/service
-async function getCurrentAuthenticatedUser() {
-    let userData = undefined;
-
-    try {
-        let currentUser = await Auth.currentAuthenticatedUser({
-            bypassCache: true  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-        });
-        console.log("getCurrentAuthenticatedUser currentAuthenticatedUser", currentUser);
-    
-        let data = await Auth.currentSession();
-        console.log("getCurrentAuthenticatedUser data: ", data);
-        userData = {
-            id: 1,
-            username: currentUser.username,
-            credential: JSON.parse(localStorage.getItem('credential')),
-            token: data.getIdToken().getJwtToken() 
-        }
-        localStorage.setItem('user', JSON.stringify(userData));
-        axios.defaults.headers.common['Authorization'] = userData.token;
-        console.log("getCurrentAuthenticatedUser userData: ", localStorage.getItem('user'));
-    } catch (error) {
-        console.error("getCurrentAuthenticatedUser error: ", error);
-        throw error;
-    }
-
-      return userData;
 }
