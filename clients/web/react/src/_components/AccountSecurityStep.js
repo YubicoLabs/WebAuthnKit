@@ -39,7 +39,7 @@ const AccountSecurityStep = ({ setForm, formData, navigation }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setUserData(WebAuthnClient.getCurrentAuthenticatedUser() || undefined);
+    setUserData(dispatch(userActions.getCurrentAuthenticatedUser()) || undefined);
     console.log(`Username: ${userData.username}`);
     console.log(`Token: ${userData.token}`);
     console.log(`Credential: ${userData.credential}`);
