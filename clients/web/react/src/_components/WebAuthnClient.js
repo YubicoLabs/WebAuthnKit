@@ -223,23 +223,10 @@ async function sendChallengeAnswer(cognitoUser, challengeResponse, pin = default
         let user = await Auth.sendCustomChallengeAnswer(cognitoUser, JSON.stringify(challengeResponse));
         console.log("WebAuthnClient sendChallengeAnswer user: ", user);
 
-        let currentUser = await Auth.currentAuthenticatedUser({
-            bypassCache: true  // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
-        });
-        console.log("WebAuthnClient sendChallengeAnswer() currentAuthenticatedUser", currentUser);
-
-        //let userSession = await Auth.userSession(user);
-        //console.log("WebAuthnClient sendChallengeAnswer() userSession", userSession);
-        window.location.reload();
-        
-
-        let data = await Auth.currentSession();
-        console.log("WebAuthnClient sendChallengeAnswer data: ", data);
         userData = {
             id: 1,
             username: user.username,
             credential: challengeResponse.credential,
-            token: data.getAccessToken().getJwtToken() 
         }
         localStorage.setItem('user', JSON.stringify(userData));
         console.log("WebAuthnClient sendChallengeAnswer userData: ", localStorage.getItem('user'));

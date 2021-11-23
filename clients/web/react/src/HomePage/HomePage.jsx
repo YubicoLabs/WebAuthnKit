@@ -452,6 +452,8 @@ function HomePage() {
 
     const logout = () => {
         Auth.signOut();
+        history.push("/login");
+        history.go();
     }
 
     return (
@@ -463,7 +465,7 @@ function HomePage() {
             <ServerVerifiedPin {...svpinChangeProps}/>
             <RecoveryCodes />
             <DeleteUser />
-            <Link onClick={logout} to="/login">Logout</Link>
+            <button type="button" onClick={logout} className="btn btn-link">Logout</button>
         </>
     );
 }
