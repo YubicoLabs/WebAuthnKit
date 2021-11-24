@@ -1,25 +1,22 @@
-import React from 'react';
-import axios from 'axios';
-import aws_exports from '../../aws-exports';
+import React, { useState, useEffect } from "react";
 
-import { useSelector } from 'react-redux';
-import { Alert, Button, Card, Modal } from 'react-bootstrap';
+import { useDispatch, useSelector } from "react-redux";
+import { Alert, Button, Card, Modal } from "react-bootstrap";
+import { credentialActions } from "../../_actions";
 
-axios.defaults.baseURL = aws_exports.apiEndpoint;
-
-function RecoveryCodes({ credentials }) {
-  let recoveryCodesViewed = credentials.recoveryCodesViewed;
-  let allRecoveryCodesUsed = credentials.allRecoveryCodesUsed;
+const RecoveryCodes = function ({ credentials }) {
+  const { recoveryCodesViewed } = credentials.recoveryCodesViewed;
+  const { allRecoveryCodesUsed } = credentials.allRecoveryCodesUsed;
   const recoveryCodes = useSelector((state) => state.recoveryCodes);
-
   const [showCodes, setShowCodes] = useState(false);
+  const dispatch = useDispatch();
 
   const handleClose = () => {
     setShowCodes(false);
   };
   const handleShow = () => {
     setShowCodes(true);
-    dispatch(credentialActions.recoveryCodesViewed());
+    dispatch(credentialActions.listRecoveryCodes());
   };
   const handleGenerate = () => {
     setShowCodes(true);
@@ -39,7 +36,7 @@ function RecoveryCodes({ credentials }) {
           <h5>Recovery Options</h5>
         </Card.Header>
         <Card.Body>
-          <Button variant='link' onClick={handleShow}>
+          <Button variant="link" onClick={handleShow}>
             Recovery Codes
           </Button>
         </Card.Body>
@@ -53,20 +50,20 @@ function RecoveryCodes({ credentials }) {
             Protect your recovery codes as you would a password. We recommend
             saving them in a safe spot, such as password manager.
           </label>
-          <Alert variant='warning'>
+          <Alert variant="warning">
             If you lose you all your authenticators and don't have the recovery
             codes you will lose access to your account.
           </Alert>
           {recoveryCodes.loading && <em>Loading recovery codes...</em>}
           {recoveryCodes.generating && <em>Generating recovery codes...</em>}
           {recoveryCodes.error && (
-            <span className='text-danger'>ERROR: {recoveryCodes.error}</span>
+            <span className="text-danger">ERROR: {recoveryCodes.error}</span>
           )}
           {recoveryCodes.codesRemaining &&
           recoveryCodes.codesRemaining === 0 ? (
             <em>Please generate new recovery codes now.</em>
           ) : (
-            ''
+            ""
           )}
           {recoveryCodes.codes && (
             <ul>
@@ -78,40 +75,40 @@ function RecoveryCodes({ credentials }) {
             </ul>
           )}
           {recoveryCodes.codes && (
-            <Alert variant='warning'>
+            <Alert variant="warning">
               Save your recovery codes now. They will not be shown again.
             </Alert>
           )}
           {recoveryCodes.codesRemaining && recoveryCodes.codesRemaining > 0 ? (
             <em>{recoveryCodes.codesRemaining} recovery codes remaining.</em>
           ) : (
-            ''
+            ""
           )}
           {allRecoveryCodesUsed &&
             (!recoveryCodes.generating || !recoveryCodes.codes) && (
-              <em className='text-danger'>
+              <em className="text-danger">
                 All recovery codes have been used. Please generate new recovery
                 codes now.
               </em>
             )}
-          <p></p>
+          <p />
           <h6>Generate new recovery codes</h6>
           <label>
             When you generate new recovery codes, you must copy them to a safe
             spot. Your old codes will not work anymore.
           </label>
-          <Button variant='secondary' onClick={handleGenerate}>
+          <Button variant="secondary" onClick={handleGenerate}>
             Generate
           </Button>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant='primary' onClick={handleClose}>
+          <Button variant="primary" onClick={handleClose}>
             Close
           </Button>
         </Modal.Footer>
       </Modal>
     </>
   );
-}
+};
 
 export { RecoveryCodes };

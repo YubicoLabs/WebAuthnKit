@@ -1,28 +1,34 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 
-import { credentialActions, alertActions } from '../../_actions';
+import { create } from "@github/webauthn-json";
+import { Button, Modal, Alert } from "react-bootstrap";
+import base64url from "base64url";
+import cbor from "cbor";
+import axios from "axios";
+import validate from "validate.js";
+import { useDispatch } from "react-redux";
+import { credentialActions, alertActions } from "../../_actions";
+// eslint-disable-next-line camelcase
+import aws_exports from "../../aws-exports";
 
-import { create } from '@github/webauthn-json';
-import { Button, Modal, Alert } from 'react-bootstrap';
-import base64url from 'base64url';
-import cbor from 'cbor';
-import axios from 'axios';
-import validate from 'validate.js';
-
+// eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
 
-function AddCredential() {
+const AddCredential = function () {
   const [showAdd, setShowAdd] = useState(false);
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState("");
   const [isResidentKey, setIsResidentKey] = useState(false);
   const [invalidNickname, setInvalidNickname] = useState(undefined);
   const [submitted, setSubmitted] = useState(false);
+  const dispatch = useDispatch();
+
   const handleClose = () => setShowAdd(false);
   const handleShow = () => {
-    setNickname('');
+    setNickname("");
     setShowAdd(true);
   };
-  var constraints = {
+  const defaultInvalidPIN = -1;
+  const constraints = {
     nickname: {
       length: {
         maximum: 20,
@@ -33,9 +39,9 @@ function AddCredential() {
   const handleSaveAdd = () => {
     setSubmitted(true);
 
-    let result = validate({ nickname: nickname }, constraints);
+    const result = validate({ nickname }, constraints);
     if (result) {
-      setInvalidNickname(result.nickname.join('. '));
+      setInvalidNickname(result.nickname.join(". "));
     } else {
       setInvalidNickname(undefined);
       setShowAdd(false);
@@ -44,19 +50,19 @@ function AddCredential() {
   };
 
   const handleCheckboxChange = (e) => {
-    const target = e.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const { target } = e;
+    const value = target.type === "checkbox" ? target.checked : target.value;
     setIsResidentKey(value);
   };
 
   function getUV(attestationObject) {
-    let attestationBuffer = base64url.toBuffer(attestationObject);
-    let attestationStruct = cbor.decodeAllSync(attestationBuffer)[0];
-    let buffer = attestationStruct.authData;
+    const attestationBuffer = base64url.toBuffer(attestationObject);
+    const attestationStruct = cbor.decodeAllSync(attestationBuffer)[0];
+    const buffer = attestationStruct.authData;
 
-    let flagsBuf = buffer.slice(32, 33);
-    let flagsInt = flagsBuf[0];
-    let flags = {
+    const flagsBuf = buffer.slice(32, 33);
+    const flagsInt = flagsBuf[0];
+    const flags = {
       up: !!(flagsInt & 0x01),
       uv: !!(flagsInt & 0x04),
       at: !!(flagsInt & 0x40),
@@ -67,48 +73,49 @@ function AddCredential() {
   }
 
   const register = () => {
-    console.log('register');
-    console.log('nickname: ', nickname);
+    console.log("register");
+    console.log("nickname: ", nickname);
 
     axios
-      .post('/users/credentials/fido2/register', {
-        nickname: nickname,
+      .post("/users/credentials/fido2/register", {
+        nickname,
         requireResidentKey: isResidentKey,
       })
       .then((startRegistrationResponse) => {
         console.log(startRegistrationResponse);
 
-        const requestId = startRegistrationResponse.data.requestId;
+        const { requestId } = startRegistrationResponse.data;
 
-        let publicKey = {
+        const publicKey = {
           publicKey:
             startRegistrationResponse.data.publicKeyCredentialCreationOptions,
         };
-        console.log('publlicKey: ', publicKey);
+        console.log("publlicKey: ", publicKey);
 
         create(publicKey)
           .then((makeCredentialResponse) => {
             console.log(
-              'make credential response: ' +
-                JSON.stringify(makeCredentialResponse)
+              `make credential response: ${JSON.stringify(
+                makeCredentialResponse
+              )}`
             );
 
-            let uv = getUV(makeCredentialResponse.response.attestationObject);
-            console.log('uv: ', uv);
+            const uv = getUV(makeCredentialResponse.response.attestationObject);
+            console.log("uv: ", uv);
 
-            let challengeResponse = {
+            const challengeResponse = {
               credential: makeCredentialResponse,
-              requestId: requestId,
+              requestId,
               pinSet: startRegistrationResponse.data.pinSet,
               pinCode: defaultInvalidPIN,
-              nickname: nickname,
+              nickname,
             };
 
-            console.log('challengeResponse: ', challengeResponse);
+            console.log("challengeResponse: ", challengeResponse);
 
             if (uv === true) {
               if (uv === true) {
-                console.log('finishRegistration: ', challengeResponse);
+                console.log("finishRegistration: ", challengeResponse);
                 dispatch(credentialActions.registerFinish(challengeResponse));
               } else {
                 dispatch(credentialActions.getUV(challengeResponse));
@@ -126,6 +133,11 @@ function AddCredential() {
       });
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNickname(value);
+  };
+
   const inputRef = useRef(null);
 
   return (
@@ -137,34 +149,33 @@ function AddCredential() {
         <Modal.Body>
           <label>Nickname</label>
           <input
-            type='text'
-            name='nickname'
+            type="text"
+            name="nickname"
             autoFocus
             value={nickname}
             ref={inputRef}
             onChange={handleChange}
-            className={
-              'form-control' +
-              (submitted && invalidNickname ? ' is-invalid' : '')
-            }
+            className={`form-control${
+              submitted && invalidNickname ? " is-invalid" : ""
+            }`}
             onKeyPress={(ev) => {
-              if (ev.key === 'Enter') {
+              if (ev.key === "Enter") {
                 handleSaveAdd();
                 ev.preventDefault();
               }
             }}
           />
           {invalidNickname ? (
-            <Alert variant='danger'>{invalidNickname}</Alert>
+            <Alert variant="danger">{invalidNickname}</Alert>
           ) : null}
           <br />
           <label>
             <input
-              name='isResidentKey'
-              type='checkbox'
+              name="isResidentKey"
+              type="checkbox"
               checked={isResidentKey}
               onChange={handleCheckboxChange}
-            />{' '}
+            />{" "}
             Enable usernameless login with this key
             <br />
             <em>
@@ -176,19 +187,19 @@ function AddCredential() {
           </label>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant='secondary' onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant='primary' onClick={handleSaveAdd}>
+          <Button variant="primary" onClick={handleSaveAdd}>
             Register security key
           </Button>
         </Modal.Footer>
       </Modal>
-      <Button variant='primary' onClick={handleShow}>
+      <Button variant="primary" onClick={handleShow}>
         Add a new security key
       </Button>
     </>
   );
-}
+};
 
 export { AddCredential };

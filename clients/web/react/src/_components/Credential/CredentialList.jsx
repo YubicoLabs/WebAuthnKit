@@ -1,25 +1,23 @@
-import React from 'react';
-import axios from 'axios';
-import aws_exports from '../../aws-exports';
+import React from "react";
+import { Card } from "react-bootstrap";
 
-import { AddCredential } from './AddCredential'
-import { Credential } from './Credential'
-import { Card } from 'react-bootstrap';
+import { AddCredential } from "./AddCredential";
+import { Credential } from "./Credential";
 
-axios.defaults.baseURL = aws_exports.apiEndpoint;
-
-function CredentialList({credentials}) {
+const CredentialList = function ({ credentialItems }) {
   return (
     <Card>
-        <Card.Header><h5>Security Keys</h5></Card.Header>
-        <Card.Body>
-            {credentials.map((credential, index) => 
-            <Credential key={'credDisp' + index} {...credential}/>
-            )}
-            <AddCredential />
-        </Card.Body>
+      <Card.Header>
+        <h5>Security Keys</h5>
+      </Card.Header>
+      <Card.Body>
+        {credentialItems.map((credential, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Credential key={index} credential={credential} />
+        ))}
+      </Card.Body>
+      <AddCredential />
     </Card>
   );
-}
-
-export { CredentialList };
+};
+export default CredentialList;

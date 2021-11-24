@@ -1,1 +1,1 @@
-export * from './CredentialList'
+export * from "./CredentialList";
