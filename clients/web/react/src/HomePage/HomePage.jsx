@@ -6,6 +6,7 @@ import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";
 import { RecoveryCodes } from "../_components/RecoveryCodes/RecoveryCodes";
 import { DeleteUser } from "../_components/DeleteUser/DeleteUser";
+import styles from "../_components/component.module.css";
 
 const HomePage = function () {
   const authentication = useSelector((state) => state.authentication);
@@ -72,7 +73,7 @@ const HomePage = function () {
     <>
       <h2>Account Security</h2>
       <div>
-        <Card>
+        <Card className={styles.cardSpacing}>
           <Card.Header>
             <h5>Trusted Devices</h5>
           </Card.Header>
@@ -133,7 +134,7 @@ const HomePage = function () {
         ) : (
           <CredentialList credentialItems={credentialItems} />
         )}
-        <Card>
+        <Card className={styles.cardSpacing}>
           <Card.Header>
             <h5>Server Verified PIN</h5>
           </Card.Header>

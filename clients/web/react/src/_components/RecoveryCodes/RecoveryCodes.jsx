@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Alert, Button, Card, Modal } from "react-bootstrap";
 import { credentialActions } from "../../_actions";
+import styles from "../component.module.css";
 
 const RecoveryCodes = function ({ credentials }) {
   const { recoveryCodesViewed } = credentials.recoveryCodesViewed;
@@ -31,7 +32,7 @@ const RecoveryCodes = function ({ credentials }) {
 
   return (
     <>
-      <Card>
+      <Card className={styles.cardSpacing}>
         <Card.Header>
           <h5>Recovery Options</h5>
         </Card.Header>

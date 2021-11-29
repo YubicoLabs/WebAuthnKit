@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { Auth } from "aws-amplify";
 import { userActions, alertActions } from "../../_actions";
 import { history } from "../../_helpers";
+import styles from "../component.module.css";
 
 const DeleteUser = function ({ userToken }) {
   const [show, setShow] = useState(false);
@@ -39,7 +40,7 @@ const DeleteUser = function ({ userToken }) {
 
   return (
     <>
-      <Card>
+      <Card className={styles.cardSpacing}>
         <Card.Header>
           <h5>Delete Account</h5>
         </Card.Header>
