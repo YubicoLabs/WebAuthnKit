@@ -70,7 +70,7 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
   const registerKeySuccessStep = (credential) => {
     localStorage.setItem('credential', JSON.stringify(credential));
     console.log('registerKeySuccessStep credential ', credential);
-    history.push('/register');
+    window.location.reload();
   }
 
   const handleChange = (e) => {
