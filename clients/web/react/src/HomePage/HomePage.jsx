@@ -30,13 +30,8 @@ const HomePage = function () {
     currentAuthenticatedUser();
   }, []);
 
-  const logOut = async () => {
-    try {
-      await Auth.signOut();
-    } catch (error) {
-      console.log("error signing out: ", error);
-    }
-    history.push("/login");
+  const logout = async () => {
+    history.push("/logout");
   };
 
   return (
@@ -157,7 +152,7 @@ const HomePage = function () {
           <hr />
         </div>
         <div>
-          <Button variant="secondary" onClick={logOut}>
+          <Button variant="secondary" onClick={logout}>
             Sign Out
           </Button>
         </div>
