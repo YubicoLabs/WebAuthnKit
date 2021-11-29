@@ -3,6 +3,7 @@ import { Button, Card, Modal } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { Auth } from "aws-amplify";
 import { userActions, alertActions } from "../../_actions";
+import { history } from "../../_helpers";
 
 const DeleteUser = function ({ userToken }) {
   const [show, setShow] = useState(false);
@@ -25,8 +26,8 @@ const DeleteUser = function ({ userToken }) {
                 return reject(error);
               }
               dispatch(userActions.delete(userToken));
-
               resolve();
+              history.push("/logout");
             });
           })
       )

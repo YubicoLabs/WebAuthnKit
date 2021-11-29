@@ -5,6 +5,8 @@ import { AddCredential } from "./AddCredential";
 import { Credential } from "./Credential";
 
 const CredentialList = function ({ credentialItems }) {
+  console.log("Printing the credentials, ", credentialItems);
+
   return (
     <Card>
       <Card.Header>

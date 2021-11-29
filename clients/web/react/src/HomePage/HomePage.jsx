@@ -1,8 +1,6 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Card, InputGroup, FormControl, Table } from "react-bootstrap";
-import { Auth } from "aws-amplify";
 import { userActions, credentialActions } from "../_actions";
 import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";
@@ -12,6 +10,12 @@ import { DeleteUser } from "../_components/DeleteUser/DeleteUser";
 const HomePage = function () {
   const authentication = useSelector((state) => state.authentication);
   const credentials = useSelector((state) => state.credentials);
+  const [credentialItems, setCredentialItems] = useState([]);
+  const [recoveryCodeProps, setRecoveryCodeProps] = useState({
+    allRecoveryCodesUsed: false,
+    recoveryCodesViewed: false,
+  });
+  const [credentialsLoading, setCredentialsLoading] = useState(true);
   const alert = useSelector((state) => state.alert);
 
   const dispatch = useDispatch();
@@ -21,8 +25,38 @@ const HomePage = function () {
   }
 
   useEffect(() => {
-    if (authentication.user.token) {
-      dispatch(credentialActions.getAll(authentication.user.token));
+    if (credentials === {} || credentials.loading) {
+      setCredentialsLoading(true);
+    } else {
+      if (credentials.items) {
+        setCredentialItems(credentials.items);
+      }
+      if (
+        credentials.allRecoveryCodesUsed !== undefined &&
+        credentials.recoveryCodesViewed !== undefined
+      ) {
+        setRecoveryCodeProps({
+          allRecoveryCodesUsed: credentials.allRecoveryCodesUsed,
+          recoveryCodesViewed: credentials.recoveryCodesViewed,
+        });
+      }
+      setCredentialsLoading(false);
+    }
+  }, [credentials]);
+
+  useEffect(() => {
+    try {
+      if (authentication.user.token !== undefined) {
+        console.log(
+          "Calling get all with credential: ",
+          authentication.user.token
+        );
+        dispatch(credentialActions.getAll(authentication.user.token));
+      }
+    } catch (error) {
+      console.warn(
+        "No user detected, please wait for the user to fully authenticate"
+      );
     }
   }, [authentication, alert]);
 
@@ -94,8 +128,10 @@ const HomePage = function () {
             </Table>
           </Card.Body>
         </Card>
-        {credentials.items && (
-          <CredentialList credentialItems={credentials.items} />
+        {credentialsLoading ? (
+          <p>Loading</p>
+        ) : (
+          <CredentialList credentialItems={credentialItems} />
         )}
         <Card>
           <Card.Header>
@@ -142,8 +178,10 @@ const HomePage = function () {
             <Button variant="secondary">Update PIN</Button>
           </Card.Body>
         </Card>
-        {!credentials.loading && credentials.items && (
-          <RecoveryCodes credentials={credentials} />
+        {credentialsLoading ? (
+          <p>Loading</p>
+        ) : (
+          <RecoveryCodes credentials={recoveryCodeProps} />
         )}
         {authentication.user.token && (
           <DeleteUser userToken={authentication.user.token} />
