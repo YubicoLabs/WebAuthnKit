@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Card, InputGroup, FormControl, Table } from "react-bootstrap";
+import { Auth } from "aws-amplify";
 import { userActions, credentialActions } from "../_actions";
 import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";
@@ -10,6 +11,7 @@ import styles from "../_components/component.module.css";
 
 const HomePage = function () {
   const authentication = useSelector((state) => state.authentication);
+
   const [jwt, setjwt] = useState("");
   const credentials = useSelector((state) => state.credentials);
   const [credentialItems, setCredentialItems] = useState([]);
@@ -18,12 +20,18 @@ const HomePage = function () {
     recoveryCodesViewed: false,
   });
   const [credentialsLoading, setCredentialsLoading] = useState(true);
-  const alert = useSelector((state) => state.alert);
 
   const dispatch = useDispatch();
 
-  function currentAuthenticatedUser() {
-    dispatch(userActions.getCurrentAuthenticatedUser());
+  async function currentAuthenticatedUser() {
+    // dispatch(userActions.getCurrentAuthenticatedUser());
+    const data = await Auth.currentSession();
+    const token = data.getIdToken().getJwtToken();
+    if (token) {
+      setjwt(token);
+    } else {
+      console.error("There was an error getting your current user session");
+    }
   }
 
   useEffect(() => {
@@ -46,32 +54,16 @@ const HomePage = function () {
     }
   }, [credentials]);
 
+  // This method is fine
   useEffect(() => {
-    dispatch(credentialActions.getAll(authentication.user.token));
+    if (jwt) {
+      console.log("Using JWT to call to getAll()");
+      dispatch(credentialActions.getAll(jwt));
+    }
   }, [jwt]);
 
   useEffect(() => {
-    if (!jwt && authentication.user.token) {
-      setjwt(authentication.user.token);
-    }
-  }, [authentication, alert]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (authentication.user.token !== undefined) {
-        console.log(
-          "Calling get all with credential: ",
-          authentication.user.token
-        );
-        dispatch(credentialActions.getAll(authentication.user.token));
-      }
-    }, 2000);
-  }, []);
-
-  useEffect(() => {
-    // window.location.reload();
-    setTimeout(() => currentAuthenticatedUser(), 300);
-    // currentAuthenticatedUser();
+    currentAuthenticatedUser();
   }, []);
 
   const logout = async () => {
@@ -193,9 +185,7 @@ const HomePage = function () {
         ) : (
           <RecoveryCodes credentials={recoveryCodeProps} />
         )}
-        {authentication.user.token && (
-          <DeleteUser userToken={authentication.user.token} />
-        )}
+        {jwt && <DeleteUser userToken={jwt} />}
         <div className="mt-5">
           <hr />
         </div>
