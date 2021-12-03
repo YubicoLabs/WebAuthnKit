@@ -1,17 +1,20 @@
+/* eslint-disable prettier/prettier */
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, InputGroup, FormControl, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 
+import validate from 'validate.js';
 import { history } from '../_helpers';
 import { WebAuthnClient } from '../_components';
 import { userActions, credentialActions, alertActions } from '../_actions';
+import ServerVerifiedPin from '../_components/ServerVerifiedPin/ServerVerifiedPin';
 
-import validate from 'validate.js';
 
 
-const SignUpStep = ({ setForm, formData, navigation }) => {
+const SignUpStep = function({ setForm, formData, navigation }) {
 
   const dispatch = useDispatch();
+  const [serverVerifiedPin, setServerVerifiedPin] = useState();
 
   const { username, pin, nickname, credential } = formData;
 
@@ -43,8 +46,8 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
     console.log("register");
     
     try {
-      let options = ""; // default = no platform or cross-platform preference
-      let userData = await WebAuthnClient.signUp(username, options, uv);
+      const options = ""; // default = no platform or cross-platform preference
+      const userData = await WebAuthnClient.signUp(username, uv);
       console.log("SignUpStep register userData: ", userData);
 
       if (userData === undefined) {
@@ -63,12 +66,23 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
     }
   }
 
-  function uv() {
-    //This is a user verifying platform. Skipping UV check.
+  const UVPromise = () => {
+    return new Promise((resolve, reject) => {
+      const svpinCreateProps = {type: "create", saveCallback: resolve, closeCallback: reject};
+      console.log("SignUpStep UVPromise(): ", svpinCreateProps);
+      setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
+    })
+  }
+
+  async function uv(challengeResponse) {
+    dispatch(credentialActions.getUV(challengeResponse));
+    const pinResult = await UVPromise();
+    console.log("SignUpStep PIN Result: ", pinResult.value);
+    return pinResult.value;
   }
 
   const registerKeySuccessStep = (credential) => {
-    localStorage.setItem('credential', JSON.stringify(credential));
+    localStorage.setItem("credential", JSON.stringify(credential));
     console.log('registerKeySuccessStep credential ', credential);
     window.location.reload();
   }
@@ -81,14 +95,14 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
     if (result) {
       setErrors(errors => ({ ...errors, [name]: result.username.join(". ") }));
       setValidated(false);
-      return;
+      
     } else {
       setErrors(errors => ({ ...errors, [name]: undefined }));
       setValidated(true);
     }
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
     const form = event.currentTarget;
 
     event.preventDefault();
@@ -100,12 +114,13 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
         }
 
         if(isUsernameValid()) {
-          register();
+          await register();
+          history.push("/");
         }
   }
 
   const isUsernameValid = () => {
-    if(validate({ username: username }, constraints)){
+    if(validate({ username }, constraints)){
         return false;
     }
     return true;
@@ -151,13 +166,14 @@ const SignUpStep = ({ setForm, formData, navigation }) => {
           <Button type="submit" variant="primary btn-block mt-3">Continue</Button>
         </Form>
         <div className="mt-5">
-          <hr></hr>
+          <hr />
         </div>
         <div>
           <center>Already have an account? <span onClick={LogInStep} className="btn-link">Log In</span></center>
         </div>
+        {serverVerifiedPin}
     </>
   );
-};
+}
 
 export default SignUpStep;

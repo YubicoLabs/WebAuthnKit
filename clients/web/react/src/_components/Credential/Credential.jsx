@@ -17,8 +17,10 @@ const Credential = function ({ credential }) {
         </div>
         <div className="p-2 flex-grow-1">
           <h5>{credential.credentialNickname.value}</h5>
-          <h6>YubiKey 5NFC</h6>
-          <p>{credential.lastUsedTime.seconds}</p>
+          <p>
+            Date Last used:{" "}
+            {new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()}
+          </p>
         </div>
         <div className="m-2">
           <EditCredential credential={credential} />

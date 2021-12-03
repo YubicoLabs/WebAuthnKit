@@ -10,6 +10,7 @@ import styles from "../_components/component.module.css";
 
 const HomePage = function () {
   const authentication = useSelector((state) => state.authentication);
+  const [jwt, setjwt] = useState("");
   const credentials = useSelector((state) => state.credentials);
   const [credentialItems, setCredentialItems] = useState([]);
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
@@ -46,7 +47,17 @@ const HomePage = function () {
   }, [credentials]);
 
   useEffect(() => {
-    try {
+    dispatch(credentialActions.getAll(authentication.user.token));
+  }, [jwt]);
+
+  useEffect(() => {
+    if (!jwt && authentication.user.token) {
+      setjwt(authentication.user.token);
+    }
+  }, [authentication, alert]);
+
+  useEffect(() => {
+    setTimeout(() => {
       if (authentication.user.token !== undefined) {
         console.log(
           "Calling get all with credential: ",
@@ -54,15 +65,13 @@ const HomePage = function () {
         );
         dispatch(credentialActions.getAll(authentication.user.token));
       }
-    } catch (error) {
-      console.warn(
-        "No user detected, please wait for the user to fully authenticate"
-      );
-    }
-  }, [authentication, alert]);
+    }, 2000);
+  }, []);
 
   useEffect(() => {
-    currentAuthenticatedUser();
+    // window.location.reload();
+    setTimeout(() => currentAuthenticatedUser(), 300);
+    // currentAuthenticatedUser();
   }, []);
 
   const logout = async () => {

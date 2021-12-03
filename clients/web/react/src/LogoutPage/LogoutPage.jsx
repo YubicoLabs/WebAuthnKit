@@ -10,7 +10,9 @@ const LogoutPage = function () {
       await Auth.signOut();
       localStorage.removeItem("username");
       localStorage.removeItem("user");
+      localStorage.removeItem("credential");
       history.push("/");
+      setTimeout(() => window.location.reload(), 100);
     } catch (err) {
       console.error("There was an error signing out the user: ", err);
     }
