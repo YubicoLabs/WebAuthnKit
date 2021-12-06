@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Card, InputGroup, FormControl, Table } from "react-bootstrap";
+import { Button, Card, Spinner, Table } from "react-bootstrap";
 import { Auth } from "aws-amplify";
 import { userActions, credentialActions } from "../_actions";
 import { history } from "../_helpers";
@@ -11,9 +11,9 @@ import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPi
 import styles from "../_components/component.module.css";
 
 const HomePage = function () {
-  const authentication = useSelector((state) => state.authentication);
   const [jwt, setjwt] = useState("");
   const credentials = useSelector((state) => state.credentials);
+  const alert = useSelector((state) => state.alert);
   const [credentialItems, setCredentialItems] = useState([]);
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
     allRecoveryCodesUsed: false,
@@ -66,12 +66,23 @@ const HomePage = function () {
       }
       setCredentialsLoading(false);
     }
-  }, [credentials]);
+  }, [credentials, alert]);
+
+  useEffect(() => {
+    if (alert.message) {
+      console.warn("*****In here ******");
+      if (
+        alert.message === "Registration successful" ||
+        alert.message === "Delete credential successful"
+      ) {
+        dispatch(credentialActions.getAll(jwt));
+      }
+    }
+  }, [alert]);
 
   // This method is fine
   useEffect(() => {
     if (jwt) {
-      console.log("Using JWT to call to getAll()");
       dispatch(credentialActions.getAll(jwt));
     }
   }, [jwt]);
@@ -145,7 +156,10 @@ const HomePage = function () {
           </Card.Body>
         </Card>
         {credentialsLoading ? (
-          <p>Loading</p>
+          <center>
+            <Spinner animation="border" role="status" variant="primary" />
+            <p>Getting your security keys!</p>
+          </center>
         ) : (
           <CredentialList credentialItems={credentialItems} />
         )}
@@ -155,50 +169,13 @@ const HomePage = function () {
           </Card.Header>
           <Card.Body>
             <ServerVerifiedPin {...serverVerifiedProps} />
-            {/**
-            <InputGroup className="mb-3">
-              <InputGroup.Prepend>
-                <InputGroup.Text id="basic-addon1">
-                  Old PIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </InputGroup.Text>
-              </InputGroup.Prepend>
-              <FormControl
-                placeholder="Old PIN"
-                aria-label="Old PIN"
-                aria-describedby="basic-addon1"
-                type="password"
-              />
-            </InputGroup>
-            <InputGroup className="mb-3">
-              <InputGroup.Prepend>
-                <InputGroup.Text id="basic-addon1">
-                  New PIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </InputGroup.Text>
-              </InputGroup.Prepend>
-              <FormControl
-                placeholder="New PIN"
-                aria-label="New PIN"
-                aria-describedby="basic-addon1"
-                type="password"
-              />
-            </InputGroup>
-            <InputGroup className="mb-3">
-              <InputGroup.Prepend>
-                <InputGroup.Text id="basic-addon1">Confirm PIN</InputGroup.Text>
-              </InputGroup.Prepend>
-              <FormControl
-                placeholder="Confirm PIN"
-                aria-label="Confirm PIN"
-                aria-describedby="basic-addon1"
-                type="password"
-              />
-            </InputGroup>
-            <Button variant="secondary">Update PIN</Button>
-            */}
           </Card.Body>
         </Card>
         {credentialsLoading ? (
-          <p>Loading</p>
+          <center>
+            <Spinner animation="border" role="status" variant="primary" />
+            <p>Getting your recovery codes!</p>
+          </center>
         ) : (
           <RecoveryCodes credentials={recoveryCodeProps} />
         )}
