@@ -8,6 +8,7 @@ import styles from "../component.module.css";
 
 // props.type: "create" | "change" | "dispatch" [default]
 // props.saveCallback: method to call on save, passes fields as the argument
+// props.closeCallback: method to call when closing the flow, is used to reject a promise
 const ServerVerifiedPin = function (props) {
   const [pinCollection, setPinCollection] = useState({
     pin: "",
@@ -166,7 +167,7 @@ const ServerVerifiedPin = function (props) {
   }, []);
 
   useEffect(() => {
-    if (finishUVRequest !== undefined) {
+    if (finishUVRequest !== undefined && props.type !== "change") {
       console.log("showing sv-pin: ", finishUVRequest);
       handleShow();
     }

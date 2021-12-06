@@ -23,4 +23,4 @@ const CredentialList = function ({ credentialItems }) {
     </Card>
   );
 };
-export default CredentialList;
+export { CredentialList };

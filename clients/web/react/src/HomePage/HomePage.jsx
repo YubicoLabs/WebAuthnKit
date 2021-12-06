@@ -4,14 +4,14 @@ import { Button, Card, InputGroup, FormControl, Table } from "react-bootstrap";
 import { Auth } from "aws-amplify";
 import { userActions, credentialActions } from "../_actions";
 import { history } from "../_helpers";
-import CredentialList from "../_components/Credential/CredentialList";
-import { RecoveryCodes } from "../_components/RecoveryCodes/RecoveryCodes";
-import { DeleteUser } from "../_components/DeleteUser/DeleteUser";
+import { CredentialList } from "../_components/Credential";
+import { RecoveryCodes } from "../_components/RecoveryCodes";
+import { DeleteUser } from "../_components/DeleteUser";
+import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
 import styles from "../_components/component.module.css";
 
 const HomePage = function () {
   const authentication = useSelector((state) => state.authentication);
-
   const [jwt, setjwt] = useState("");
   const credentials = useSelector((state) => state.credentials);
   const [credentialItems, setCredentialItems] = useState([]);
@@ -20,8 +20,22 @@ const HomePage = function () {
     recoveryCodesViewed: false,
   });
   const [credentialsLoading, setCredentialsLoading] = useState(true);
-
   const dispatch = useDispatch();
+
+  function svpCallback(newValue) {
+    const fields = { pin: newValue.value, confirmPin: newValue.value };
+    dispatch(credentialActions.updatePin(fields));
+  }
+
+  function svpCloseCallback(message) {
+    console.warn(message);
+  }
+
+  const serverVerifiedProps = {
+    type: "change",
+    saveCallback: svpCallback,
+    closeCallback: svpCloseCallback,
+  };
 
   async function currentAuthenticatedUser() {
     // dispatch(userActions.getCurrentAuthenticatedUser());
@@ -140,6 +154,8 @@ const HomePage = function () {
             <h5>Server Verified PIN</h5>
           </Card.Header>
           <Card.Body>
+            <ServerVerifiedPin {...serverVerifiedProps} />
+            {/**
             <InputGroup className="mb-3">
               <InputGroup.Prepend>
                 <InputGroup.Text id="basic-addon1">
@@ -178,6 +194,7 @@ const HomePage = function () {
               />
             </InputGroup>
             <Button variant="secondary">Update PIN</Button>
+            */}
           </Card.Body>
         </Card>
         {credentialsLoading ? (
