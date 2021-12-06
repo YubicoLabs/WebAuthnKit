@@ -8,6 +8,7 @@ import axios from "axios";
 import validate from "validate.js";
 import { useDispatch } from "react-redux";
 import { credentialActions, alertActions } from "../../_actions";
+import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
 
@@ -16,6 +17,7 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 
 const AddCredential = function () {
   const [showAdd, setShowAdd] = useState(false);
+  const [serverVerifiedPin, setServerVerifiedPin] = useState();
   const [nickname, setNickname] = useState("");
   const [isResidentKey, setIsResidentKey] = useState(false);
   const [invalidNickname, setInvalidNickname] = useState(undefined);
@@ -72,7 +74,26 @@ const AddCredential = function () {
     return flags.uv;
   }
 
-  const register = () => {
+  const UVPromise = () => {
+    return new Promise((resolve, reject) => {
+      const svpinCreateProps = {
+        type: "create",
+        saveCallback: resolve,
+        closeCallback: reject,
+      };
+      console.log("SignUpStep UVPromise(): ", svpinCreateProps);
+      setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
+    });
+  };
+
+  async function registerUV(challengeResponse) {
+    dispatch(credentialActions.getUV(challengeResponse));
+    const pinResult = await UVPromise();
+    console.log("SignUpStep PIN Result: ", pinResult.value);
+    return pinResult.value;
+  }
+
+  const register = async () => {
     console.log("register");
     console.log("nickname: ", nickname);
 
@@ -81,7 +102,7 @@ const AddCredential = function () {
         nickname,
         requireResidentKey: isResidentKey,
       })
-      .then((startRegistrationResponse) => {
+      .then(async (startRegistrationResponse) => {
         console.log(startRegistrationResponse);
 
         const { requestId } = startRegistrationResponse.data;
@@ -93,7 +114,7 @@ const AddCredential = function () {
         console.log("publlicKey: ", publicKey);
 
         create(publicKey)
-          .then((makeCredentialResponse) => {
+          .then(async (makeCredentialResponse) => {
             console.log(
               `make credential response: ${JSON.stringify(
                 makeCredentialResponse
@@ -114,12 +135,13 @@ const AddCredential = function () {
             console.log("challengeResponse: ", challengeResponse);
 
             if (uv === true) {
-              if (uv === true) {
-                console.log("finishRegistration: ", challengeResponse);
-                dispatch(credentialActions.registerFinish(challengeResponse));
-              } else {
-                dispatch(credentialActions.getUV(challengeResponse));
-              }
+              console.log("finishRegistration: ", challengeResponse);
+              dispatch(credentialActions.registerFinish(challengeResponse));
+            } else {
+              const uvPin = await registerUV(challengeResponse);
+              console.log("AddCredential, new Key PIN is: ", uvPin);
+              challengeResponse.pinCode = uvPin;
+              dispatch(credentialActions.registerFinish(challengeResponse));
             }
           })
           .catch((error) => {
@@ -198,6 +220,7 @@ const AddCredential = function () {
       <Button variant="primary" onClick={handleShow}>
         Add a new security key
       </Button>
+      {serverVerifiedPin}
     </>
   );
 };
