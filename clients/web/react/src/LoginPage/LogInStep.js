@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, InputGroup, Form, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 
-import { get, supported } from "@github/webauthn-json";
 import base64url from "base64url";
-import { Auth } from "aws-amplify";
 import validate from "validate.js";
 import { WebAuthnClient } from "../_components";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
 import { history } from "../_helpers";
-import { userActions, credentialActions, alertActions } from "../_actions";
+import { credentialActions, alertActions } from "../_actions";
 
 import styles from "../_components/component.module.css";
 
@@ -23,11 +21,9 @@ const LogInStep = function ({ navigation }) {
     username: "",
   });
   const [validated, setValidated] = useState(false);
-  const [cognitoUser, setCognitoUser] = useState({});
   const webAuthnStartResponse = useSelector(
     (state) => state.authentication.webAuthnStartResponse
   );
-  const defaultInvalidPIN = -1;
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState();
 
@@ -47,19 +43,6 @@ const LogInStep = function ({ navigation }) {
   };
 
   const dispatch = useDispatch();
-
-  // reset login status
-  /* useEffect(() => { 
-        dispatch(userActions.logout()); 
-        
-        if(inputs.username) {
-            signInWithUsername();
-        } else {
-            setContinueSubmitted(true);
-            dispatch(userActions.webAuthnStart());
-        }
-        
-    }, []); */
 
   useEffect(() => {
     if (webAuthnStartResponse) {
@@ -123,114 +106,6 @@ const LogInStep = function ({ navigation }) {
     }
   }
 
-  /*
-  async function signIn(name) {
-    console.log("signIn ", name);
-    setContinueSubmitted(true);
-
-    const lowercaseName = name.toLocaleLowerCase();
-
-    localStorage.setItem("username", lowercaseName);
-
-    try {
-      const cognitoUser = await Auth.signIn(lowercaseName);
-      setCognitoUser(cognitoUser);
-      console.log("SignIn CognitoUser: ", cognitoUser);
-
-      if (
-        cognitoUser.challengeName === "CUSTOM_CHALLENGE" &&
-        cognitoUser.challengeParam.type === "webauthn.create"
-      ) {
-        dispatch(alertActions.error("Please Sign Up"));
-        history.push("/register");
-        return;
-      }
-      if (
-        cognitoUser.challengeName === "CUSTOM_CHALLENGE" &&
-        cognitoUser.challengeParam.type === "webauthn.get"
-      ) {
-        console.log(
-          `assertion request: ${JSON.stringify(
-            cognitoUser.challengeParam,
-            null,
-            2
-          )}`
-        );
-
-        const request = JSON.parse(
-          cognitoUser.challengeParam.publicKeyCredentialRequestOptions
-        );
-        console.log("request: ", request);
-
-        const publicKey = {
-          publicKey: request.publicKeyCredentialRequestOptions,
-        };
-        console.log("publicKey: ", publicKey);
-
-        const assertionResponse = await get(publicKey);
-        console.log(`assertion response: ${JSON.stringify(assertionResponse)}`);
-
-        const uv = getUV(assertionResponse.response.authenticatorData);
-        console.log(`uv: ${uv}`);
-
-        const challengeResponse = {
-          credential: assertionResponse,
-          requestId: request.requestId,
-          pinCode: defaultInvalidPIN,
-        };
-        console.log("challengeResponse: ", challengeResponse);
-
-        if (uv == false) {
-          dispatch(credentialActions.getUV(challengeResponse));
-        } else {
-          console.log("sending Custom Challenge Answer");
-          // to send the answer of the custom challenge
-          Auth.sendCustomChallengeAnswer(
-            cognitoUser,
-            JSON.stringify(challengeResponse)
-          )
-            .then((user) => {
-              console.log(user);
-
-              Auth.currentSession()
-                .then((data) => {
-                  dispatch(alertActions.success("Authentication successful"));
-                  const userData = {
-                    id: 1,
-                    username: user.attributes.name,
-                    token: data.getAccessToken().getJwtToken(),
-                  };
-                  localStorage.setItem("user", JSON.stringify(userData));
-                  console.log("userData ", localStorage.getItem("user"));
-
-                  registerTrustedDeviceOrContinue("/");
-                })
-                .catch((err) => {
-                  console.error("currentSession error: ", err);
-                  dispatch(
-                    alertActions.error("Something went wrong. ", err.message)
-                  );
-                  setContinueSubmitted(false);
-                });
-            })
-            .catch((err) => {
-              console.error("sendCustomChallengeAnswer error: ", err);
-              dispatch(alertActions.error(err.message));
-            });
-        }
-      } else {
-        setContinueSubmitted(false);
-        dispatch(alertActions.error("Invalid server response"));
-      }
-    } catch (err) {
-      console.error("signIn error");
-      console.error(err);
-      setContinueSubmitted(false);
-      dispatch(alertActions.error(err.message));
-    }
-  }
-  */
-
   function registerTrustedDeviceOrContinue(path) {
     const trustedDevice = localStorage.getItem("trustedDevice");
     console.log("trustedDevice=", trustedDevice);
@@ -252,65 +127,7 @@ const LogInStep = function ({ navigation }) {
       history.push(path);
     }
   }
-  /*
-  const UV = function (props) {
-    const { cognitoUser } = props;
-    const finishUVRequest = useSelector(
-      (state) => state.credentials.finishUVRequest
-    );
-    const svpinDispatchProps = {
-      type: "dispatch",
-      saveCallback: finishUVResponse,
-      showSelector: finishUVRequest,
-    };
 
-    function finishUVResponse(fields) {
-      const challengeResponse = finishUVRequest;
-      console.log(
-        "sending authenticator response with sv-pin: ",
-        challengeResponse
-      );
-      challengeResponse.pinCode = parseInt(fields.pin);
-
-      Auth.sendCustomChallengeAnswer(
-        cognitoUser,
-        JSON.stringify(challengeResponse)
-      )
-        .then((user) => {
-          console.log("uv sendCustomChallengeAnswer: ", user);
-
-          Auth.currentSession()
-            .then((data) => {
-              dispatch(alertActions.success("Authentication successful"));
-              const userData = {
-                id: 1,
-                username: user.attributes.name,
-                token: data.getAccessToken().getJwtToken(),
-              };
-              localStorage.setItem("user", JSON.stringify(userData));
-              console.log("userData ", localStorage.getItem("user"));
-              history.push("/");
-            })
-            .catch((err) => {
-              console.log("currentSession error: ", err);
-              dispatch(
-                alertActions.error("Something went wrong. ", err.message)
-              );
-              setContinueSubmitted(false);
-            });
-        })
-        .catch((err) => {
-          console.log("sendCustomChallengeAnswer error: ", err);
-          const message = "Invalid PIN";
-          dispatch(alertActions.error(message));
-          setContinueSubmitted(false);
-        });
-      dispatch(credentialActions.completeUV());
-    }
-
-    return <ServerVerifiedPin {...svpinDispatchProps} />;
-  };
-*/
   const promptSvPinStep = () => {
     navigation.go("PromptSvPinStep");
   };
@@ -369,6 +186,7 @@ const LogInStep = function ({ navigation }) {
         await signIn(inputs.username);
         history.push("/");
       } else if (inputs.forgotStep === true) {
+        localStorage.setItem("username", inputs.username);
         forgotStep();
       }
     } else {
