@@ -1,16 +1,24 @@
 package com.yubicolabs;
 
 import com.yubico.webauthn.data.*;
+import com.yubico.internal.util.JacksonCodecs;
 import com.yubico.webauthn.*;
 import com.yubicolabs.data.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +28,7 @@ import java.security.SecureRandom;
 
 public class AppTest {
     private static final SecureRandom random = new SecureRandom();
-    Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private String username = "foo-user";
     private String displayName = "Foo User";
     private String credentialNickname = "My Lovely Credential";
@@ -29,13 +37,31 @@ public class AppTest {
     private RelyingPartyIdentity rpId = RelyingPartyIdentity.builder().id("localhost").name("Test party").build();
     private String origins = "localhost";
     //private val appId = Optional.empty[AppId]
+    private final ObjectMapper jsonMapper = JacksonCodecs.json();
+    
 
     @BeforeEach
     void initAll() {
+        jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         try {
             requestId = ByteArray.fromBase64Url("request1");
         } catch (Exception e) {
             //System.out.println("error: ", e);
+        }
+    }
+
+    @Test
+    public void handleRequest_decodejson() {
+        String input = "{\"type\":\"finishRegistration\",\"requestId\":\"YqtrUqVuH6Xm4l3Rd-nBmUaWHWVJLAgwqrAfW3mCqwY\",\"credential\":{\"type\":\"public-key\",\"id\":\"5tMHGvNM13Y3xWo5I2v7erJp7G7pGebOe6ke0RYDkGhbBqX5o98YTDieTK4m3jEoFrY5pC6oFvHB2pBib4hqkA\",\"rawId\":\"5tMHGvNM13Y3xWo5I2v7erJp7G7pGebOe6ke0RYDkGhbBqX5o98YTDieTK4m3jEoFrY5pC6oFvHB2pBib4hqkA\",\"response\":{\"clientDataJSON\":\"eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoieFI0YWJLTkQ2Q19GVFpKVkdKU2dTRDhSa3hLcDR6SmZoMlRDSDdjRXktYyIsIm9yaWdpbiI6Imh0dHBzOi8vZGV2LmRqczMwcTd3Z3Y1MnUuYW1wbGlmeWFwcC5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2UsIm90aGVyX2tleXNfY2FuX2JlX2FkZGVkX2hlcmUiOiJkbyBub3QgY29tcGFyZSBjbGllbnREYXRhSlNPTiBhZ2FpbnN0IGEgdGVtcGxhdGUuIFNlZSBodHRwczovL2dvby5nbC95YWJQZXgifQ\",\"attestationObject\":\"o2NmbXRmcGFja2VkZ2F0dFN0bXSjY2FsZyZjc2lnWEcwRQIhAPyyIlZC5IYIYBEuq3ra94xQLOYgF1OCKZ-KCUa5TDDAAiAZYAlyYq0Lq4_wr6zXvpYtmfJhF_shnHs7qxIqTmXBP2N4NWOBWQLBMIICvTCCAaWgAwIBAgIEGKxGwDANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZdWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ1NzIwMDYzMTAgFw0xNDA4MDEwMDAwMDBaGA8yMDUwMDkwNDAwMDAwMFowbjELMAkGA1UEBhMCU0UxEjAQBgNVBAoMCVl1YmljbyBBQjEiMCAGA1UECwwZQXV0aGVudGljYXRvciBBdHRlc3RhdGlvbjEnMCUGA1UEAwweWXViaWNvIFUyRiBFRSBTZXJpYWwgNDEzOTQzNDg4MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEeeo7LHxJcBBiIwzSP-tg5SkxcdSD8QC-hZ1rD4OXAwG1Rs3Ubs_K4-PzD4Hp7WK9Jo1MHr03s7y-kqjCrutOOqNsMGowIgYJKwYBBAGCxAoCBBUxLjMuNi4xLjQuMS40MTQ4Mi4xLjcwEwYLKwYBBAGC5RwCAQEEBAMCBSAwIQYLKwYBBAGC5RwBAQQEEgQQy2lIHo_3QDmT7AonKaFUqDAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3DQEBCwUAA4IBAQCXnQOX2GD4LuFdMRx5brr7Ivqn4ITZurTGG7tX8-a0wYpIN7hcPE7b5IND9Nal2bHO2orh_tSRKSFzBY5e4cvda9rAdVfGoOjTaCW6FZ5_ta2M2vgEhoz5Do8fiuoXwBa1XCp61JfIlPtx11PXm5pIS2w3bXI7mY0uHUMGvxAzta74zKXLslaLaSQibSKjWKt9h-SsXy4JGqcVefOlaQlJfXL1Tga6wcO0QTu6Xq-Uw7ZPNPnrpBrLauKDd202RlN4SP7ohL3d9bG6V5hUz_3OusNEBZUn5W3VmPj1ZnFavkMB3RkRMOa58MZAORJT4imAPzrvJ0vtv94_y71C6tZ5aGF1dGhEYXRhWMQbryQXR7muZf6kijMdZ-GXxefmsOE1XX21TXeqdTmuwkUAAAIWy2lIHo_3QDmT7AonKaFUqABA5tMHGvNM13Y3xWo5I2v7erJp7G7pGebOe6ke0RYDkGhbBqX5o98YTDieTK4m3jEoFrY5pC6oFvHB2pBib4hqkKUBAgMmIAEhWCCBQa7SRfFIddrvyg5SqD1SqEmXcS-Nn-Q5N7YTrgn1HCJYID-LFrGHw9zjjIssZUC4lUiF_DaHH3wcd4L3yjUl2Kee\"},\"clientExtensionResults\":{}}}";
+
+        try {
+            JsonObject responseJson = gson.fromJson(input.toString(), JsonObject.class);
+            RegistrationResponse response = jsonMapper.readValue(responseJson.toString(), RegistrationResponse.class);
+            assertNotNull(response);
+        } catch(Exception e) {
+           System.out.println("JSON error. Failed to decode response object.");
+           System.out.println(e);
+           fail();
         }
     }
 
