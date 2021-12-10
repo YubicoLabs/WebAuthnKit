@@ -9,7 +9,7 @@
     "dependencies": {
         "@github/webauthn-json": "^0.4.5",
         "aws-amplify": "^3.3.4",
-        "axios": "^0.20.0",
+        "axios": "^0.21.2",
         "base64url": "^3.0.1",
         "bootstrap": "^4.5.3",
         "cbor": "^5.1.0",
