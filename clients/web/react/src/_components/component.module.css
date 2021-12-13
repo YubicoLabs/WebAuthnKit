@@ -26,10 +26,11 @@
 }
 
 .security-key-image {
-  max-height: 70px;
   border: 3px #e7e7e7 solid;
-  padding: 5px;
+  padding: 10px;
   background-color: #9aca3c;
+  width: 75px;
+  height: 75px
 }
 
 .security-key-image-col {

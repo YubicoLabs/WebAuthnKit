@@ -51,6 +51,13 @@ const EditCredential = function ({ credential }) {
   };
   const inputRef = useRef(null);
 
+  const checkAttestation = (credential) => {
+    const credAtt =
+      credential.attestationMetadata?.value?.deviceProperties?.displayName;
+    if (credAtt) return true;
+    return false;
+  };
+
   return (
     <>
       <Button variant="secondary" onClick={handleShow}>
@@ -121,6 +128,40 @@ const EditCredential = function ({ credential }) {
               : ""}
           </label>
           <br />
+          <br />
+          {checkAttestation(credential) && (
+            <>
+              <h4 style={{ color: "#9aca3c" }}>Yubico Device Information:</h4>
+              <label>
+                <em>Device Name:</em>{" "}
+                {
+                  credential.attestationMetadata.value.deviceProperties
+                    .displayName
+                }{" "}
+                -{" "}
+                <a
+                  href={
+                    credential.attestationMetadata.value.deviceProperties
+                      .deviceUrl
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Device Info
+                </a>
+              </label>
+              <label>
+                <em>Available Interfaces:</em>{" "}
+                <ul>
+                  {credential.attestationMetadata.value.transports.map(
+                    (transport, index) => (
+                      <li key={index}>{transport}</li>
+                    )
+                  )}
+                </ul>
+              </label>
+            </>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
