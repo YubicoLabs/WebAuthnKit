@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Card, Spinner, Table } from "react-bootstrap";
 import { Auth } from "aws-amplify";
-import { userActions, credentialActions } from "../_actions";
+import { credentialActions } from "../_actions";
 import { history } from "../_helpers";
 import { CredentialList } from "../_components/Credential";
 import { RecoveryCodes } from "../_components/RecoveryCodes";
-import { DeleteUser } from "../_components/DeleteUser";
+import DeleteUser from "../_components/DeleteUser/DeleteUser";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
 import styles from "../_components/component.module.css";
 

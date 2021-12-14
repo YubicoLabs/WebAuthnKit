@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { Button, Card, Modal } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { Auth } from "aws-amplify";
+// import PropTypes from "prop-types";
 import { userActions, alertActions } from "../../_actions";
 import { history } from "../../_helpers";
-import styles from "../component.module.css";
+
+const PropTypes = require("prop-types");
+const styles = require("../component.module.css");
 
 const DeleteUser = function ({ userToken }) {
   const [show, setShow] = useState(false);
@@ -21,14 +24,14 @@ const DeleteUser = function ({ userToken }) {
     Auth.currentAuthenticatedUser()
       .then(
         (user) =>
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve, reject) => {
             user.deleteUser((error) => {
               if (error) {
                 return reject(error);
               }
               dispatch(userActions.delete(userToken));
-              resolve();
               history.push("/logout");
+              return resolve();
             });
           })
       )
@@ -55,10 +58,10 @@ const DeleteUser = function ({ userToken }) {
           <Modal.Title>Delete Account</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <label>
+          <p>
             Once you delete your account, there is no going back. Please be
             certain.
-          </label>
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="danger" onClick={handleDelete}>
@@ -73,4 +76,8 @@ const DeleteUser = function ({ userToken }) {
   );
 };
 
-export { DeleteUser };
+DeleteUser.propTypes = {
+  userToken: PropTypes.string.isRequired,
+};
+
+export default DeleteUser;

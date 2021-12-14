@@ -17,5 +17,9 @@
         "@typescript-eslint"
     ],
     "rules": {
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
+        "func-names": 0,
+        "no-console": ["error", { "allow": ["warn", "error", "info"] }],
+        "import/extensions": ["ignorePackages"]
     }
 }

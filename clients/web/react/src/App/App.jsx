@@ -74,4 +74,4 @@ const App = function () {
   );
 };
 
-export { App };
+export default App;
