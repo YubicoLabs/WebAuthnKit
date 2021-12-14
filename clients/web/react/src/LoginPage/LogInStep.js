@@ -184,7 +184,7 @@ const LogInStep = function ({ navigation }) {
       setValidated(true);
       if (inputs.continue === true) {
         await signIn(inputs.username);
-        history.push("/");
+        registerTrustedDeviceOrContinue("/");
       } else if (inputs.forgotStep === true) {
         localStorage.setItem("username", inputs.username);
         forgotStep();
