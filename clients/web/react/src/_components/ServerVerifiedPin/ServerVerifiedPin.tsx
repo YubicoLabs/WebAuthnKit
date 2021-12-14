@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, RootStateOrAny } from "react-redux";
 import { Alert, Button, Card, Form, Modal, ModalBody } from "react-bootstrap";
 import { validate } from "validate.js";
-import { alertActions, credentialActions } from "../../_actions";
-import styles from "../component.module.css";
+
+const styles = require("../component.module.css");
 
 // props.type: "create" | "change" | "dispatch" [default]
 // props.saveCallback: method to call on save, passes fields as the argument
@@ -15,7 +15,7 @@ const ServerVerifiedPin = function (props) {
     confirmPin: "",
   });
   const finishUVRequest = useSelector(
-    (state) => state.credentials.finishUVRequest
+    (state: RootStateOrAny) => state.credentials.finishUVRequest
   );
   const [invalidPin, setInvalidPin] = useState(undefined);
   const [invalidConfirmPin, setInvalidConfirmPin] = useState(undefined);
@@ -176,7 +176,7 @@ const ServerVerifiedPin = function (props) {
   return (
     <>
       {showButton && (
-        <Card className={styles.cardSpacing}>
+        <Card className={styles.default["cardSpacing"]}>
           <Button onClick={handleShow}>{label.buttonText}</Button>
         </Card>
       )}

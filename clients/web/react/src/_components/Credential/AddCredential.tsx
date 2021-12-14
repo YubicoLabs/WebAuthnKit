@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, ReactElement } from "react";
 
 import { create } from "@github/webauthn-json";
 import { Button, Modal, Alert } from "react-bootstrap";
@@ -17,7 +17,7 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 
 const AddCredential = function () {
   const [showAdd, setShowAdd] = useState(false);
-  const [serverVerifiedPin, setServerVerifiedPin] = useState();
+  const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
   const [nickname, setNickname] = useState("");
   const [isResidentKey, setIsResidentKey] = useState(false);
   const [invalidNickname, setInvalidNickname] = useState(undefined);
@@ -74,7 +74,7 @@ const AddCredential = function () {
     return flags.uv;
   }
 
-  const UVPromise = () => {
+  const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
       const svpinCreateProps = {
         type: "create",
@@ -225,4 +225,4 @@ const AddCredential = function () {
   );
 };
 
-export { AddCredential };
+export default AddCredential;

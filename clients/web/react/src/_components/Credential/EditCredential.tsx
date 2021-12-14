@@ -145,8 +145,7 @@ const EditCredential = function ({ credential }) {
                       .deviceUrl
                   }
                   target="_blank"
-                  rel="noreferrer"
-                >
+                  rel="noreferrer">
                   Device Info
                 </a>
               </label>
@@ -179,4 +178,4 @@ const EditCredential = function ({ credential }) {
   );
 };
 
-export { EditCredential };
+export default EditCredential;

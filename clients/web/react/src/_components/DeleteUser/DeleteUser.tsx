@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button, Card, Modal } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { Auth } from "aws-amplify";
-// import PropTypes from "prop-types";
 import { userActions, alertActions } from "../../_actions";
 import { history } from "../../_helpers";
 

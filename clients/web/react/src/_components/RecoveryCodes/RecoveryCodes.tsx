@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Alert, Button, Card, Modal } from "react-bootstrap";
 import { credentialActions } from "../../_actions";
-import styles from "../component.module.css";
+
+const PropTypes = require("prop-types");
+const styles = require("../component.module.css");
 
 const RecoveryCodes = function ({ credentials }) {
   const { recoveryCodesViewed } = credentials.recoveryCodesViewed;
   const { allRecoveryCodesUsed } = credentials.allRecoveryCodesUsed;
-  const recoveryCodes = useSelector((state) => state.recoveryCodes);
+  const recoveryCodes = useSelector(
+    (state: RootStateOrAny) => state.recoveryCodes
+  );
   const [showCodes, setShowCodes] = useState(false);
   const dispatch = useDispatch();
 
@@ -112,4 +116,8 @@ const RecoveryCodes = function ({ credentials }) {
   );
 };
 
-export { RecoveryCodes };
+RecoveryCodes.propTypes = {
+  credentials: PropTypes.any.isRequired,
+};
+
+export default RecoveryCodes;

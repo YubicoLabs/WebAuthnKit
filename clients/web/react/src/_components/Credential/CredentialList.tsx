@@ -1,9 +1,10 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 
-import { AddCredential } from "./AddCredential";
-import { Credential } from "./Credential";
-import styles from "../component.module.css";
+import AddCredential from "./AddCredential";
+import Credential from "./Credential";
+
+const styles = require("../component.module.css");
 
 const CredentialList = function ({ credentialItems }) {
   console.log("Printing the credentials, ", credentialItems);
@@ -15,7 +16,6 @@ const CredentialList = function ({ credentialItems }) {
       </Card.Header>
       <Card.Body>
         {credentialItems.map((credential, index) => (
-          // eslint-disable-next-line react/no-array-index-key
           <Credential key={index} credential={credential} />
         ))}
         <AddCredential />
@@ -23,4 +23,4 @@ const CredentialList = function ({ credentialItems }) {
     </Card>
   );
 };
-export { CredentialList };
+export default CredentialList;

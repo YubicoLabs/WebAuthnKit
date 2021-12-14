@@ -1,8 +1,8 @@
 import React from "react";
 import { Image } from "react-bootstrap";
-import styles from "../component.module.css";
+import EditCredential from "./EditCredential";
 
-import { EditCredential } from "./EditCredential";
+const styles = require("../component.module.css");
 
 const checkAttestation = (credential) => {
   const credAtt =
@@ -25,7 +25,7 @@ const Credential = function ({ credential }) {
       <div className="d-flex justify-content-center align-items-center">
         <div className="p-2">
           <Image
-            className={styles["security-key-image"]}
+            className={styles.default["security-key-image"]}
             src={getAttestationImage(credential)}
             roundedCircle
           />
@@ -49,9 +49,9 @@ const Credential = function ({ credential }) {
           <EditCredential credential={credential} />
         </div>
       </div>
-      <hr className={styles["section-divider"]} />
+      <hr className={styles.default["section-divider"]} />
     </>
   );
 };
 
-export { Credential };
+export default Credential;
