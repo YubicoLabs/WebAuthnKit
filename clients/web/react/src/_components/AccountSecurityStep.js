@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, Profiler } from 'react';
 import { Button, Card, InputGroup, FormControl, Table, ListGroup, Image, Container, Row, Col, Modal, Alert } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { userActions, credentialActions, alertActions } from '../_actions';
+import { userActions, credentialActions } from '../_actions';
 import { WebAuthnClient } from './WebAuthnClient';
 
 import styles from "./component.module.css";

@@ -1,3 +1,3 @@
-export * from './alert.actions';
-export * from './user.actions';
-export * from './credential.actions';
+export { alertActions } from './alert.actions';
+export { credentialActions } from './credential.actions';
+export { userActions } from './user.actions'
