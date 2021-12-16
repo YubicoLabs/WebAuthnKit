@@ -8,7 +8,7 @@ import { history } from "../_helpers";
 import { PrivateRoute } from "../_components";
 import HomePage from "../HomePage/HomePage";
 import IdentifierFirstLoginFlowPage from "../LoginPage/IdentifierFirstLoginFlowPage";
-import { IdentifierFirstSignUpFlowPage } from "../RegisterPage";
+import IdentifierFirstSignUpFlowPage from "../RegisterPage/IdentifierFirstSignUpFlowPage";
 import LogoutPage from "../LogoutPage/LogoutPage";
 
 import aws_exports from "../aws-exports";
