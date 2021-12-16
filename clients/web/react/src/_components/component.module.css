@@ -46,3 +46,7 @@
 .cardSpacing {
   margin-bottom: 1em;
 }
+
+.textCenter {
+  text-align: center;
+}

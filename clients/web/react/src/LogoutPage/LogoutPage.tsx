@@ -3,6 +3,8 @@ import { Spinner } from "react-bootstrap";
 import { Auth } from "aws-amplify";
 import { history } from "../_helpers";
 
+const styles = require("../_components/component.module.css");
+
 const LogoutPage = function () {
   const logoutUser = async () => {
     console.log("Called into loader");
@@ -23,10 +25,10 @@ const LogoutPage = function () {
   }, []);
 
   return (
-    <center>
+    <div className={styles.default["textCenter"]}>
       <Spinner animation="border" role="status" variant="primary" />
       <h2>Thank you for joining us!</h2>
-    </center>
+    </div>
   );
 };
 

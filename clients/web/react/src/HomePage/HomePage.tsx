@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Button, Card, Spinner, Table } from "react-bootstrap";
 import { Auth } from "aws-amplify";
 import { credentialActions } from "../_actions";
@@ -8,12 +8,13 @@ import CredentialList from "../_components/Credential/CredentialList";
 import RecoveryCodes from "../_components/RecoveryCodes/RecoveryCodes";
 import DeleteUser from "../_components/DeleteUser/DeleteUser";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
-import styles from "../_components/component.module.css";
+
+const styles = require("../_components/component.module.css");
 
 const HomePage = function () {
   const [jwt, setjwt] = useState("");
-  const credentials = useSelector((state) => state.credentials);
-  const alert = useSelector((state) => state.alert);
+  const credentials = useSelector((state: RootStateOrAny) => state.credentials);
+  const alert = useSelector((state: RootStateOrAny) => state.alert);
   const [credentialItems, setCredentialItems] = useState([]);
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
     allRecoveryCodesUsed: false,
@@ -38,7 +39,6 @@ const HomePage = function () {
   };
 
   async function currentAuthenticatedUser() {
-    // dispatch(userActions.getCurrentAuthenticatedUser());
     const data = await Auth.currentSession();
     const token = data.getIdToken().getJwtToken();
     if (token) {
@@ -99,7 +99,7 @@ const HomePage = function () {
     <>
       <h2>Account Security</h2>
       <div>
-        <Card className={styles.cardSpacing}>
+        <Card className={styles.default["cardSpacing"]}>
           <Card.Header>
             <h5>Trusted Devices</h5>
           </Card.Header>
@@ -156,14 +156,14 @@ const HomePage = function () {
           </Card.Body>
         </Card>
         {credentialsLoading ? (
-          <center>
+          <div className={styles.default["textCenter"]}>
             <Spinner animation="border" role="status" variant="primary" />
             <p>Getting your security keys!</p>
-          </center>
+          </div>
         ) : (
           <CredentialList credentialItems={credentialItems} />
         )}
-        <Card className={styles.cardSpacing}>
+        <Card className={styles.default["cardSpacing"]}>
           <Card.Header>
             <h5>Server Verified PIN</h5>
           </Card.Header>
@@ -172,10 +172,10 @@ const HomePage = function () {
           </Card.Body>
         </Card>
         {credentialsLoading ? (
-          <center>
+          <div className={styles.default["textCenter"]}>
             <Spinner animation="border" role="status" variant="primary" />
             <p>Getting your recovery codes!</p>
-          </center>
+          </div>
         ) : (
           <RecoveryCodes credentials={recoveryCodeProps} />
         )}

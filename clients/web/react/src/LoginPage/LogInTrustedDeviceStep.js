@@ -9,7 +9,7 @@ import { userActions, alertActions } from '../_actions';
 import { history } from '../_helpers';
 
 
-const LogInTrustedDeviceStep = ({ setForm, formData, navigation }) => {
+const LogInTrustedDeviceStep = ({ navigation }) => {
 
     const webAuthnStartResponse = useSelector(state => state.authentication.webAuthnStartResponse);
     const defaultInvalidPIN = -1;

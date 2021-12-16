@@ -6,7 +6,7 @@ import { history } from '../_helpers';
 import { WebAuthnClient } from '../_components';
 import { userActions, credentialActions, alertActions } from '../_actions';
 
-const RegisterTrustedDeviceStep = ({ setForm, formData, navigation }) => {
+const RegisterTrustedDeviceStep = ({ navigation }) => {
 
   const dispatch = useDispatch();
 

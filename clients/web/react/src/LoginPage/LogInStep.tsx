@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactElement } from "react";
 import { Button, InputGroup, Form, Spinner } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 
 import base64url from "base64url";
 import validate from "validate.js";
@@ -9,7 +9,7 @@ import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPi
 import { history } from "../_helpers";
 import { credentialActions, alertActions } from "../_actions";
 
-import styles from "../_components/component.module.css";
+const styles = require("../_components/component.module.css");
 
 const LogInStep = function ({ navigation }) {
   const [inputs, setInputs] = useState({
@@ -22,10 +22,10 @@ const LogInStep = function ({ navigation }) {
   });
   const [validated, setValidated] = useState(false);
   const webAuthnStartResponse = useSelector(
-    (state) => state.authentication.webAuthnStartResponse
+    (state: RootStateOrAny) => state.authentication.webAuthnStartResponse
   );
   const [continueSubmitted, setContinueSubmitted] = useState(false);
-  const [serverVerifiedPin, setServerVerifiedPin] = useState();
+  const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
 
   const constraints = {
     username: {
@@ -44,11 +44,13 @@ const LogInStep = function ({ navigation }) {
 
   const dispatch = useDispatch();
 
+  /*
   useEffect(() => {
     if (webAuthnStartResponse) {
       signInWithoutUsername();
     }
   }, [webAuthnStartResponse]);
+  */
 
   function getUV(authenticatorData) {
     const buffer = base64url.toBuffer(authenticatorData);
@@ -65,7 +67,7 @@ const LogInStep = function ({ navigation }) {
     return flags.uv;
   }
 
-  const UVPromise = () => {
+  const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
       const svpinCreateProps = {
         type: "dispatch",
@@ -128,9 +130,6 @@ const LogInStep = function ({ navigation }) {
     }
   }
 
-  const promptSvPinStep = () => {
-    navigation.go("PromptSvPinStep");
-  };
   const registerTrustedDeviceStep = () => {
     navigation.go("RegisterTrustedDeviceStep");
   };
@@ -203,13 +202,13 @@ const LogInStep = function ({ navigation }) {
 
   return (
     <>
-      <center>
+      <div className={styles.default["textCenter"]}>
         <h2>Welcome</h2>
         <label>Log in to the WebAuthn Starter Kit to continue</label>
-      </center>
+      </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group>
-          <InputGroup mb="3" hasValidation>
+          <InputGroup hasValidation>
             <InputGroup.Prepend>
               <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
             </InputGroup.Prepend>
@@ -236,8 +235,7 @@ const LogInStep = function ({ navigation }) {
           value="continue"
           variant="primary"
           block
-          disabled={continueSubmitted}
-        >
+          disabled={continueSubmitted}>
           {continueSubmitted && (
             <Spinner
               as="span"
@@ -253,8 +251,7 @@ const LogInStep = function ({ navigation }) {
           type="submit"
           onClick={forgotClickHandler}
           variant="link"
-          className="float-right"
-        >
+          className="float-right">
           Forgot Your Security Key?
         </Button>
         <br />
@@ -265,8 +262,7 @@ const LogInStep = function ({ navigation }) {
       <div>
         <Button
           onClick={accountSecurityStep}
-          variant="secondary btn-block mt-3"
-        >
+          variant="secondary btn-block mt-3">
           Continue with Trusted Device or Security Key
         </Button>
       </div>
@@ -274,12 +270,12 @@ const LogInStep = function ({ navigation }) {
         <hr />
       </div>
       <div>
-        <center>
+        <div className={styles.default["textCenter"]}>
           Don't have an account?{" "}
           <span onClick={signUpStep} className="btn-link">
             Sign Up
           </span>
-        </center>
+        </div>
       </div>
       {serverVerifiedPin}
     </>
