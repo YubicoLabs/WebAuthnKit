@@ -100,11 +100,15 @@ const LogInStep = function ({ navigation }) {
         dispatch(alertActions.success("Login Successful"));
         localStorage.setItem("credential", JSON.stringify(userData.credential));
         console.log("LogInStep Successful credential ", userData.credential);
+        registerTrustedDeviceOrContinue("/");
       }
     } catch (error) {
       console.log("LoginStep signin error");
       console.log(error);
       dispatch(alertActions.error(error.message));
+      if (error.code === "UserNotFoundException") {
+        signUpStep();
+      }
     }
   }
 
@@ -182,8 +186,9 @@ const LogInStep = function ({ navigation }) {
     if (isUsernameValid()) {
       setValidated(true);
       if (inputs.continue === true) {
+        setContinueSubmitted(true);
         await signIn(inputs.username);
-        registerTrustedDeviceOrContinue("/");
+        setContinueSubmitted(false);
       } else if (inputs.forgotStep === true) {
         localStorage.setItem("username", inputs.username);
         forgotStep();
@@ -237,15 +242,20 @@ const LogInStep = function ({ navigation }) {
           block
           disabled={continueSubmitted}>
           {continueSubmitted && (
-            <Spinner
-              as="span"
-              animation="border"
-              size="sm"
-              role="status"
-              aria-hidden="true"
-            />
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className={styles.default["loaderSpan"]}>
+                Fetching your profile
+              </span>
+            </>
           )}
-          Continue
+          {!continueSubmitted && <span>Continue</span>}
         </Button>
         <Button
           type="submit"

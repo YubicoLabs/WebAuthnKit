@@ -1,6 +1,12 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, ReactElement } from "react";
-import { Button, InputGroup, FormControl, Form } from "react-bootstrap";
+import {
+  Button,
+  InputGroup,
+  FormControl,
+  Form,
+  Spinner,
+} from "react-bootstrap";
 import { useDispatch } from "react-redux";
 
 import validate from "validate.js";
@@ -21,6 +27,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
     username: "",
   });
   const [validated, setValidated] = useState(false);
+  const [continueSubmitted, setContinueSubmitted] = useState(false);
 
   const constraints = {
     username: {
@@ -118,8 +125,13 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
     }
 
     if (isUsernameValid()) {
+      setContinueSubmitted(true);
       await register();
-      history.push("/");
+      setContinueSubmitted(false);
+      const hasCred = localStorage.getItem("credential");
+      if (hasCred) {
+        history.push("/");
+      }
     }
   };
 
@@ -167,8 +179,25 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
           <li>Follow the steps in the browser</li>
           <li>Give your Security Key a nickname to easily identify it later</li>
         </ol>
-        <Button type="submit" variant="primary btn-block mt-3">
-          Continue
+        <Button
+          type="submit"
+          variant="primary btn-block mt-3"
+          disabled={continueSubmitted}>
+          {continueSubmitted && (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className={styles.default["loaderSpan"]}>
+                Creating your account
+              </span>
+            </>
+          )}
+          {!continueSubmitted && <span>Continue</span>}
         </Button>
       </Form>
       <div className="mt-5">

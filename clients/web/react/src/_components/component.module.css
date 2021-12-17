@@ -50,3 +50,7 @@
 .textCenter {
   text-align: center;
 }
+
+.loaderSpan {
+  margin-left: 1em;
+}
