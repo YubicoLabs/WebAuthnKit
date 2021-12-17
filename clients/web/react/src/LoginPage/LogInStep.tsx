@@ -257,7 +257,7 @@ const LogInStep = function ({ navigation }) {
         <br />
       </Form>
       <div className="mt-3">
-        <span className={styles["text-divider"]}>OR</span>
+        <span className={styles.default["text-divider"]}>OR</span>
       </div>
       <div>
         <Button

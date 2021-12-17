@@ -36,7 +36,7 @@ const RecoveryCodes = function ({ credentials }) {
 
   return (
     <>
-      <Card className={styles.cardSpacing}>
+      <Card className={styles.default["cardSpacing"]}>
         <Card.Header>
           <h5>Recovery Options</h5>
         </Card.Header>

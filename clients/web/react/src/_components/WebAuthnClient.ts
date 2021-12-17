@@ -8,29 +8,34 @@ import aws_exports from "../aws-exports";
 
 axios.defaults.baseURL = aws_exports.apiEndpoint;
 
-export const WebAuthnClient = {
+const WebAuthnClient = {
   getAuthChallegeResponse,
   getPublicKeyRequestOptions,
-  getUsernamelessAuthChallegeResponse,
+  //getUsernamelessAuthChallegeResponse,
   getUVFromAssertion,
   sendChallengeAnswer,
   signIn,
   signUp,
 };
 
-const defaultInvalidPIN = -1;
+const defaultInvalidPIN = "-1";
 const webAuthnClientExceptionName = "WebAuthnClientException";
 const ERROR_CODE = "ERROR_CODE";
 const INVALID_CHALLENGE_TYPE = "INVALID_CHALLENGE_TYPE";
 
 function WebAuthnClientException(message, code = ERROR_CODE) {
   const error = new Error(message);
-  error.code = code;
-  error.name = webAuthnClientExceptionName;
-  return error;
+  const formattedError = {
+    ...error,
+    code: code,
+    name: webAuthnClientExceptionName,
+  };
+  //error.code = code;
+  //error.name = webAuthnClientExceptionName;
+  return formattedError;
 }
 
-async function getPublicKeyRequestOptions() {
+async function getPublicKeyRequestOptions(): Promise<any> {
   try {
     const response = await axios.get("/users/credentials/fido2/authenticate");
     console.log(
@@ -44,9 +49,10 @@ async function getPublicKeyRequestOptions() {
   }
 }
 
+/*
 async function getUsernamelessAuthChallegeResponse() {
   try {
-    const requestOptions = getPublicKeyRequestOptions();
+    const requestOptions = await getPublicKeyRequestOptions();
 
     const publicKey = {
       publicKey: requestOptions.publicKeyCredentialRequestOptions,
@@ -87,6 +93,7 @@ async function getUsernamelessAuthChallegeResponse() {
     throw error;
   }
 }
+*/
 
 async function getAuthChallegeResponse(cognitoChallenge) {
   try {
@@ -220,8 +227,8 @@ async function signIn(name, requestUV) {
 
     if (name === undefined) {
       console.log("WebAuthnClient signIn() usernameless flow");
-      challengeResponse,
-        (username = await getUsernamelessAuthChallegeResponse());
+      //challengeResponse,
+      //(username = await getUsernamelessAuthChallegeResponse());
     } else {
       console.log("WebAuthnClient signIn() username flow");
       username = name.toLocaleLowerCase();
@@ -235,7 +242,7 @@ async function signIn(name, requestUV) {
       cognitoUser.challengeName === "CUSTOM_CHALLENGE" &&
       cognitoUser.challengeParam.type === "webauthn.create"
     ) {
-      throw new WebAuthnClientException(
+      throw WebAuthnClientException(
         "User not found. Please Sign Up.",
         INVALID_CHALLENGE_TYPE
       );
@@ -281,7 +288,7 @@ async function signIn(name, requestUV) {
       console.error(
         "WebAuthnClient signIn() error: throw WebAuthnClientException"
       );
-      throw new WebAuthnClientException("Invalid server response");
+      throw WebAuthnClientException("Invalid server response");
     }
   } catch (error) {
     console.error("WebAuthnClient signIn() error: ", error);
@@ -363,7 +370,7 @@ async function signUp(name, requestUV) {
       cognitoUser.challengeName === "CUSTOM_CHALLENGE" &&
       cognitoUser.challengeParam.type === "webauthn.get"
     ) {
-      throw new WebAuthnClientException(
+      throw WebAuthnClientException(
         "User already exists. Please Sign In.",
         INVALID_CHALLENGE_TYPE
       );
@@ -403,10 +410,12 @@ async function signUp(name, requestUV) {
       console.error(
         "WebAuthnClient signUp() error: throw WebAuthnClientException"
       );
-      throw new WebAuthnClientException("Invalid server response");
+      throw WebAuthnClientException("Invalid server response");
     }
   } catch (error) {
     console.error("WebAuthnClient signUp() error: ", error);
     throw error;
   }
 }
+
+export { WebAuthnClient };

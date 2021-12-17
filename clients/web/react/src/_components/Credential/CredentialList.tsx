@@ -10,7 +10,7 @@ const CredentialList = function ({ credentialItems }) {
   console.log("Printing the credentials, ", credentialItems);
 
   return (
-    <Card className={styles.cardSpacing}>
+    <Card className={styles.default["cardSpacing"]}>
       <Card.Header>
         <h5>Security Keys</h5>
       </Card.Header>

@@ -1,4 +1,2 @@
-export * from './PrivateRoute';
-export * from './ServerVerifiedPin';
-export * from './IdentifierFirstFlow';
-export * from './WebAuthnClient';
+export { PrivateRoute } from './PrivateRoute';
+export { WebAuthnClient } from './WebAuthnClient';
