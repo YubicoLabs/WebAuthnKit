@@ -8,8 +8,8 @@ const PropTypes = require("prop-types");
 const styles = require("../component.module.css");
 
 const RecoveryCodes = function ({ credentials }) {
-  const { recoveryCodesViewed } = credentials.recoveryCodesViewed;
-  const { allRecoveryCodesUsed } = credentials.allRecoveryCodesUsed;
+  const recoveryCodesViewed = credentials.recoveryCodesViewed;
+  const allRecoveryCodesUsed = credentials.allRecoveryCodesUsed;
   const recoveryCodes = useSelector(
     (state: RootStateOrAny) => state.recoveryCodes
   );
@@ -29,7 +29,7 @@ const RecoveryCodes = function ({ credentials }) {
   };
 
   useEffect(() => {
-    if (recoveryCodesViewed === false || allRecoveryCodesUsed) {
+    if (!recoveryCodesViewed || allRecoveryCodesUsed) {
       handleShow();
     }
   }, [recoveryCodesViewed, allRecoveryCodesUsed]);

@@ -26,6 +26,7 @@ const LogInStep = function ({ navigation }) {
   );
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+  const [initialInput, setInitialInput] = useState(false); //detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
 
   const constraints = {
     username: {
@@ -158,6 +159,9 @@ const LogInStep = function ({ navigation }) {
   };
 
   const handleChange = (e) => {
+    if (!initialInput) {
+      setInitialInput(true);
+    }
     const { name, value } = e.target;
     setInputs((inputs) => ({ ...inputs, [name]: value }));
 
@@ -183,7 +187,7 @@ const LogInStep = function ({ navigation }) {
       event.stopPropagation();
     }
 
-    if (isUsernameValid()) {
+    if (isUsernameValid() && inputs.username !== "") {
       setValidated(true);
       if (inputs.continue === true) {
         setContinueSubmitted(true);
@@ -224,7 +228,7 @@ const LogInStep = function ({ navigation }) {
               defaultValue={inputs.username}
               aria-describedby="basic-addon1"
               onChange={handleChange}
-              isInvalid={!isUsernameValid()}
+              isInvalid={!isUsernameValid() && initialInput}
               isValid={isUsernameValid()}
               required
             />

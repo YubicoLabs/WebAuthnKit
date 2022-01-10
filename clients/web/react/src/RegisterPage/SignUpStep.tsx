@@ -28,6 +28,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   });
   const [validated, setValidated] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+  const [initialInput, setInitialInput] = useState(false); //detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
 
   const constraints = {
     username: {
@@ -97,6 +98,9 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   };
 
   const handleChange = (e) => {
+    if (!initialInput) {
+      setInitialInput(true);
+    }
     const { name, value } = e.target;
     setForm(e);
 
@@ -161,7 +165,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
               defaultValue={username}
               aria-describedby="basic-addon1"
               onChange={handleChange}
-              isInvalid={!isUsernameValid()}
+              isInvalid={!isUsernameValid() && initialInput}
               isValid={isUsernameValid()}
               required
             />

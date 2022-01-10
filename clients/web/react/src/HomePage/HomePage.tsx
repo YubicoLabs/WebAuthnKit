@@ -70,7 +70,6 @@ const HomePage = function () {
 
   useEffect(() => {
     if (alert.message) {
-      console.warn("*****In here ******");
       if (
         alert.message === "Registration successful" ||
         alert.message === "Delete credential successful"
@@ -100,6 +99,18 @@ const HomePage = function () {
       <h2>Account Security</h2>
       <div>
         <Card className={styles.default["cardSpacing"]}>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, .6)",
+              position: "absolute",
+              color: "#ffffff",
+              margin: "auto",
+              padding: "30%",
+            }}>
+            This section is under construction
+          </div>
           <Card.Header>
             <h5>Trusted Devices</h5>
           </Card.Header>
