@@ -49,7 +49,6 @@ async function getPublicKeyRequestOptions(): Promise<any> {
   }
 }
 
-/*
 async function getUsernamelessAuthChallegeResponse() {
   try {
     const requestOptions = await getPublicKeyRequestOptions();
@@ -84,7 +83,7 @@ async function getUsernamelessAuthChallegeResponse() {
       challengeResponse
     );
 
-    return challengeResponse, userhandle;
+    return { challengeResponse: challengeResponse, userhandle: userhandle };
   } catch (error) {
     console.error(
       "WebAuthnClient getUsernamelessAuthChallegeResponse() error: ",
@@ -93,7 +92,6 @@ async function getUsernamelessAuthChallegeResponse() {
     throw error;
   }
 }
-*/
 
 async function getAuthChallegeResponse(cognitoChallenge) {
   try {
@@ -159,10 +157,14 @@ async function getCreateCredentialChallegeResponse(cognitoChallenge) {
     );
 
     const publicKey = { publicKey: request.publicKeyCredentialCreationOptions };
+    publicKey.publicKey.authenticatorSelection.residentKey =
+      publicKey.publicKey.authenticatorSelection.residentKey.toLowerCase();
     console.log(
       "WebAuthnClient getCreateCredentialChallegeResponse() publicKey: ",
       publicKey
     );
+
+    /**Come back right here, and add the undercase treatment to the resident key value */
 
     const attestationResponse = await create(publicKey);
     console.log(
@@ -227,8 +229,11 @@ async function signIn(name, requestUV) {
 
     if (name === undefined) {
       console.log("WebAuthnClient signIn() usernameless flow");
-      //challengeResponse,
-      //(username = await getUsernamelessAuthChallegeResponse());
+      //username = await getUsernamelessAuthChallegeResponse();
+      const userhandleChallengeResponse =
+        await getUsernamelessAuthChallegeResponse();
+      username = userhandleChallengeResponse.userhandle;
+      challengeResponse = userhandleChallengeResponse.challengeResponse;
     } else {
       console.log("WebAuthnClient signIn() username flow");
       username = name.toLocaleLowerCase();

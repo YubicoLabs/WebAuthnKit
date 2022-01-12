@@ -144,8 +144,9 @@ const LogInStep = function ({ navigation }) {
   const forgotStep = () => {
     navigation.go("ForgotStep");
   };
-  const accountSecurityStep = () => {
-    // signIn();
+  const usernamelessLogin = async () => {
+    console.log("LoginStep, beginning usernamelessLogin");
+    await signIn(undefined);
   };
 
   const forgotClickHandler = () => {
@@ -274,9 +275,7 @@ const LogInStep = function ({ navigation }) {
         <span className={styles.default["text-divider"]}>OR</span>
       </div>
       <div>
-        <Button
-          onClick={accountSecurityStep}
-          variant="secondary btn-block mt-3">
+        <Button onClick={usernamelessLogin} variant="secondary btn-block mt-3">
           Continue with Trusted Device or Security Key
         </Button>
       </div>

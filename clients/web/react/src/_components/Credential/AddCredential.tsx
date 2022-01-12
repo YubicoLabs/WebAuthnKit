@@ -103,6 +103,8 @@ const AddCredential = function () {
         requireResidentKey: isResidentKey,
       })
       .then(async (startRegistrationResponse) => {
+        startRegistrationResponse.data.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey =
+          startRegistrationResponse.data.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey.toLowerCase();
         console.log(startRegistrationResponse);
 
         const { requestId } = startRegistrationResponse.data;
