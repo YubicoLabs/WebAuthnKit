@@ -47,6 +47,11 @@ const constraints = {
 };
 const saltRounds = 5;
 
+const authSelectorResolve = {
+    "PLATFORM": "platform",
+    "CROSS_PLATFORM": "cross-platform"
+};
+
 
 exports.handler = async (event, context) => {
     
@@ -297,6 +302,7 @@ async function startRegisterFIDO2Credential(profile, body, uid) {
         "displayName": profile.username,
         "credentialNickname": jsonBody.nickname,
         "requireResidentKey": jsonBody.requireResidentKey,
+        "requireAuthenticatorAttachment": jsonBody.requireAuthenticatorAttachment,
         "uid": uid
     });
     console.log("startRegistration request payload: "+payload);
@@ -321,6 +327,8 @@ async function startRegisterFIDO2Credential(profile, body, uid) {
         startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64;
         startRegisterPayload.publicKeyCredentialCreationOptions.attestation = startRegisterPayload.publicKeyCredentialCreationOptions.attestation.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
+        startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey.toLowerCase();
+        startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment = authSelectorResolve[startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment];
         startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams = startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams.map( (cred) => { 
             cred.type = cred.type.toLowerCase().replace('_','-');
             cred.alg = coseLookup[cred.alg];
