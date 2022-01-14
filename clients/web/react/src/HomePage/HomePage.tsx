@@ -5,6 +5,7 @@ import { Auth } from "aws-amplify";
 import { credentialActions } from "../_actions";
 import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";
+import TrustedDeviceList from "../_components/TrustedDevices/TrustedDeviceList";
 import RecoveryCodes from "../_components/RecoveryCodes/RecoveryCodes";
 import DeleteUser from "../_components/DeleteUser/DeleteUser";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
@@ -16,6 +17,8 @@ const HomePage = function () {
   const credentials = useSelector((state: RootStateOrAny) => state.credentials);
   const alert = useSelector((state: RootStateOrAny) => state.alert);
   const [credentialItems, setCredentialItems] = useState([]);
+  const [securityKeyItems, setSecurityKeyItems] = useState([]);
+  const [registeredDeviceItems, setRegisteredDeviceItems] = useState([]);
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
     allRecoveryCodesUsed: false,
     recoveryCodesViewed: false,
@@ -54,6 +57,9 @@ const HomePage = function () {
     } else {
       if (credentials.items) {
         setCredentialItems(credentials.items);
+        const keySegment = secKeyOrRegisteredDevice(credentials.items);
+        setSecurityKeyItems(keySegment.securityKeys);
+        setRegisteredDeviceItems(keySegment.registeredDevices);
       }
       if (
         credentials.allRecoveryCodesUsed !== undefined &&
@@ -94,85 +100,43 @@ const HomePage = function () {
     history.push("/logout");
   };
 
+  function secKeyOrRegisteredDevice(credList) {
+    const secKeys = [];
+    const regDevice = [];
+    for (let i = 0; i < credList.length; i++) {
+      const itemAuthAttach =
+        credList[i].registrationRequest.publicKeyCredentialCreationOptions
+          .authenticatorSelection?.authenticatorAttachment;
+      if (itemAuthAttach === null || itemAuthAttach === "CROSS_PLATFORM") {
+        secKeys.push(credList[i]);
+      } else if (itemAuthAttach === "PLATFORM") {
+        regDevice.push(credList[i]);
+      }
+    }
+    console.log("SecKeys: ", secKeys);
+    console.log("RegDevs: ", regDevice);
+    return { securityKeys: secKeys, registeredDevices: regDevice };
+  }
+
   return (
     <>
       <h2>Account Security</h2>
       <div>
-        <Card className={styles.default["cardSpacing"]}>
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0, 0, 0, .6)",
-              position: "absolute",
-              color: "#ffffff",
-              margin: "auto",
-              padding: "30%",
-            }}>
-            This section is under construction
+        {credentialsLoading ? (
+          <div className={styles.default["textCenter"]}>
+            <Spinner animation="border" role="status" variant="primary" />
+            <p>Getting your trusted devices!</p>
           </div>
-          <Card.Header>
-            <h5>Trusted Devices</h5>
-          </Card.Header>
-          <Card.Body>
-            <Table hover responsive>
-              <tbody>
-                <tr>
-                  <td>
-                    <img
-                      src="https://www.yubico.com/wp-content/uploads/2021/01/illus-fingerprint-r1-dk-teal-1.svg"
-                      width="20"
-                      height="20"
-                      alt=""
-                    />
-                  </td>
-                  <td>Safari on macOS. Registered: May 26, 2021</td>
-                  <td>
-                    {" "}
-                    <Button variant="danger">Delete</Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <img
-                      src="https://www.yubico.com/wp-content/uploads/2021/01/illus-fingerprint-r1-dk-teal-1.svg"
-                      width="20"
-                      height="20"
-                      alt=""
-                    />
-                  </td>
-                  <td>Safari on macOS. Registered: April 26, 2021</td>
-                  <td>
-                    {" "}
-                    <Button variant="danger">Delete</Button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <img
-                      src="https://www.yubico.com/wp-content/uploads/2021/01/illus-fingerprint-r1-dk-teal-1.svg"
-                      width="20"
-                      height="20"
-                      alt=""
-                    />
-                  </td>
-                  <td>Safari on macOS. Registered: March 26, 2021</td>
-                  <td>
-                    {" "}
-                    <Button variant="danger">Delete</Button>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
+        ) : (
+          <TrustedDeviceList credentialItems={registeredDeviceItems} />
+        )}
         {credentialsLoading ? (
           <div className={styles.default["textCenter"]}>
             <Spinner animation="border" role="status" variant="primary" />
             <p>Getting your security keys!</p>
           </div>
         ) : (
-          <CredentialList credentialItems={credentialItems} />
+          <CredentialList credentialItems={securityKeyItems} />
         )}
         <Card className={styles.default["cardSpacing"]}>
           <Card.Header>

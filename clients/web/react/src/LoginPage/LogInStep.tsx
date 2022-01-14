@@ -121,7 +121,7 @@ const LogInStep = function ({ navigation }) {
       PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
         .then(function (available) {
           if (available) {
-            registerTrustedDeviceStep();
+            InitUserStep();
           } else {
             history.push(path);
           }
@@ -135,8 +135,8 @@ const LogInStep = function ({ navigation }) {
     }
   }
 
-  const registerTrustedDeviceStep = () => {
-    navigation.go("RegisterTrustedDeviceStep");
+  const InitUserStep = () => {
+    navigation.go("InitUserStep");
   };
   const signUpStep = () => {
     history.push("/register");
@@ -213,7 +213,7 @@ const LogInStep = function ({ navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Welcome</h2>
+        <h2>Welcome2345</h2>
         <label>Log in to the WebAuthn Starter Kit to continue</label>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>

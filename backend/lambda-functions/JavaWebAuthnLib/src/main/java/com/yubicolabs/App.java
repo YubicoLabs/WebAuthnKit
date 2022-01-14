@@ -217,7 +217,9 @@ public class App implements RequestHandler<Object, Object> {
         String displayName = jsonRequest.get("displayName").getAsString();
         String credentialNickname = jsonRequest.get("credentialNickname").getAsString();
         boolean requireResidentKey = jsonRequest.get("requireResidentKey").getAsBoolean();
-        boolean requireAuthenticatorAttachment = jsonRequest.get("requireAuthenticatorAttachment").getAsBoolean();
+        boolean requireAuthenticatorAttachment = (jsonRequest.has("requireAuthenticatorAttachment"))
+                ? (jsonRequest.get("requireAuthenticatorAttachment").getAsBoolean())
+                : false;
         String uid = jsonRequest.get("uid").getAsString();
 
         log.trace(

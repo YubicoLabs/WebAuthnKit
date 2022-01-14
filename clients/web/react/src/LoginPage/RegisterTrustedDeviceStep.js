@@ -5,44 +5,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import { history } from '../_helpers';
 import { WebAuthnClient } from '../_components';
 import { userActions, credentialActions, alertActions } from '../_actions';
+import userService from '../_services/user.service'
+import AddTrustedDevice from '../_components/TrustedDevices/AddTrustedDevice';
+import { Auth } from 'aws-amplify';
+import { TrustedDeviceHelper } from '../_components/TrustedDevices/TrustedDeviceHelper';
 
 const RegisterTrustedDeviceStep = ({ navigation }) => {
-
+  const [allowAdd, setAllowAdd] = useState(false);
   const dispatch = useDispatch();
-
-  async function register() {
-    console.log("register");
-    alert("Hi from the registration stub. This feature is still under construction.")
-    /*
-    //TODO: get username from formData
-    let username = localStorage.getItem('username');
-    try {
-      // TODO: add hint to request authentication with an internal authenticator
-      let options = "";
-      let userData = await WebAuthnClient.signUp(username, options, uv);
-      console.log("RegisterTrustedDevice register userData: ", userData);
-
-      if (userData === undefined) {
-        console.error("RegisterTrustedDeviceStep register error: userData undefined");
-        dispatch(alertActions.error("Something went wrong. Please try again."));
-      } else {
-        dispatch(alertActions.success('Registration successful'));
-        setTrustedDevice(true);
-      }
-      
-    } catch (err) {
-      console.error("RegisterTrustedDeviceStep register error");
-      console.error(err);
-      dispatch(alertActions.error(err.message));
-      return;
+  
+  useEffect(() => {
+    const localTrustedDevice = localStorage.getItem("trustedDevice");
+    console.log("Local TD: ", localTrustedDevice);
+    if(localTrustedDevice === TrustedDeviceHelper.TrustedDeviceEnum.NEVER) {
+      continueStep();
     }
-    */
-    registerDeviceSuccessStep();
-  }
-
-  function uv() {
-    //This is a user verifying platform. Skipping UV check.
-  }
+    const checkUser = JSON.parse(localStorage.getItem("user"));
+    if(checkUser.token) {
+      setAllowAdd(true);
+    }
+  }, []);
 
   async function authenticate() {
     console.log("authenticate");
@@ -51,7 +33,7 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
     try {
       // TODO: add hint to request authentication with an internal authenticator
       let options = "";
-      let userData = await WebAuthnClient.signIn(username, options, uv);
+      let userData = await WebAuthnClient.signIn(username, options, null);
       console.log("RegisterTrustedDevice authenticate userData: ", userData);
 
       if (userData === undefined) {
@@ -59,17 +41,15 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
         dispatch(alertActions.error("Something went wrong. Please try again."));
       } else {
         dispatch(alertActions.success('Authentication successful'));
-        setTrustedDevice(true);
+        TrustedDeviceHelper.setTrustedDevice(TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED);
+        continueStep();
       }
       
     } catch (err) {
       console.error("RegisterTrustedDeviceStep authenticate error");
-      console.error(err);
       dispatch(alertActions.error(err.message));
       return;
     }
-
-    continueStep();
   }
 
   const setTrustedDevice = (value) => {
@@ -80,9 +60,16 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
     navigation.go('RegisterDeviceSuccessStep');
   }
 
+  const clickNeverAsk = (value) => {
+    TrustedDeviceHelper.setTrustedDevice(value);
+    continueStep();
+  }
+
   const continueStep = () => {
     history.push('/');
   }
+
+  const AddTrustedDeviceProps = { continueStep };
 
   return (
     <>
@@ -92,7 +79,13 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
       </center>
       <div className="form mt-2">
         <div>
-          <Button onClick={register} variant="primary btn-block mt-3">Add this device now</Button>
+        {allowAdd ? (
+          <AddTrustedDevice {...AddTrustedDeviceProps} />
+        ) : (
+          <Button variant="primary btn-block mt-3" disabled>
+            Add this device now
+          </Button>
+        )}
           <hr></hr>
           <center><label>Already registered this device before?</label></center>
           <Button onClick={authenticate} variant="secondary btn-block mt-2">Confirm Trusted Device</Button>
@@ -104,7 +97,7 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
           Don't want to register this device?
           <ul>
             <li><span onClick={continueStep} className="btn-link">Ask me later</span></li>
-            <li><span onClick={() => setTrustedDevice(false)} className="btn-link">Never ask me to register this device</span></li>
+            <li><span onClick={() => clickNeverAsk(TrustedDeviceHelper.TrustedDeviceEnum.NEVER)} className="btn-link">Never ask me to register this device</span></li>
           </ul>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useState, useRef, ReactElement } from "react";
 
 import { create } from "@github/webauthn-json";
+import { history } from "../../_helpers";
 import { Button, Modal, Alert } from "react-bootstrap";
 import base64url from "base64url";
 import cbor from "cbor";
@@ -9,17 +10,17 @@ import validate from "validate.js";
 import { useDispatch } from "react-redux";
 import { credentialActions, alertActions } from "../../_actions";
 import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
+import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
 
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
 
-const AddCredential = function () {
+const AddTrustedDevice = function ({ continueStep }) {
   const [showAdd, setShowAdd] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
   const [nickname, setNickname] = useState("");
-  const [isResidentKey, setIsResidentKey] = useState(false);
   const [invalidNickname, setInvalidNickname] = useState(undefined);
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
@@ -49,12 +50,6 @@ const AddCredential = function () {
       setShowAdd(false);
       register();
     }
-  };
-
-  const handleCheckboxChange = (e) => {
-    const { target } = e;
-    const value = target.type === "checkbox" ? target.checked : target.value;
-    setIsResidentKey(value);
   };
 
   function getUV(attestationObject) {
@@ -100,8 +95,8 @@ const AddCredential = function () {
     axios
       .post("/users/credentials/fido2/register", {
         nickname,
-        requireResidentKey: isResidentKey,
-        requireAuthenticatorAttachment: false,
+        requireResidentKey: true,
+        requireAuthenticatorAttachment: true,
       })
       .then(async (startRegistrationResponse) => {
         console.log(startRegistrationResponse);
@@ -135,19 +130,27 @@ const AddCredential = function () {
 
             console.log("challengeResponse: ", challengeResponse);
 
-            if (uv === true) {
-              console.log("finishRegistration: ", challengeResponse);
-              dispatch(credentialActions.registerFinish(challengeResponse));
-            } else {
-              const uvPin = await registerUV(challengeResponse);
-              console.log("AddCredential, new Key PIN is: ", uvPin);
-              challengeResponse.pinCode = uvPin;
-              dispatch(credentialActions.registerFinish(challengeResponse));
-            }
+            console.log("finishRegistration: ", challengeResponse);
+            dispatch(credentialActions.registerFinish(challengeResponse));
+            TrustedDeviceHelper.setTrustedDevice(
+              TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED,
+              challengeResponse.credential.id
+            );
+            continueStep();
           })
           .catch((error) => {
-            console.error(error);
-            dispatch(alertActions.error(error.message));
+            if (
+              error.message ===
+              "The user attempted to register an authenticator that contains one of the credentials already registered with the relying party."
+            ) {
+              dispatch(
+                alertActions.success("Trusted Device is already registered")
+              );
+              continueStep();
+            } else {
+              console.error(error);
+              dispatch(alertActions.error(error.message));
+            }
           });
       })
       .catch((error) => {
@@ -167,7 +170,7 @@ const AddCredential = function () {
     <>
       <Modal show={showAdd} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Add a new security key</Modal.Title>
+          <Modal.Title>Add a new trusted device</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <label>Nickname</label>
@@ -191,39 +194,22 @@ const AddCredential = function () {
           {invalidNickname ? (
             <Alert variant="danger">{invalidNickname}</Alert>
           ) : null}
-          <br />
-          <label>
-            <input
-              name="isResidentKey"
-              type="checkbox"
-              checked={isResidentKey}
-              onChange={handleCheckboxChange}
-            />{" "}
-            Enable usernameless login with this key
-            <br />
-            <em>
-              <small>
-                Note: Passwordless requires a FIDO2 device and a browser that
-                supports it.
-              </small>
-            </em>
-          </label>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSaveAdd}>
-            Register security key
+            Register Trusted Device
           </Button>
         </Modal.Footer>
       </Modal>
-      <Button variant="primary" onClick={handleShow}>
-        Add a new security key
+      <Button variant="primary btn-block mt-3" onClick={handleShow}>
+        Add this device now
       </Button>
       {serverVerifiedPin}
     </>
   );
 };
 
-export default AddCredential;
+export default AddTrustedDevice;

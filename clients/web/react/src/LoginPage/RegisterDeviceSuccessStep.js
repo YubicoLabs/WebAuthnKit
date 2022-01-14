@@ -4,7 +4,7 @@ import { Button, InputGroup, FormControl, } from 'react-bootstrap';
 import { history } from '../_helpers';
 
 
-const RegisterDeviceSuccessStep = ({ setForm, formData, navigation }) => {
+const RegisterDeviceSuccessStep = ({ navigation }) => {
   const accountSecurityStep = () => {
     history.push('/');
   }
