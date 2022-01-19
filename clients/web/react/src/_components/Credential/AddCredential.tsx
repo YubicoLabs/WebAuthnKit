@@ -101,7 +101,7 @@ const AddCredential = function () {
       .post("/users/credentials/fido2/register", {
         nickname,
         requireResidentKey: isResidentKey,
-        requireAuthenticatorAttachment: false,
+        requireAuthenticatorAttachment: "CROSS_PLATFORM",
       })
       .then(async (startRegistrationResponse) => {
         console.log(startRegistrationResponse);

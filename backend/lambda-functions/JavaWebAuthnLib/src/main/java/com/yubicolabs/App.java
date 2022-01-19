@@ -217,9 +217,9 @@ public class App implements RequestHandler<Object, Object> {
         String displayName = jsonRequest.get("displayName").getAsString();
         String credentialNickname = jsonRequest.get("credentialNickname").getAsString();
         boolean requireResidentKey = jsonRequest.get("requireResidentKey").getAsBoolean();
-        boolean requireAuthenticatorAttachment = (jsonRequest.has("requireAuthenticatorAttachment"))
-                ? (jsonRequest.get("requireAuthenticatorAttachment").getAsBoolean())
-                : false;
+        AuthenticatorAttachment requireAuthenticatorAttachment = (jsonRequest.has("requireAuthenticatorAttachment"))
+                ? (resolveAuthenticatorAttachment(jsonRequest.get("requireAuthenticatorAttachment").getAsString()))
+                : null;
         String uid = jsonRequest.get("uid").getAsString();
 
         log.trace(
@@ -257,8 +257,9 @@ public class App implements RequestHandler<Object, Object> {
                                 .authenticatorSelection(AuthenticatorSelectionCriteria.builder()
                                         .requireResidentKey(requireResidentKey)
                                         .authenticatorAttachment(
-                                                requireAuthenticatorAttachment ? AuthenticatorAttachment.PLATFORM
-                                                        : AuthenticatorAttachment.CROSS_PLATFORM)
+                                                requireAuthenticatorAttachment != null
+                                                        ? requireAuthenticatorAttachment
+                                                        : null)
                                         .build())
                                 .build()));
         log.debug("request: {}", request);
@@ -268,6 +269,15 @@ public class App implements RequestHandler<Object, Object> {
         log.debug("registerRequestJson: {}", registerRequestJson);
 
         return registerRequestJson;
+    }
+
+    AuthenticatorAttachment resolveAuthenticatorAttachment(String value) {
+        if (value.equals("PLATFORM")) {
+            return AuthenticatorAttachment.PLATFORM;
+        } else if (value.equals("CROSS_PLATFORM")) {
+            return AuthenticatorAttachment.CROSS_PLATFORM;
+        }
+        return null;
     }
 
     Object finishRegistration(JsonObject responseJson) {

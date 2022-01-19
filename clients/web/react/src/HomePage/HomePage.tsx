@@ -107,10 +107,10 @@ const HomePage = function () {
       const itemAuthAttach =
         credList[i].registrationRequest.publicKeyCredentialCreationOptions
           .authenticatorSelection?.authenticatorAttachment;
-      if (itemAuthAttach === null || itemAuthAttach === "CROSS_PLATFORM") {
-        secKeys.push(credList[i]);
-      } else if (itemAuthAttach === "PLATFORM") {
+      if (itemAuthAttach === "PLATFORM") {
         regDevice.push(credList[i]);
+      } else {
+        secKeys.push(credList[i]);
       }
     }
     console.log("SecKeys: ", secKeys);

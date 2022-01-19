@@ -96,7 +96,7 @@ const AddTrustedDevice = function ({ continueStep }) {
       .post("/users/credentials/fido2/register", {
         nickname,
         requireResidentKey: true,
-        requireAuthenticatorAttachment: true,
+        requireAuthenticatorAttachment: "PLATFORM",
       })
       .then(async (startRegistrationResponse) => {
         console.log(startRegistrationResponse);
