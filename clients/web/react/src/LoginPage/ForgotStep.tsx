@@ -95,6 +95,15 @@ const ForgotStep = ({ navigation }) => {
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <InputGroup className="mb-3">
+          <InputGroup.Text id="basic-addon1">Username</InputGroup.Text>
+          <FormControl
+            placeholder={localStorage.getItem("username")}
+            aria-label="Username"
+            aria-describedby="basic-addon1"
+            disabled
+          />
+        </InputGroup>
+        <InputGroup className="mb-3">
           <InputGroup.Prepend>
             <InputGroup.Text id="basic-addon1">Recovery Code</InputGroup.Text>
           </InputGroup.Prepend>

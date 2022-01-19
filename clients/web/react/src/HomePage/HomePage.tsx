@@ -13,6 +13,7 @@ import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPi
 const styles = require("../_components/component.module.css");
 
 const HomePage = function () {
+  const [username, setUsername] = useState("");
   const [jwt, setjwt] = useState("");
   const credentials = useSelector((state: RootStateOrAny) => state.credentials);
   const alert = useSelector((state: RootStateOrAny) => state.alert);
@@ -94,6 +95,8 @@ const HomePage = function () {
 
   useEffect(() => {
     currentAuthenticatedUser();
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    setUsername(currentUser.username);
   }, []);
 
   const logout = async () => {
@@ -120,6 +123,7 @@ const HomePage = function () {
 
   return (
     <>
+      <h2 className={styles.default["usernameHeader"]}>Welcome {username}!</h2>
       <h2>Account Security</h2>
       <div>
         {credentialsLoading ? (

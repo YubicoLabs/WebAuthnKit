@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, InputGroup, FormControl, Card } from 'react-bootstrap';
+import { Button, InputGroup, FormControl, Card, Spinner } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { history } from '../_helpers';
@@ -10,8 +10,11 @@ import AddTrustedDevice from '../_components/TrustedDevices/AddTrustedDevice';
 import { Auth } from 'aws-amplify';
 import { TrustedDeviceHelper } from '../_components/TrustedDevices/TrustedDeviceHelper';
 
+const styles = require("../_components/component.module.css");
+
 const RegisterTrustedDeviceStep = ({ navigation }) => {
   const [allowAdd, setAllowAdd] = useState(false);
+  const [continueSubmitted, setContinueSubmitted] = useState(false);
   const dispatch = useDispatch();
   
   useEffect(() => {
@@ -28,6 +31,7 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
 
   async function authenticate() {
     console.log("authenticate");
+    setContinueSubmitted(true);
     //TODO: get username from formData
     let username = localStorage.getItem('username');
     try {
@@ -39,14 +43,16 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
       if (userData === undefined) {
         console.error("RegisterTrustedDeviceStep authenticate error: userData undefined");
         dispatch(alertActions.error("Something went wrong. Please try again."));
+        setContinueSubmitted(false);
       } else {
         dispatch(alertActions.success('Authentication successful'));
-        TrustedDeviceHelper.setTrustedDevice(TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED);
+        TrustedDeviceHelper.setTrustedDevice(TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED, userData.credential.id);
         continueStep();
       }
       
     } catch (err) {
       console.error("RegisterTrustedDeviceStep authenticate error");
+      setContinueSubmitted(false);
       dispatch(alertActions.error(err.message));
       return;
     }
@@ -88,7 +94,29 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
         )}
           <hr></hr>
           <center><label>Already registered this device before?</label></center>
-          <Button onClick={authenticate} variant="secondary btn-block mt-2">Confirm Trusted Device</Button>
+          <Button
+          type="submit"
+          onClick={authenticate}
+          value="continue"
+          variant="secondary btn-block mt-2"
+          block
+          disabled={continueSubmitted}>
+          {continueSubmitted && (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className={styles.default["loaderSpan"]}>
+                Confirming your device
+              </span>
+            </>
+          )}
+          {!continueSubmitted && <span>Confirm Trusted Device</span>}
+        </Button>
         </div>
         <div className="mt-3">
           <hr></hr>

@@ -136,6 +136,8 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
       if (hasCred) {
         history.push("/");
       }
+    } else {
+      setErrors({ username: "Please enter your username" });
     }
   };
 

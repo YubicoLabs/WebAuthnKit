@@ -53,3 +53,9 @@
 .loaderSpan {
   margin-left: 1em;
 }
+
+.usernameHeader {
+  color: #9aca3c;
+  text-align: center; 
+  padding: 1em 0em;
+}

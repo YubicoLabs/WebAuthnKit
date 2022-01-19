@@ -31,8 +31,9 @@ const AddCredential = function () {
   };
   const defaultInvalidPIN = -1;
   const constraints = {
-    nickname: {
+    keyName: {
       length: {
+        minimum: 1,
         maximum: 20,
       },
     },
@@ -41,9 +42,9 @@ const AddCredential = function () {
   const handleSaveAdd = () => {
     setSubmitted(true);
 
-    const result = validate({ nickname }, constraints);
+    const result = validate({ keyName: nickname }, constraints);
     if (result) {
-      setInvalidNickname(result.nickname.join(". "));
+      setInvalidNickname(result.keyName.join(". "));
     } else {
       setInvalidNickname(undefined);
       setShowAdd(false);
@@ -159,6 +160,16 @@ const AddCredential = function () {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNickname(value);
+
+    console.log(value);
+
+    const result = validate({ keyName: value }, constraints);
+    if (result) {
+      console.log("Here");
+      setInvalidNickname(result.keyName.join(". "));
+    } else {
+      setInvalidNickname(undefined);
+    }
   };
 
   const inputRef = useRef(null);

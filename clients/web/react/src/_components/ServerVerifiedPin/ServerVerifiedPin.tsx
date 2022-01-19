@@ -99,6 +99,7 @@ const ServerVerifiedPin = function (props) {
 
   const validForm = (currentPin, currentConfirmPin) => {
     const pinResult = validate({ pin: currentPin }, constraints);
+    console.log(pinResult);
     if (pinResult) {
       setInvalidPin(pinResult.pin.join(". "));
     } else {
@@ -142,6 +143,12 @@ const ServerVerifiedPin = function (props) {
       )
     );
     setShow(false);
+    setInvalidPin(undefined);
+    setInvalidConfirmPin(undefined);
+    setPinCollection({
+      pin: "",
+      confirmPin: "",
+    });
   };
 
   const handleSave = () => {
@@ -192,7 +199,7 @@ const ServerVerifiedPin = function (props) {
             <Form.Control
               name="pin"
               value={pinCollection.pin}
-              type="text"
+              type="password"
               placeholder="ex. 85943"
               ref={inputRef}
               onChange={handleChange}
@@ -217,7 +224,7 @@ const ServerVerifiedPin = function (props) {
                 <Form.Control
                   name="confirmPin"
                   value={pinCollection.confirmPin}
-                  type="text"
+                  type="password"
                   placeholder="Use the same PIN you used above"
                   ref={inputRefNext}
                   onChange={handleChange}

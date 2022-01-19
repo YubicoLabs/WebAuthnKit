@@ -21,10 +21,8 @@ const LogInStep = function ({ navigation }) {
     username: "",
   });
   const [validated, setValidated] = useState(false);
-  const webAuthnStartResponse = useSelector(
-    (state: RootStateOrAny) => state.authentication.webAuthnStartResponse
-  );
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+  const [usernamelessSubmitted, setUsernamelessSubmitted] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
   const [initialInput, setInitialInput] = useState(false); //detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
 
@@ -44,14 +42,6 @@ const LogInStep = function ({ navigation }) {
   };
 
   const dispatch = useDispatch();
-
-  /*
-  useEffect(() => {
-    if (webAuthnStartResponse) {
-      signInWithoutUsername();
-    }
-  }, [webAuthnStartResponse]);
-  */
 
   function getUV(authenticatorData) {
     const buffer = base64url.toBuffer(authenticatorData);
@@ -100,8 +90,9 @@ const LogInStep = function ({ navigation }) {
       } else {
         dispatch(alertActions.success("Login Successful"));
         localStorage.setItem("credential", JSON.stringify(userData.credential));
+        localStorage.setItem("username", userData.username);
         console.log("LogInStep Successful credential ", userData.credential);
-        registerTrustedDeviceOrContinue("/");
+        registerTrustedDeviceOrContinue("/", username);
       }
     } catch (error) {
       console.log("LoginStep signin error");
@@ -113,11 +104,11 @@ const LogInStep = function ({ navigation }) {
     }
   }
 
-  function registerTrustedDeviceOrContinue(path) {
+  function registerTrustedDeviceOrContinue(path, username) {
     const trustedDevice = localStorage.getItem("trustedDevice");
     console.log("trustedDevice=", trustedDevice);
 
-    if (trustedDevice === null) {
+    if (trustedDevice === null && username !== undefined) {
       PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
         .then(function (available) {
           if (available) {
@@ -146,7 +137,9 @@ const LogInStep = function ({ navigation }) {
   };
   const usernamelessLogin = async () => {
     console.log("LoginStep, beginning usernamelessLogin");
+    setUsernamelessSubmitted(true);
     await signIn(undefined);
+    setUsernamelessSubmitted(false);
   };
 
   const forgotClickHandler = () => {
@@ -184,12 +177,13 @@ const LogInStep = function ({ navigation }) {
 
     event.preventDefault();
 
+    setValidated(true);
+
     if (form.checkValidity() === false) {
       event.stopPropagation();
     }
 
-    if (isUsernameValid() && inputs.username !== "") {
-      setValidated(true);
+    if (isUsernameValid()) {
       if (inputs.continue === true) {
         setContinueSubmitted(true);
         await signIn(inputs.username);
@@ -199,7 +193,7 @@ const LogInStep = function ({ navigation }) {
         forgotStep();
       }
     } else {
-      setValidated(false);
+      setErrors({ username: "Please enter your username" });
     }
   };
 
@@ -213,7 +207,7 @@ const LogInStep = function ({ navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Welcome2345</h2>
+        <h2>Welcome</h2>
         <label>Log in to the WebAuthn Starter Kit to continue</label>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
@@ -275,8 +269,30 @@ const LogInStep = function ({ navigation }) {
         <span className={styles.default["text-divider"]}>OR</span>
       </div>
       <div>
-        <Button onClick={usernamelessLogin} variant="secondary btn-block mt-3">
-          Continue with Trusted Device or Security Key
+        <Button
+          type="submit"
+          onClick={usernamelessLogin}
+          value="continue"
+          variant="secondary btn-block mt-3"
+          block
+          disabled={usernamelessSubmitted}>
+          {usernamelessSubmitted && (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className={styles.default["loaderSpan"]}>
+                Fetching your credentials
+              </span>
+            </>
+          )}
+          {!usernamelessSubmitted && (
+            <span>Continue with Trusted Device or Security Key</span>
+          )}
         </Button>
       </div>
       <div className="mt-5">

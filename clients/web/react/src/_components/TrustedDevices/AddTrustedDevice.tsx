@@ -2,7 +2,7 @@ import React, { useState, useRef, ReactElement } from "react";
 
 import { create } from "@github/webauthn-json";
 import { history } from "../../_helpers";
-import { Button, Modal, Alert } from "react-bootstrap";
+import { Button, Modal, Alert, Spinner } from "react-bootstrap";
 import base64url from "base64url";
 import cbor from "cbor";
 import axios from "axios";
@@ -17,7 +17,10 @@ import aws_exports from "../../aws-exports";
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
 
+const styles = require("../component.module.css");
+
 const AddTrustedDevice = function ({ continueStep }) {
+  const [continueSubmitted, setContinueSubmitted] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
   const [nickname, setNickname] = useState("");
@@ -25,9 +28,13 @@ const AddTrustedDevice = function ({ continueStep }) {
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
 
-  const handleClose = () => setShowAdd(false);
+  const handleClose = () => {
+    setContinueSubmitted(false);
+    setShowAdd(false);
+  };
   const handleShow = () => {
     setNickname("");
+    setContinueSubmitted(true);
     setShowAdd(true);
   };
   const defaultInvalidPIN = -1;
@@ -39,8 +46,9 @@ const AddTrustedDevice = function ({ continueStep }) {
     },
   };
 
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     setSubmitted(true);
+    setShowAdd(true);
 
     const result = validate({ nickname }, constraints);
     if (result) {
@@ -48,8 +56,9 @@ const AddTrustedDevice = function ({ continueStep }) {
     } else {
       setInvalidNickname(undefined);
       setShowAdd(false);
-      register();
+      await register();
     }
+    setShowAdd(false);
   };
 
   function getUV(attestationObject) {
@@ -139,6 +148,7 @@ const AddTrustedDevice = function ({ continueStep }) {
             continueStep();
           })
           .catch((error) => {
+            setContinueSubmitted(false);
             if (
               error.message ===
               "The user attempted to register an authenticator that contains one of the credentials already registered with the relying party."
@@ -155,6 +165,7 @@ const AddTrustedDevice = function ({ continueStep }) {
       })
       .catch((error) => {
         console.error(error);
+        setContinueSubmitted(false);
         dispatch(alertActions.error(error.message));
       });
   };
@@ -204,8 +215,28 @@ const AddTrustedDevice = function ({ continueStep }) {
           </Button>
         </Modal.Footer>
       </Modal>
-      <Button variant="primary btn-block mt-3" onClick={handleShow}>
-        Add this device now
+      <Button
+        type="submit"
+        onClick={handleShow}
+        value="continue"
+        variant="primary btn-block mt-3"
+        block
+        disabled={continueSubmitted}>
+        {continueSubmitted && (
+          <>
+            <Spinner
+              as="span"
+              animation="border"
+              size="sm"
+              role="status"
+              aria-hidden="true"
+            />
+            <span className={styles.default["loaderSpan"]}>
+              Adding your device
+            </span>
+          </>
+        )}
+        {!continueSubmitted && <span>Add this device now</span>}
       </Button>
       {serverVerifiedPin}
     </>
