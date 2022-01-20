@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Button, Card, Spinner, Table } from "react-bootstrap";
-import { Auth } from "aws-amplify";
 import { credentialActions } from "../_actions";
 
 import { userActions } from "../_actions";
@@ -12,7 +11,6 @@ import TrustedDeviceList from "../_components/TrustedDevices/TrustedDeviceList";
 import RecoveryCodes from "../_components/RecoveryCodes/RecoveryCodes";
 import DeleteUser from "../_components/DeleteUser/DeleteUser";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
-import userService from "../_services/user.service";
 
 const styles = require("../_components/component.module.css");
 
@@ -22,7 +20,6 @@ const HomePage = function () {
   const credentials = useSelector((state: RootStateOrAny) => state.credentials);
   const user = useSelector((state: RootStateOrAny) => state.users);
   const alert = useSelector((state: RootStateOrAny) => state.alert);
-  const [credentialItems, setCredentialItems] = useState([]);
   const [securityKeyItems, setSecurityKeyItems] = useState([]);
   const [registeredDeviceItems, setRegisteredDeviceItems] = useState([]);
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
@@ -52,7 +49,6 @@ const HomePage = function () {
       setCredentialsLoading(true);
     } else {
       if (credentials.items) {
-        setCredentialItems(credentials.items);
         const keySegment = secKeyOrRegisteredDevice(credentials.items);
         setSecurityKeyItems(keySegment.securityKeys);
         setRegisteredDeviceItems(keySegment.registeredDevices);
@@ -69,6 +65,17 @@ const HomePage = function () {
       setCredentialsLoading(false);
     }
   }, [credentials]);
+
+  useEffect(() => {
+    if (alert.message && jwt) {
+      if (
+        alert.message === "Registration successful" ||
+        alert.message === "Delete credential successful"
+      ) {
+        dispatch(credentialActions.getAll(jwt));
+      }
+    }
+  }, [alert]);
 
   useEffect(() => {
     if (jwt) {

@@ -1,7 +1,6 @@
 import React, { useState, useRef, ReactElement } from "react";
 
 import { create } from "@github/webauthn-json";
-import { history } from "../../_helpers";
 import { Button, Modal, Alert, Spinner } from "react-bootstrap";
 import base64url from "base64url";
 import cbor from "cbor";
@@ -9,7 +8,6 @@ import axios from "axios";
 import validate from "validate.js";
 import { useDispatch } from "react-redux";
 import { credentialActions, alertActions } from "../../_actions";
-import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
 import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
@@ -22,7 +20,6 @@ const styles = require("../component.module.css");
 const AddTrustedDevice = function ({ continueStep }) {
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
   const [nickname, setNickname] = useState("");
   const [invalidNickname, setInvalidNickname] = useState(undefined);
   const [submitted, setSubmitted] = useState(false);
@@ -58,7 +55,6 @@ const AddTrustedDevice = function ({ continueStep }) {
       setShowAdd(false);
       await register();
     }
-    setShowAdd(false);
   };
 
   function getUV(attestationObject) {
@@ -76,25 +72,6 @@ const AddTrustedDevice = function ({ continueStep }) {
       flagsInt,
     };
     return flags.uv;
-  }
-
-  const UVPromise = (): Promise<{ value: number }> => {
-    return new Promise((resolve, reject) => {
-      const svpinCreateProps = {
-        type: "create",
-        saveCallback: resolve,
-        closeCallback: reject,
-      };
-      console.log("SignUpStep UVPromise(): ", svpinCreateProps);
-      setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
-    });
-  };
-
-  async function registerUV(challengeResponse) {
-    dispatch(credentialActions.getUV(challengeResponse));
-    const pinResult = await UVPromise();
-    console.log("SignUpStep PIN Result: ", pinResult.value);
-    return pinResult.value;
   }
 
   const register = async () => {
@@ -165,6 +142,7 @@ const AddTrustedDevice = function ({ continueStep }) {
       })
       .catch((error) => {
         console.error(error);
+        setShowAdd(false);
         setContinueSubmitted(false);
         dispatch(alertActions.error(error.message));
       });
@@ -197,8 +175,8 @@ const AddTrustedDevice = function ({ continueStep }) {
             }`}
             onKeyPress={(ev) => {
               if (ev.key === "Enter") {
-                handleSaveAdd();
                 ev.preventDefault();
+                handleSaveAdd();
               }
             }}
           />
@@ -238,7 +216,6 @@ const AddTrustedDevice = function ({ continueStep }) {
         )}
         {!continueSubmitted && <span>Add this device now</span>}
       </Button>
-      {serverVerifiedPin}
     </>
   );
 };

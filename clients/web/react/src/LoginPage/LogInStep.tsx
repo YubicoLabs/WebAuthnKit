@@ -1,8 +1,7 @@
-import React, { useState, useEffect, ReactElement } from "react";
+import React, { useState, ReactElement } from "react";
 import { Button, InputGroup, Form, Spinner } from "react-bootstrap";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 
-import base64url from "base64url";
 import validate from "validate.js";
 import { WebAuthnClient } from "../_components";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
@@ -43,21 +42,6 @@ const LogInStep = function ({ navigation }) {
 
   const dispatch = useDispatch();
 
-  function getUV(authenticatorData) {
-    const buffer = base64url.toBuffer(authenticatorData);
-
-    const flagsBuf = buffer.slice(32, 33);
-    const flagsInt = flagsBuf[0];
-    const flags = {
-      up: !!(flagsInt & 0x01),
-      uv: !!(flagsInt & 0x04),
-      at: !!(flagsInt & 0x40),
-      ed: !!(flagsInt & 0x80),
-      flagsInt,
-    };
-    return flags.uv;
-  }
-
   const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
       const svpinCreateProps = {
@@ -92,38 +76,16 @@ const LogInStep = function ({ navigation }) {
         localStorage.setItem("credential", JSON.stringify(userData.credential));
         localStorage.setItem("username", userData.username);
         console.log("LogInStep Successful credential ", userData.credential);
-        //registerTrustedDeviceOrContinue("/", username);
         InitUserStep();
       }
     } catch (error) {
       console.log("LoginStep signin error");
       console.log(error);
+      setUsernamelessSubmitted(false);
       dispatch(alertActions.error(error.message));
       if (error.code === "UserNotFoundException") {
         signUpStep();
       }
-    }
-  }
-
-  function registerTrustedDeviceOrContinue(path, username) {
-    const trustedDevice = localStorage.getItem("trustedDevice");
-    console.log("trustedDevice=", trustedDevice);
-
-    if (trustedDevice === null && username !== undefined) {
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-        .then(function (available) {
-          if (available) {
-            InitUserStep();
-          } else {
-            history.push(path);
-          }
-        })
-        .catch(function (err) {
-          console.error(err);
-          history.push(path);
-        });
-    } else {
-      history.push(path);
     }
   }
 
@@ -140,7 +102,6 @@ const LogInStep = function ({ navigation }) {
     console.log("LoginStep, beginning usernamelessLogin");
     setUsernamelessSubmitted(true);
     await signIn(undefined);
-    setUsernamelessSubmitted(false);
   };
 
   const forgotClickHandler = () => {
@@ -188,7 +149,6 @@ const LogInStep = function ({ navigation }) {
       if (inputs.continue === true) {
         setContinueSubmitted(true);
         await signIn(inputs.username);
-        setContinueSubmitted(false);
       } else if (inputs.forgotStep === true) {
         localStorage.setItem("username", inputs.username);
         forgotStep();
