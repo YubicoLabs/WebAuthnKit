@@ -3,12 +3,16 @@ import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Button, Card, Spinner, Table } from "react-bootstrap";
 import { Auth } from "aws-amplify";
 import { credentialActions } from "../_actions";
+
+import { userActions } from "../_actions";
+
 import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";
 import TrustedDeviceList from "../_components/TrustedDevices/TrustedDeviceList";
 import RecoveryCodes from "../_components/RecoveryCodes/RecoveryCodes";
 import DeleteUser from "../_components/DeleteUser/DeleteUser";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
+import userService from "../_services/user.service";
 
 const styles = require("../_components/component.module.css");
 
@@ -16,6 +20,7 @@ const HomePage = function () {
   const [username, setUsername] = useState("");
   const [jwt, setjwt] = useState("");
   const credentials = useSelector((state: RootStateOrAny) => state.credentials);
+  const user = useSelector((state: RootStateOrAny) => state.users);
   const alert = useSelector((state: RootStateOrAny) => state.alert);
   const [credentialItems, setCredentialItems] = useState([]);
   const [securityKeyItems, setSecurityKeyItems] = useState([]);
@@ -42,16 +47,6 @@ const HomePage = function () {
     closeCallback: svpCloseCallback,
   };
 
-  async function currentAuthenticatedUser() {
-    const data = await Auth.currentSession();
-    const token = data.getIdToken().getJwtToken();
-    if (token) {
-      setjwt(token);
-    } else {
-      console.error("There was an error getting your current user session");
-    }
-  }
-
   useEffect(() => {
     if (credentials === {} || credentials.loading) {
       setCredentialsLoading(true);
@@ -73,20 +68,8 @@ const HomePage = function () {
       }
       setCredentialsLoading(false);
     }
-  }, [credentials, alert]);
+  }, [credentials]);
 
-  useEffect(() => {
-    if (alert.message) {
-      if (
-        alert.message === "Registration successful" ||
-        alert.message === "Delete credential successful"
-      ) {
-        dispatch(credentialActions.getAll(jwt));
-      }
-    }
-  }, [alert]);
-
-  // This method is fine
   useEffect(() => {
     if (jwt) {
       dispatch(credentialActions.getAll(jwt));
@@ -94,10 +77,25 @@ const HomePage = function () {
   }, [jwt]);
 
   useEffect(() => {
-    currentAuthenticatedUser();
-    const currentUser = JSON.parse(localStorage.getItem("user"));
-    setUsername(currentUser.username);
+    if (localStorage.getItem("user") === null) {
+      dispatch(userActions.getCurrentAuthenticatedUser());
+    } else {
+      setUser();
+    }
   }, []);
+
+  useEffect(() => {
+    const token = user?.token;
+    if (token !== undefined) {
+      setUser();
+    }
+  }, [user]);
+
+  const setUser = () => {
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    setUsername(currentUser.displayname);
+    setjwt(currentUser.token);
+  };
 
   const logout = async () => {
     history.push("/logout");
@@ -116,8 +114,6 @@ const HomePage = function () {
         secKeys.push(credList[i]);
       }
     }
-    console.log("SecKeys: ", secKeys);
-    console.log("RegDevs: ", regDevice);
     return { securityKeys: secKeys, registeredDevices: regDevice };
   }
 

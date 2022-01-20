@@ -7,7 +7,6 @@ const styles = require("../_components/component.module.css");
 
 const LogoutPage = function () {
   const logoutUser = async () => {
-    console.log("Called into loader");
     try {
       await Auth.signOut();
       localStorage.removeItem("username");

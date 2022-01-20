@@ -94,7 +94,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   const registerKeySuccessStep = (credential) => {
     localStorage.setItem("credential", JSON.stringify(credential));
     console.log("registerKeySuccessStep credential ", credential);
-    window.location.reload();
+    //window.location.reload();
   };
 
   const handleChange = (e) => {
@@ -132,12 +132,13 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
       setContinueSubmitted(true);
       await register();
       setContinueSubmitted(false);
-      const hasCred = localStorage.getItem("credential");
-      if (hasCred) {
-        history.push("/");
-      }
-    } else {
-      setErrors({ username: "Please enter your username" });
+      navigation.go("InitUserStep");
+      //const hasCred = localStorage.getItem("credential");
+      //if (hasCred) {
+      //history.push("/");
+      //}
+      //} else {
+      //setErrors({ username: "Please enter your username" });
     }
   };
 

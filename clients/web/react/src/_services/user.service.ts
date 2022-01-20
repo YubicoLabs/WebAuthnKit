@@ -79,6 +79,7 @@ async function getCurrentAuthenticatedUser() {
     let userData = {
       id: 1,
       username: currentUser.username,
+      displayname: currentUser.attributes.name,
       credential: JSON.parse(localStorage.getItem("credential")),
       token: data.getIdToken().getJwtToken(),
     };

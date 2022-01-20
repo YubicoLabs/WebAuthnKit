@@ -7,8 +7,6 @@ import Credential from "./Credential";
 const styles = require("../component.module.css");
 
 const CredentialList = function ({ credentialItems }) {
-  console.log("Printing the credentials, ", credentialItems);
-
   return (
     <Card className={styles.default["cardSpacing"]}>
       <Card.Header>

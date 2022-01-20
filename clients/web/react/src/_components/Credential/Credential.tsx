@@ -14,7 +14,6 @@ const checkAttestation = (credential) => {
 const getAttestationImage = (credential) => {
   const imgUrl =
     credential.attestationMetadata?.value?.deviceProperties?.imageUrl;
-  console.log(imgUrl);
   if (imgUrl) return imgUrl;
   return "https://www.yubico.com/wp-content/uploads//2021/02/illus-shield-lock-r1-dkteal.svg";
 };

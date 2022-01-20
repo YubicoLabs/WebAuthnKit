@@ -92,7 +92,8 @@ const LogInStep = function ({ navigation }) {
         localStorage.setItem("credential", JSON.stringify(userData.credential));
         localStorage.setItem("username", userData.username);
         console.log("LogInStep Successful credential ", userData.credential);
-        registerTrustedDeviceOrContinue("/", username);
+        //registerTrustedDeviceOrContinue("/", username);
+        InitUserStep();
       }
     } catch (error) {
       console.log("LoginStep signin error");

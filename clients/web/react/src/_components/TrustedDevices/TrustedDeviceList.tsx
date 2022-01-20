@@ -25,7 +25,6 @@ const TrustedDeviceList = function ({ credentialItems }) {
     }
   }
 
-  console.log("Printing the credentials, ", credentialItems);
   const AddTrustedDeviceProps = { continueStep: function () {} };
 
   return (

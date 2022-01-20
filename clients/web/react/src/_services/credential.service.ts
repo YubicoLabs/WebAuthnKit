@@ -30,6 +30,9 @@ async function generateRecoveryCodes() {
 
 async function listRecoveryCodes() {
   try {
+    if (axios.defaults.headers.common["Authorization"] === undefined) {
+      return;
+    }
     const response = await axios.get("/users/credentials/codes");
     console.log(response);
     return response.data;

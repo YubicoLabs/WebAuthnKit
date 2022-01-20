@@ -2,11 +2,13 @@ import React from "react";
 import { useForm, useStep } from "react-hooks-helper";
 import SignUpStep from "./SignUpStep";
 import RegisterKeySuccessStep from "./RegisterKeySuccessStep";
+import InitUserStep from "./InitUserStep";
 
 const steps = [
   { id: "SignUpStep" },
   { id: "RegisterSvPinStep" },
   { id: "RegisterKeySuccessStep" },
+  { id: "InitUserStep" },
 ];
 
 const defaultData = {
@@ -29,6 +31,8 @@ const IdentifierFirstSignUpFlow = () => {
         return <SignUpStep {...props} />;
       case "RegisterKeySuccessStep":
         return <RegisterKeySuccessStep {...props} />;
+      case "InitUserStep":
+        return <InitUserStep {...props} />;
       default:
         return null;
     }

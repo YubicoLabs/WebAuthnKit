@@ -11,25 +11,8 @@ const InitUserStep = function ({ navigation }) {
   const user = useSelector((state: RootStateOrAny) => state.users);
   const dispatch = useDispatch();
 
-  function registerTrustedDeviceOrContinue() {
-    const trustedDevice = localStorage.getItem("trustedDevice");
-
-    if (trustedDevice === null) {
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-        .then(function (available) {
-          if (available) {
-            navigation.go("RegisterTrustedDeviceStep");
-          } else {
-            history.push("/");
-          }
-        })
-        .catch(function (err) {
-          console.error(err);
-          history.push("/");
-        });
-    } else {
-      history.push("/");
-    }
+  function continueToRegisterKeySuccess() {
+    navigation.go("RegisterKeySuccessStep");
   }
 
   useEffect(() => {
@@ -40,7 +23,7 @@ const InitUserStep = function ({ navigation }) {
     const token = user?.token;
 
     if (token !== undefined) {
-      registerTrustedDeviceOrContinue();
+      continueToRegisterKeySuccess();
     }
   }, [user]);
 
