@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-
+import { history } from "../_helpers";
 import { WebAuthnClient } from "../_components";
 import { alertActions } from "../_actions";
 import AddTrustedDevice from "../_components/TrustedDevices/AddTrustedDevice";
@@ -58,11 +58,15 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
 
   const clickNeverAsk = (value) => {
     TrustedDeviceHelper.setTrustedDevice(value, undefined);
-    continueStep();
+    history.push("/");
   };
 
   const continueStep = () => {
     navigation.go("RegisterDeviceSuccessStep");
+  };
+
+  const askLaterStep = () => {
+    history.push("/");
   };
 
   const AddTrustedDeviceProps = { continueStep };
@@ -120,7 +124,7 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
           Don't want to register this device?
           <ul>
             <li>
-              <span onClick={continueStep} className="btn-link">
+              <span onClick={askLaterStep} className="btn-link">
                 Ask me later
               </span>
             </li>

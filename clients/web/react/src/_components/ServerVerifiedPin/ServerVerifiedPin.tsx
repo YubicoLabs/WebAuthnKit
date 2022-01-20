@@ -184,7 +184,9 @@ const ServerVerifiedPin = function (props) {
     <>
       {showButton && (
         <Card className={styles.default["cardSpacing"]}>
-          <Button onClick={handleShow}>{label.buttonText}</Button>
+          <Button variant="dark" onClick={handleShow}>
+            {label.buttonText}
+          </Button>
         </Card>
       )}
       <Modal show={show} onHide={handleClose}>

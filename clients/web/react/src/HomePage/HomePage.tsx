@@ -130,18 +130,32 @@ const HomePage = function () {
       <h2>Account Security</h2>
       <div>
         {credentialsLoading ? (
-          <div className={styles.default["textCenter"]}>
-            <Spinner animation="border" role="status" variant="primary" />
-            <p>Getting your trusted devices!</p>
-          </div>
+          <Card className={styles.default["cardSpacing"]}>
+            <Card.Header>
+              <h5>Trusted Devices</h5>
+            </Card.Header>
+            <Card.Body>
+              <div className={styles.default["textCenter"]}>
+                <Spinner animation="border" role="status" variant="primary" />
+                <p>Getting your trusted devices!</p>
+              </div>
+            </Card.Body>
+          </Card>
         ) : (
           <TrustedDeviceList credentialItems={registeredDeviceItems} />
         )}
         {credentialsLoading ? (
-          <div className={styles.default["textCenter"]}>
-            <Spinner animation="border" role="status" variant="primary" />
-            <p>Getting your security keys!</p>
-          </div>
+          <Card className={styles.default["cardSpacing"]}>
+            <Card.Header>
+              <h5>Security Keys</h5>
+            </Card.Header>
+            <Card.Body>
+              <div className={styles.default["textCenter"]}>
+                <Spinner animation="border" role="status" variant="primary" />
+                <p>Getting your security keys!</p>
+              </div>
+            </Card.Body>
+          </Card>
         ) : (
           <CredentialList credentialItems={securityKeyItems} />
         )}
@@ -154,10 +168,17 @@ const HomePage = function () {
           </Card.Body>
         </Card>
         {credentialsLoading ? (
-          <div className={styles.default["textCenter"]}>
-            <Spinner animation="border" role="status" variant="primary" />
-            <p>Getting your recovery codes!</p>
-          </div>
+          <Card className={styles.default["cardSpacing"]}>
+            <Card.Header>
+              <h5>Recovery Options</h5>
+            </Card.Header>
+            <Card.Body>
+              <div className={styles.default["textCenter"]}>
+                <Spinner animation="border" role="status" variant="primary" />
+                <p>Getting your recovery codes!</p>
+              </div>
+            </Card.Body>
+          </Card>
         ) : (
           <RecoveryCodes credentials={recoveryCodeProps} />
         )}

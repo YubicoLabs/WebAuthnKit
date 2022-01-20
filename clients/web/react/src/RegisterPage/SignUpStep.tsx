@@ -64,10 +64,12 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
         dispatch(alertActions.success("Registration successful"));
         setForm({ target: { name: "credential", value: userData.credential } });
         registerKeySuccessStep(userData.credential);
+        navigation.go("InitUserStep");
       }
     } catch (err) {
       console.error("SignUpStep register error");
       console.error(err);
+      setContinueSubmitted(false);
       dispatch(alertActions.error(err.message));
     }
   }
@@ -131,8 +133,6 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
     if (isUsernameValid()) {
       setContinueSubmitted(true);
       await register();
-      setContinueSubmitted(false);
-      navigation.go("InitUserStep");
       //const hasCred = localStorage.getItem("credential");
       //if (hasCred) {
       //history.push("/");

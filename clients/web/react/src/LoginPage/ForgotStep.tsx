@@ -1,16 +1,23 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Button, InputGroup, FormControl, Form } from "react-bootstrap";
+import {
+  Button,
+  InputGroup,
+  FormControl,
+  Form,
+  Spinner,
+} from "react-bootstrap";
 
 import { Auth } from "aws-amplify";
 
 import { alertActions } from "../_actions";
-import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
 
 const ForgotStep = ({ navigation }) => {
   const [validated, setValidated] = useState(false);
+  const [continueSubmitted, setContinueSubmitted] = useState(false);
+
   const dispatch = useDispatch();
 
   const [inputs, setInputs] = useState({
@@ -41,6 +48,7 @@ const ForgotStep = ({ navigation }) => {
     setValidated(true);
 
     if (inputs.recoveryCode) {
+      setContinueSubmitted(true);
       handleRecoveryCode(inputs.recoveryCode);
     }
   };
@@ -67,7 +75,7 @@ const ForgotStep = ({ navigation }) => {
               };
               localStorage.setItem("user", JSON.stringify(userData));
               console.log("userData ", localStorage.getItem("user"));
-              history.push("/");
+              navigation.go("InitUserStep");
             })
             .catch((err) => {
               console.log("currentSession error: ", err);
@@ -77,11 +85,13 @@ const ForgotStep = ({ navigation }) => {
         })
         .catch((err) => {
           console.log("sendCustomChallengeAnswer error: ", err);
+          setContinueSubmitted(false);
           let msg = "Invalid recovery code";
           dispatch(alertActions.error(msg));
         });
     } catch (error) {
       console.error("recovery code error");
+      setContinueSubmitted(false);
       console.error(error);
       dispatch(alertActions.error(error.message));
     }
@@ -120,8 +130,27 @@ const ForgotStep = ({ navigation }) => {
             Please provide a recover code.
           </Form.Control.Feedback>
         </InputGroup>
-        <Button type="submit" variant="primary" block>
-          Continue
+        <Button
+          type="submit"
+          value="continue"
+          variant="primary"
+          block
+          disabled={continueSubmitted}>
+          {continueSubmitted && (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+              />
+              <span className={styles.default["loaderSpan"]}>
+                Fetching your profile
+              </span>
+            </>
+          )}
+          {!continueSubmitted && <span>Continue</span>}
         </Button>
       </Form>
       <div className="mt-5">

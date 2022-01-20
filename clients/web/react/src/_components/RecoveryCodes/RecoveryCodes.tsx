@@ -41,7 +41,7 @@ const RecoveryCodes = function ({ credentials }) {
           <h5>Recovery Options</h5>
         </Card.Header>
         <Card.Body>
-          <Button variant="link" onClick={handleShow}>
+          <Button variant="dark" onClick={handleShow}>
             Recovery Codes
           </Button>
         </Card.Body>
