@@ -328,6 +328,10 @@ async function startRegisterFIDO2Credential(profile, body, uid) {
         startRegisterPayload.publicKeyCredentialCreationOptions.attestation = startRegisterPayload.publicKeyCredentialCreationOptions.attestation.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey.toLowerCase();
+        startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.requireResidentKey = false;
+        if(startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey === "required") {
+            startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.requireResidentKey = true;
+        }
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment = authSelectorResolve[startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment];
         startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams = startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams.map( (cred) => { 
             cred.type = cred.type.toLowerCase().replace('_','-');
