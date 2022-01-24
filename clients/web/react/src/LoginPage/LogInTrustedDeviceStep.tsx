@@ -10,7 +10,7 @@ import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
 
-const LogInTrustedDeviceStep = ({ navigation }) => {
+function LogInTrustedDeviceStep({ navigation }) {
   const [continueSubmitted, setContinueSubmitted] = useState(false);
 
   const webAuthnStartResponse = useSelector(
@@ -38,7 +38,7 @@ const LogInTrustedDeviceStep = ({ navigation }) => {
     try {
       setContinueSubmitted(true);
       await signInWithoutUsername();
-      //setContinueSubmitted(false);
+      // setContinueSubmitted(false);
     } catch {
       setContinueSubmitted(false);
     }
@@ -54,14 +54,14 @@ const LogInTrustedDeviceStep = ({ navigation }) => {
     };
     console.log("publicKey: ", publicKey);
 
-    let assertionResponse = await get(publicKey);
+    const assertionResponse = await get(publicKey);
     console.log("assertionResponse: ", assertionResponse);
 
     // get username from assertionResponse
     const username = assertionResponse.response.userHandle;
     console.log("userhandle: ", username);
 
-    let challengeResponse = {
+    const challengeResponse = {
       credential: assertionResponse,
       requestId: webAuthnStartResponse.requestId,
       pinCode: defaultInvalidPIN,
@@ -75,7 +75,6 @@ const LogInTrustedDeviceStep = ({ navigation }) => {
         ) {
           dispatch(alertActions.error("Please register an account"));
           history.push("/register");
-          return;
         } else if (
           user.challengeName === "CUSTOM_CHALLENGE" &&
           user.challengeParam.type === "webauthn.get"
@@ -146,7 +145,7 @@ const LogInTrustedDeviceStep = ({ navigation }) => {
           </Button>
         </div>
         <div className="mt-5">
-          <hr></hr>
+          <hr />
         </div>
         <div>
           <div className={styles.default["textCenter"]}>
@@ -158,6 +157,6 @@ const LogInTrustedDeviceStep = ({ navigation }) => {
       </div>
     </>
   );
-};
+}
 
 export default LogInTrustedDeviceStep;

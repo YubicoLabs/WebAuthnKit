@@ -1,5 +1,5 @@
-import { credentialConstants } from "../_constants";
 import { RootStateOrAny } from "react-redux";
+import { credentialConstants } from "../_constants";
 
 export function credentials(state: RootStateOrAny = {}, action) {
   switch (action.type) {

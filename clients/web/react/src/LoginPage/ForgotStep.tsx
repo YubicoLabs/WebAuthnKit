@@ -14,7 +14,7 @@ import { alertActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
 
-const ForgotStep = ({ navigation }) => {
+function ForgotStep({ navigation }) {
   const [validated, setValidated] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
 
@@ -55,7 +55,7 @@ const ForgotStep = ({ navigation }) => {
 
   async function handleRecoveryCode(code) {
     try {
-      let cognitoUser = await Auth.signIn(inputs.username);
+      const cognitoUser = await Auth.signIn(inputs.username);
       console.log("CognitoUser: ", cognitoUser);
 
       Auth.sendCustomChallengeAnswer(
@@ -68,7 +68,7 @@ const ForgotStep = ({ navigation }) => {
           Auth.currentSession()
             .then((data) => {
               dispatch(alertActions.success("Authentication successful"));
-              let userData = {
+              const userData = {
                 id: 1,
                 username: user.attributes.name,
                 token: data.getAccessToken().getJwtToken(),
@@ -79,14 +79,14 @@ const ForgotStep = ({ navigation }) => {
             })
             .catch((err) => {
               console.log("currentSession error: ", err);
-              const errorAlert = "Something went wrong. " + err.message;
+              const errorAlert = `Something went wrong. ${err.message}`;
               dispatch(alertActions.error(errorAlert));
             });
         })
         .catch((err) => {
           console.log("sendCustomChallengeAnswer error: ", err);
           setContinueSubmitted(false);
-          let msg = "Invalid recovery code";
+          const msg = "Invalid recovery code";
           dispatch(alertActions.error(msg));
         });
     } catch (error) {
@@ -154,7 +154,7 @@ const ForgotStep = ({ navigation }) => {
         </Button>
       </Form>
       <div className="mt-5">
-        <hr></hr>
+        <hr />
       </div>
       <div>
         <div className={styles.default["textCenter"]}>
@@ -165,6 +165,6 @@ const ForgotStep = ({ navigation }) => {
       </div>
     </>
   );
-};
+}
 
 export default ForgotStep;

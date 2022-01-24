@@ -14,12 +14,14 @@ import { history } from "../_helpers";
 import { WebAuthnClient } from "../_components";
 import { credentialActions, alertActions } from "../_actions";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
+import HandleWebKit from "../_components/HandleWebkit/HandleWebkit";
 
 const styles = require("../_components/component.module.css");
 
 const SignUpStep = function ({ setForm, formData, navigation }) {
   const dispatch = useDispatch();
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+  const [handleWebKit, setHandleWebKit] = useState<ReactElement>();
 
   const { username, pin, nickname, credential } = formData;
 
@@ -28,7 +30,8 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   });
   const [validated, setValidated] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
-  const [initialInput, setInitialInput] = useState(false); //detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
+  // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
+  const [initialInput, setInitialInput] = useState(false);
 
   const constraints = {
     username: {
@@ -53,8 +56,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
     console.log("register");
 
     try {
-      const options = ""; // default = no platform or cross-platform preference
-      const userData = await WebAuthnClient.signUp(username, uv);
+      const userData = await WebAuthnClient.signUp(username, uv, webKitMethod);
       console.log("SignUpStep register userData: ", userData);
 
       if (userData === undefined) {
@@ -71,6 +73,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
       console.error(err);
       setContinueSubmitted(false);
       dispatch(alertActions.error(err.message));
+      setHandleWebKit(null);
     }
   }
 
@@ -93,10 +96,31 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
     return pinResult.value;
   }
 
-  const registerKeySuccessStep = (credential) => {
-    localStorage.setItem("credential", JSON.stringify(credential));
-    console.log("registerKeySuccessStep credential ", credential);
-    //window.location.reload();
+  const WebKitPromise = (
+    type,
+    publicKey
+  ): Promise<{ attestationResponse: any }> => {
+    return new Promise((resolve, reject) => {
+      const handleWebKitProps = {
+        type,
+        publicKey,
+        saveCallback: resolve,
+        closeCallback: reject,
+      };
+      console.log("SignUpStep WebKitPromise(): ", handleWebKitProps);
+      setHandleWebKit(<HandleWebKit {...handleWebKitProps} />);
+    });
+  };
+
+  async function webKitMethod(type, publicKey) {
+    const attestationResponse = await WebKitPromise(type, publicKey);
+    console.log("SignUpStep webKitMethod Result: ", attestationResponse);
+    return attestationResponse;
+  }
+
+  const registerKeySuccessStep = (userCredential) => {
+    localStorage.setItem("credential", JSON.stringify(userCredential));
+    console.log("registerKeySuccessStep credential ", userCredential);
   };
 
   const handleChange = (e) => {
@@ -108,13 +132,13 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
 
     const result = validate({ username: value }, constraints);
     if (result) {
-      setErrors((errors) => ({
-        ...errors,
+      setErrors((errorList) => ({
+        ...errorList,
         [name]: result.username.join(". "),
       }));
       setValidated(false);
     } else {
-      setErrors((errors) => ({ ...errors, [name]: undefined }));
+      setErrors((errorList) => ({ ...errorList, [name]: undefined }));
       setValidated(true);
     }
   };
@@ -133,12 +157,6 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
     if (isUsernameValid()) {
       setContinueSubmitted(true);
       await register();
-      //const hasCred = localStorage.getItem("credential");
-      //if (hasCred) {
-      //history.push("/");
-      //}
-      //} else {
-      //setErrors({ username: "Please enter your username" });
     }
   };
 
@@ -219,6 +237,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
         </div>
       </div>
       {serverVerifiedPin}
+      {handleWebKit}
     </>
   );
 };

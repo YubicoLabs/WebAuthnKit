@@ -1,7 +1,7 @@
+import validate from "validate.js";
 import { credentialConstants } from "../_constants";
 import credentialService from "../_services/credential.service";
 import { alertActions } from ".";
-import validate from "validate.js";
 
 const credentialActions = {
   generateRecoveryCodes,
@@ -218,36 +218,36 @@ function getUV(uvRequest) {
   return (dispatch) => {
     dispatch(request(uvRequest));
 
-    /*credentialService.getAll(id)
+    /* credentialService.getAll(id)
             .then(
                 credentials => dispatch(success(credentials)),
                 error => dispatch(failure(error.toString()))
-            );*/
+            ); */
   };
 
   function request(uvRequest) {
     return { type: credentialConstants.GETUV_REQUEST, uvRequest };
   }
-  //function success(credentials) { return { type: credentialConstants.GETALL_SUCCESS, credentials } }
-  //function failure(error) { return { type: credentialConstants.GETALL_FAILURE, error } }
+  // function success(credentials) { return { type: credentialConstants.GETALL_SUCCESS, credentials } }
+  // function failure(error) { return { type: credentialConstants.GETALL_FAILURE, error } }
 }
 
 function completeUV() {
   return (dispatch) => {
     dispatch(success());
 
-    /*credentialService.getAll(id)
+    /* credentialService.getAll(id)
             .then(
                 credentials => dispatch(success(credentials)),
                 error => dispatch(failure(error.toString()))
-            );*/
+            ); */
   };
 
-  //function request(uvRequest) { return { type: credentialConstants.GETUV_REQUEST, uvRequest } }
+  // function request(uvRequest) { return { type: credentialConstants.GETUV_REQUEST, uvRequest } }
   function success() {
     return { type: credentialConstants.GETUV_COMPLETE };
   }
-  //function failure(error) { return { type: credentialConstants.GETALL_FAILURE, error } }
+  // function failure(error) { return { type: credentialConstants.GETALL_FAILURE, error } }
 }
 
 // prefixed function name with underscore because delete is a reserved word in javascript
@@ -281,10 +281,10 @@ function validateCredentialNickname(nickname) {
   return (dispatch) => {
     dispatch(request(nickname));
 
-    let result = validate({ nickname: nickname }, constraints);
+    const result = validate({ nickname }, constraints);
 
     if (result) {
-      let error = result.nickname.join(". ");
+      const error = result.nickname.join(". ");
       dispatch(failure(result, error.toString()));
       dispatch(alertActions.error(error.toString()));
     } else {

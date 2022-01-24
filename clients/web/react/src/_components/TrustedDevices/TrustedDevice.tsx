@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
 import { Button, Image } from "react-bootstrap";
 import { credentialActions } from "../../_actions";
 
 const styles = require("../component.module.css");
+
 const TrustedDevice = function ({ credential }) {
   const dispatch = useDispatch();
 

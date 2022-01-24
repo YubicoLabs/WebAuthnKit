@@ -18,7 +18,7 @@ const defaultData = {
   credential: localStorage.getItem("credential"),
 };
 
-const IdentifierFirstSignUpFlow = () => {
+function IdentifierFirstSignUpFlow() {
   const [formData, setForm] = useForm(defaultData);
   const _initialStep = defaultData.credential == null ? 0 : 2;
   const { step, navigation } = useStep({ initialStep: _initialStep, steps });
@@ -39,6 +39,6 @@ const IdentifierFirstSignUpFlow = () => {
   };
 
   return <>{renderSwitch(id)}</>;
-};
+}
 
 export default IdentifierFirstSignUpFlow;

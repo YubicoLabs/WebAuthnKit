@@ -1,7 +1,7 @@
 import React from "react";
 import { Router, Route, Switch, Redirect } from "react-router-dom";
 import { useSelector, RootStateOrAny } from "react-redux";
-import { Jumbotron, Container, Row, Col, Card } from "react-bootstrap";
+import { Jumbotron, Row, Col, Card } from "react-bootstrap";
 
 import Amplify from "aws-amplify";
 import { history } from "../_helpers";
@@ -13,9 +13,7 @@ import LogoutPage from "../LogoutPage/LogoutPage";
 
 import aws_exports from "../aws-exports";
 
-const styles = require("../_components/component.module.css");
-
-const config = Amplify.configure(aws_exports);
+Amplify.configure(aws_exports);
 
 const App = function () {
   const alert = useSelector((state: RootStateOrAny) => state.alert);

@@ -5,7 +5,7 @@ import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
 
-const RegisterDeviceSuccessStep = ({ navigation }) => {
+function RegisterDeviceSuccessStep({ navigation }) {
   const accountSecurityStep = () => {
     history.push("/");
   };
@@ -27,6 +27,6 @@ const RegisterDeviceSuccessStep = ({ navigation }) => {
       </div>
     </>
   );
-};
+}
 
 export default RegisterDeviceSuccessStep;

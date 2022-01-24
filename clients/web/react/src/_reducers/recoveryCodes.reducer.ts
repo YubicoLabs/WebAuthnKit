@@ -1,33 +1,33 @@
-import { credentialConstants } from '../_constants';
+import { credentialConstants } from "../_constants";
 
 export function recoveryCodes(state = {}, action) {
   switch (action.type) {
     case credentialConstants.LIST_CODES_REQUEST:
       return {
-        loading: true
+        loading: true,
       };
     case credentialConstants.LIST_CODES_SUCCESS:
       return {
-        codesRemaining: action.count
+        codesRemaining: action.count,
       };
     case credentialConstants.LIST_CODES_FAILURE:
-      return { 
-        error: action.error
+      return {
+        error: action.error,
       };
     case credentialConstants.GENERATE_CODES_REQUEST:
-    return {
-        generating: true
-    };
+      return {
+        generating: true,
+      };
     case credentialConstants.GENERATE_CODES_SUCCESS:
-    return {
+      return {
         generated: true,
-        codes: action.codes
-    };
+        codes: action.codes,
+      };
     case credentialConstants.GENERATE_CODES_FAILURE:
-    return { 
-        error: action.error
-    };
+      return {
+        error: action.error,
+      };
     default:
-      return state
+      return state;
   }
 }

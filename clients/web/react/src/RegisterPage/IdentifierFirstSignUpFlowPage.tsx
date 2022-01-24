@@ -3,11 +3,7 @@ import React from "react";
 import IdentifierFirstSignUpFlow from "./IdentifierFirstSignUpFlow";
 
 function IdentifierFirstSignUpFlowPage() {
-  return (
-    <>
-      <IdentifierFirstSignUpFlow />
-    </>
-  );
+  return <IdentifierFirstSignUpFlow />;
 }
 
 export default IdentifierFirstSignUpFlowPage;

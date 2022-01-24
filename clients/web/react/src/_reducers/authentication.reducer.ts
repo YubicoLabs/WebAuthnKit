@@ -1,6 +1,6 @@
-import { userConstants } from '../_constants';
+import { userConstants } from "../_constants";
 
-let user = JSON.parse(localStorage.getItem('user'));
+const user = JSON.parse(localStorage.getItem("user"));
 const initialState = user ? { loggedIn: true, user } : {};
 
 export function authentication(state = initialState, action) {
@@ -12,33 +12,33 @@ export function authentication(state = initialState, action) {
     case userConstants.WEBAUTHN_START_SUCCESS:
       return {
         webAuthnReady: true,
-        webAuthnStartResponse: action.response
+        webAuthnStartResponse: action.response,
       };
     case userConstants.WEBAUTHN_START_FAILURE:
       return {
-        error: action.error
+        error: action.error,
       };
     case userConstants.WEBAUTHN_FINISH_REQUEST:
       return {
         loggingIn: true,
-        webAuthnFinishResponse: action.assertion
+        webAuthnFinishResponse: action.assertion,
       };
     case userConstants.WEBAUTHN_FINISH_SUCCESS:
       return {
         loggedIn: true,
-        user: action.user
+        user: action.user,
       };
     case userConstants.WEBAUTHN_FINISH_FAILURE:
       return {};
     case userConstants.LOGIN_REQUEST:
       return {
         loggingIn: true,
-        user: action.user
+        user: action.user,
       };
     case userConstants.LOGIN_SUCCESS:
       return {
         loggedIn: true,
-        user: action.user
+        user: action.user,
       };
     case userConstants.LOGIN_FAILURE:
       return {};
@@ -46,17 +46,17 @@ export function authentication(state = initialState, action) {
       return {};
     case userConstants.EXISTS_REQUEST:
       return {
-        signInResult: undefined
+        signInResult: undefined,
       };
     case userConstants.EXISTS_SUCCESS:
       return {
-        signInResult: action.user
+        signInResult: action.user,
       };
     case userConstants.EXISTS_FAILURE:
       return {
-        signInResult: action.error
+        signInResult: action.error,
       };
     default:
-      return state
+      return state;
   }
 }

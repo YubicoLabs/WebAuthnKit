@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Button, InputGroup, FormControl } from "react-bootstrap";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { history } from "../_helpers";
@@ -6,7 +6,7 @@ import { userActions, credentialActions, alertActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
 
-const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
+function RegisterKeySuccessStep({ setForm, formData, navigation }) {
   const dispatch = useDispatch();
 
   const validNickname = useSelector(
@@ -40,13 +40,13 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
       nickname
     );
     try {
-      let ls_credential = JSON.parse(localStorage.getItem("credential"));
+      const ls_credential = JSON.parse(localStorage.getItem("credential"));
       console.log(
         "RegisterKeySuccessStep updateCredential() ls_credential:",
         ls_credential
       );
 
-      let credentialToUpdate = {
+      const credentialToUpdate = {
         credential: {
           credentialId: {
             base64: ls_credential.id,
@@ -85,7 +85,8 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
                 <img
                   src="https://media.yubico.com/media/catalog/product/5/n/5nfc_hero_2021.png"
                   width="20"
-                  height="20"></img>
+                  height="20"
+                />
               </InputGroup.Text>
             </InputGroup.Prepend>
             <FormControl
@@ -107,6 +108,6 @@ const RegisterKeySuccessStep = ({ setForm, formData, navigation }) => {
       </div>
     </>
   );
-};
+}
 
 export default RegisterKeySuccessStep;

@@ -36,16 +36,15 @@ async function logout() {
 async function exists(username) {
   const _username = username.toLowerCase();
   try {
-    let cognitoUser = await Auth.signIn(_username);
+    const cognitoUser = await Auth.signIn(_username);
     if (
       cognitoUser.challengeName === "CUSTOM_CHALLENGE" &&
       cognitoUser.challengeParam.type === "webauthn.get"
     ) {
       return cognitoUser;
-    } else {
-      // user exists but no credentials, registration may have been interrupted
-      return _error(cognitoUser);
     }
+    // user exists but no credentials, registration may have been interrupted
+    return _error(cognitoUser);
   } catch (error) {
     return _error(error);
   }
@@ -66,7 +65,7 @@ async function _delete(jwt) {
 
 async function getCurrentAuthenticatedUser() {
   try {
-    let currentUser = await Auth.currentAuthenticatedUser({
+    const currentUser = await Auth.currentAuthenticatedUser({
       bypassCache: true, // Optional, By default is false. If set to true, this call will send a request to Cognito to get the latest user data
     });
     console.log(
@@ -74,9 +73,9 @@ async function getCurrentAuthenticatedUser() {
       currentUser
     );
 
-    let data = await Auth.currentSession();
+    const data = await Auth.currentSession();
     console.log("getCurrentAuthenticatedUser data: ", data);
-    let userData = {
+    const userData = {
       id: 1,
       username: currentUser.username,
       displayname: currentUser.attributes.name,

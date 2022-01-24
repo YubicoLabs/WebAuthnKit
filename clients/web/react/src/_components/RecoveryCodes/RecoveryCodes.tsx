@@ -8,8 +8,8 @@ const PropTypes = require("prop-types");
 const styles = require("../component.module.css");
 
 const RecoveryCodes = function ({ credentials }) {
-  const recoveryCodesViewed = credentials.recoveryCodesViewed;
-  const allRecoveryCodesUsed = credentials.allRecoveryCodesUsed;
+  const { recoveryCodesViewed } = credentials;
+  const { allRecoveryCodesUsed } = credentials;
   const recoveryCodes = useSelector(
     (state: RootStateOrAny) => state.recoveryCodes
   );

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
-import { Button, Card, Spinner, Table } from "react-bootstrap";
-import { credentialActions } from "../_actions";
-
-import { userActions } from "../_actions";
+import { Button, Card, Spinner } from "react-bootstrap";
+import { credentialActions, userActions } from "../_actions";
 
 import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";

@@ -1,4 +1,4 @@
-import React, { useState, useRef, ReactElement } from "react";
+import React, { useState, useRef } from "react";
 
 import { create } from "@github/webauthn-json";
 import { Button, Modal, Alert, Spinner } from "react-bootstrap";

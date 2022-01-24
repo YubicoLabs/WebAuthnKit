@@ -18,8 +18,8 @@ const steps = [
   { id: "InitUserStep" },
 ];
 
-const IdentifierFirstLoginFlow = () => {
-  let trustedDevice = localStorage.getItem("trustedDevice");
+function IdentifierFirstLoginFlow() {
+  const trustedDevice = localStorage.getItem("trustedDevice");
   const _initialStep =
     trustedDevice === TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED ? 0 : 1;
   const { step, navigation } = useStep({ initialStep: _initialStep, steps });
@@ -48,6 +48,6 @@ const IdentifierFirstLoginFlow = () => {
   };
 
   return <>{renderSwitch(id)}</>;
-};
+}
 
 export default IdentifierFirstLoginFlow;

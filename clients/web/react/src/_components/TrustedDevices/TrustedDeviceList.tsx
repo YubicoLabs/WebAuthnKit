@@ -4,6 +4,7 @@ import { Card } from "react-bootstrap";
 import AddTrustedDevice from "./AddTrustedDevice";
 import TrustedDevice from "./TrustedDevice";
 import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
+
 const styles = require("../component.module.css");
 
 const TrustedDeviceList = function ({ credentialItems }) {
@@ -25,7 +26,7 @@ const TrustedDeviceList = function ({ credentialItems }) {
     }
   }
 
-  const AddTrustedDeviceProps = { continueStep: function () {} };
+  const AddTrustedDeviceProps = { continueStep() {} };
 
   return (
     <Card className={styles.default["cardSpacing"]}>

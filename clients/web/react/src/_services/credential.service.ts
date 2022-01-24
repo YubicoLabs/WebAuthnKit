@@ -1,5 +1,5 @@
-//import config from 'config';
-//import { authHeader } from '../_helpers';
+// import config from 'config';
+// import { authHeader } from '../_helpers';
 import axios from "axios";
 import aws_exports from "../aws-exports";
 
@@ -13,7 +13,7 @@ const credentialService = {
   registerStart,
   registerFinish,
   getAll,
-  //getById,
+  // getById,
   delete: _delete,
 };
 
@@ -119,7 +119,7 @@ async function registerFinish(registration) {
 // prefixed function name with underscore because delete is a reserved word in javascript
 async function _delete(id) {
   try {
-    const response = await axios.delete("/users/credentials/fido2?id=" + id);
+    const response = await axios.delete(`/users/credentials/fido2?id=${id}`);
     console.log(response);
     return response.data;
   } catch (error) {

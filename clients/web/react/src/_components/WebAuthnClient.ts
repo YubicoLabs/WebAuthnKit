@@ -1,4 +1,4 @@
-import { get, create, supported } from "@github/webauthn-json";
+import { get, create } from "@github/webauthn-json";
 import base64url from "base64url";
 import cbor from "cbor";
 import { Auth } from "aws-amplify";

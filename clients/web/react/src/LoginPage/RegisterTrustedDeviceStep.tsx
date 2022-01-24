@@ -9,7 +9,7 @@ import { TrustedDeviceHelper } from "../_components/TrustedDevices/TrustedDevice
 
 const styles = require("../_components/component.module.css");
 
-const RegisterTrustedDeviceStep = ({ navigation }) => {
+function RegisterTrustedDeviceStep({ navigation }) {
   const [allowAdd, setAllowAdd] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const dispatch = useDispatch();
@@ -28,10 +28,10 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
   async function authenticate() {
     console.log("authenticate");
     setContinueSubmitted(true);
-    let username = localStorage.getItem("username");
+    const username = localStorage.getItem("username");
     try {
-      let options = "";
-      let userData = await WebAuthnClient.signIn(username, options);
+      const options = "";
+      const userData = await WebAuthnClient.signIn(username, options);
       console.log("RegisterTrustedDevice authenticate userData: ", userData);
 
       if (userData === undefined) {
@@ -52,7 +52,6 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
       console.error("RegisterTrustedDeviceStep authenticate error");
       setContinueSubmitted(false);
       dispatch(alertActions.error(err.message));
-      return;
     }
   }
 
@@ -89,7 +88,7 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
               Add this device now
             </Button>
           )}
-          <hr></hr>
+          <hr />
           <div className={styles.default["textCenter"]}>
             <label>Already registered this device before?</label>
           </div>
@@ -118,7 +117,7 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
           </Button>
         </div>
         <div className="mt-3">
-          <hr></hr>
+          <hr />
         </div>
         <div>
           Don't want to register this device?
@@ -142,6 +141,6 @@ const RegisterTrustedDeviceStep = ({ navigation }) => {
       </div>
     </>
   );
-};
+}
 
 export default RegisterTrustedDeviceStep;

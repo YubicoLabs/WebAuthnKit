@@ -1,6 +1,6 @@
 import React, { useState, ReactElement } from "react";
 import { Button, InputGroup, Form, Spinner } from "react-bootstrap";
-import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import validate from "validate.js";
 import { WebAuthnClient } from "../_components";
@@ -23,7 +23,7 @@ const LogInStep = function ({ navigation }) {
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const [usernamelessSubmitted, setUsernamelessSubmitted] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
-  const [initialInput, setInitialInput] = useState(false); //detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
+  const [initialInput, setInitialInput] = useState(false); // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
 
   const constraints = {
     username: {

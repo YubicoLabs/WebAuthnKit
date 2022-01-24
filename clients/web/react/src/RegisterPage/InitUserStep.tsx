@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Spinner } from "react-bootstrap";
-import { history } from "../_helpers";
-import userService from "../_services/user.service";
 import { userActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
