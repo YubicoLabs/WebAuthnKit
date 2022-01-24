@@ -19,7 +19,10 @@
     "rules": {
         "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
         "func-names": 0,
-        "no-console": ["error", { "allow": ["warn", "error", "info"] }],
-        "import/extensions": ["ignorePackages"]
+        "no-console": [1, { "allow": ["warn", "error", "info"] }],
+        "import/extensions": [0, "ignorePackages"],
+        "import/no-unresolved": [0, { "commonjs": true }],
+        "dot-notation": ["off"],
+        "react/jsx-props-no-spreading": [0, { "custom": "ignore"}]
     }
 }

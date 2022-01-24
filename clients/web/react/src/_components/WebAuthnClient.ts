@@ -11,7 +11,7 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 const WebAuthnClient = {
   getAuthChallegeResponse,
   getPublicKeyRequestOptions,
-  //getUsernamelessAuthChallegeResponse,
+  // getUsernamelessAuthChallegeResponse,
   getUVFromAssertion,
   sendChallengeAnswer,
   signIn,
@@ -27,11 +27,11 @@ function WebAuthnClientException(message, code = ERROR_CODE) {
   const error = new Error(message);
   const formattedError = {
     ...error,
-    code: code,
+    code,
     name: webAuthnClientExceptionName,
   };
-  //error.code = code;
-  //error.name = webAuthnClientExceptionName;
+  // error.code = code;
+  // error.name = webAuthnClientExceptionName;
   return formattedError;
 }
 
@@ -83,7 +83,7 @@ async function getUsernamelessAuthChallegeResponse() {
       challengeResponse
     );
 
-    return { challengeResponse: challengeResponse, userhandle: userhandle };
+    return { challengeResponse, userhandle };
   } catch (error) {
     console.error(
       "WebAuthnClient getUsernamelessAuthChallegeResponse() error: ",
@@ -138,7 +138,10 @@ async function getAuthChallegeResponse(cognitoChallenge) {
   }
 }
 
-async function getCreateCredentialChallegeResponse(cognitoChallenge) {
+async function getCreateCredentialChallegeResponse(
+  cognitoChallenge,
+  registerWebKit
+) {
   try {
     console.log(
       `WebAuthnClient getCreateCredentialChallegeResponse() cognitoChallenge response: ${JSON.stringify(
@@ -164,9 +167,54 @@ async function getCreateCredentialChallegeResponse(cognitoChallenge) {
       publicKey
     );
 
-    /**Come back right here, and add the undercase treatment to the resident key value */
+    const { userAgent } = navigator;
+    let handleCreateOption;
 
-    const attestationResponse = await create(publicKey);
+    if (userAgent.indexOf("Macintosh") !== -1) {
+      if (
+        userAgent.indexOf("Edg") === -1 &&
+        userAgent.indexOf("Chrome") === -1 &&
+        userAgent.indexOf("Safari") !== -1
+      ) {
+        handleCreateOption = 1;
+      } else {
+        handleCreateOption = -1;
+      }
+    } else if (userAgent.indexOf("iPhone") !== -1) {
+      if (
+        userAgent.indexOf("Edg") === -1 &&
+        userAgent.indexOf("Chrome") === -1 &&
+        userAgent.indexOf("Safari") !== -1
+      ) {
+        handleCreateOption = 2;
+      } else {
+        handleCreateOption = -1;
+      }
+    } else {
+      handleCreateOption = -1;
+    }
+
+    let attestationResponse;
+
+    if (handleCreateOption === -1) {
+      console.log(
+        "WebAuthnClient getCreateCredentialChallegeResponse() handleCreationOption: Handling non-Apple/non-Safari login"
+      );
+      attestationResponse = await create(publicKey);
+    } else if (handleCreateOption === 1) {
+      console.log(
+        "WebAuthnClient getCreateCredentialChallegeResponse() handleCreationOption: Handling Mac Safari login"
+      );
+      attestationResponse = await registerWebKit("macos", publicKey);
+    } else if (handleCreateOption === 2) {
+      console.log(
+        "WebAuthnClient getCreateCredentialChallegeResponse() handleCreationOption: Handling iPhone Safari login"
+      );
+      attestationResponse = await registerWebKit("ios", publicKey);
+    }
+
+    /** Come back right here, and add the undercase treatment to the resident key value */
+
     console.log(
       `WebAuthnClient getCreateCredentialChallegeResponse() attestationResponse: ${JSON.stringify(
         attestationResponse
@@ -229,7 +277,7 @@ async function signIn(name, requestUV) {
 
     if (name === undefined) {
       console.log("WebAuthnClient signIn() usernameless flow");
-      //username = await getUsernamelessAuthChallegeResponse();
+      // username = await getUsernamelessAuthChallegeResponse();
       const userhandleChallengeResponse =
         await getUsernamelessAuthChallegeResponse();
       username = userhandleChallengeResponse.userhandle;
@@ -340,7 +388,7 @@ async function sendChallengeAnswer(
   return userData;
 }
 
-async function signUp(name, requestUV) {
+async function signUp(name, requestUV, registerWebKit) {
   console.log("WebAuthnClient signUp() name=", name);
 
   // Start Registration
@@ -384,7 +432,8 @@ async function signUp(name, requestUV) {
       cognitoUser.challengeParam.type === "webauthn.create"
     ) {
       const challengeResponse = await getCreateCredentialChallegeResponse(
-        cognitoUser.challengeParam
+        cognitoUser.challengeParam,
+        registerWebKit
       );
       console.log(
         "WebAuthnClient signUp() challengeResponse: ",
