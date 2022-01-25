@@ -6,6 +6,10 @@ import { userActions, credentialActions, alertActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Page to allow the user to rename their first security key before proceeding to the home page
+ * If the user does not enter in a new name the default name will be kept as "Security Key"
+ */
 function RegisterKeySuccessStep({ setForm, formData, navigation }) {
   const dispatch = useDispatch();
 

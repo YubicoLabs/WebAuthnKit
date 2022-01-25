@@ -5,6 +5,12 @@ import { useDispatch } from "react-redux";
 import validate from "validate.js";
 import { credentialActions } from "../../_actions";
 
+/**
+ * Component used to display additional details about a credential, as well as allowing
+ * the user to update the nickname, or delete
+ * @param credential Data related to a specific credential
+ * @returns
+ */
 const EditCredential = function ({ credential }) {
   const [show, setShow] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -12,11 +18,18 @@ const EditCredential = function ({ credential }) {
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * Closes the modal
+   */
   const handleClose = () => setShow(false);
   const handleShow = () => {
     setNickname(credential.credentialNickname.value);
     setShow(true);
   };
+
+  /**
+   * Handles the deletion of a credential if triggered by a user using the method in credentialActions
+   */
   const handleDelete = () => {
     setShow(false);
     dispatch(
@@ -32,6 +45,10 @@ const EditCredential = function ({ credential }) {
     },
   };
 
+  /**
+   * Handles when the user saves a new nickname for their security key
+   * First validates if the nickname is valid before allowing an update
+   */
   const handleSave = () => {
     setSubmitted(true);
     const result = validate({ nickname }, constraints);
@@ -46,6 +63,10 @@ const EditCredential = function ({ credential }) {
     dispatch(credentialActions.update(credential));
   };
 
+  /**
+   * Used to validate nickname changes on user input
+   * @param e Event triggered by user action
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNickname(value);
@@ -62,6 +83,11 @@ const EditCredential = function ({ credential }) {
   };
   const inputRef = useRef(null);
 
+  /**
+   * Checks if attestation data exists on the credential, used to determine if additional data should be displayed
+   * @param credential credential that was passed into this component by parent
+   * @returns
+   */
   const checkAttestation = (credential) => {
     const credAtt =
       credential.attestationMetadata?.value?.deviceProperties?.displayName;

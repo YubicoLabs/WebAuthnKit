@@ -10,6 +10,10 @@ import { credentialActions, alertActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Step used to login the user with a username
+ * This component will also allow the user to transition to other auth steps if needed
+ */
 const LogInStep = function ({ navigation }) {
   const [inputs, setInputs] = useState({
     username: localStorage.getItem("username"),
@@ -20,10 +24,13 @@ const LogInStep = function ({ navigation }) {
     username: "",
   });
   const [validated, setValidated] = useState(false);
+  // Loading indicator for the Continue Button, used to prevent the user from making multiple registration requests
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+  // Loading indicator for the Usernameless Continue Button, used to prevent the user from making multiple registration requests
   const [usernamelessSubmitted, setUsernamelessSubmitted] = useState(false);
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
-  const [initialInput, setInitialInput] = useState(false); // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
+  // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
+  const [initialInput, setInitialInput] = useState(false);
 
   const constraints = {
     username: {
@@ -42,6 +49,12 @@ const LogInStep = function ({ navigation }) {
 
   const dispatch = useDispatch();
 
+  /**
+   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
+   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
+   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
+   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   */
   const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
       const svpinCreateProps = {
@@ -54,6 +67,12 @@ const LogInStep = function ({ navigation }) {
     });
   };
 
+  /**
+   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
+   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
+   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
+   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   */
   async function uv(challengeResponse) {
     dispatch(credentialActions.getUV(challengeResponse));
     const pinResult = await UVPromise();
@@ -61,6 +80,11 @@ const LogInStep = function ({ navigation }) {
     return pinResult.value;
   }
 
+  /**
+   * Primary logic of the sign in step
+   * @param username Username input by the user - if usernameless then this will be undefined
+   * If successful the user will proceed to the init user step
+   */
   async function signIn(username) {
     console.log("LoginStep Signing In User, ", username);
 
@@ -89,31 +113,55 @@ const LogInStep = function ({ navigation }) {
     }
   }
 
+  /**
+   * Routes the user to the Init User Step to set their credentials and Auth Tokens
+   */
   const InitUserStep = () => {
     navigation.go("InitUserStep");
   };
+  /**
+   * Routes the user to the first step of the register step
+   */
   const signUpStep = () => {
     history.push("/register");
   };
+  /**
+   * Routes the user to the step allowing them to log in with a recovery code
+   */
   const forgotStep = () => {
     navigation.go("ForgotStep");
   };
+
+  /**
+   * Entry point to allow the user to login with a resident credential
+   * Sends undefined to the WebAuthN component, logic to handle undefined is defined there
+   */
   const usernamelessLogin = async () => {
     console.log("LoginStep, beginning usernamelessLogin");
     setUsernamelessSubmitted(true);
     await signIn(undefined);
   };
 
+  /**
+   * This method will prevent the user from moving to the recovery step if they haven't entered a valid username
+   */
   const forgotClickHandler = () => {
     setInputs((inputs) => ({ ...inputs, continue: false }));
     setInputs((inputs) => ({ ...inputs, forgotStep: true }));
   };
 
+  /**
+   * This method will prevent the user from calling the sign in method if they haven't entered a valid username
+   */
   const continueClickHandler = () => {
     setInputs((inputs) => ({ ...inputs, continue: true }));
     setInputs((inputs) => ({ ...inputs, forgotStep: false }));
   };
 
+  /**
+   * Used to validate if the username sent by the user follows the constraints set above
+   * @param e Event sent by the button in the render code below
+   */
   const handleChange = (e) => {
     if (!initialInput) {
       setInitialInput(true);
@@ -134,6 +182,11 @@ const LogInStep = function ({ navigation }) {
     }
   };
 
+  /**
+   * Used to submit the request to the sign in method above
+   * This method also locks the button to prevent multiple user triggered logins
+   * @param event Event sent by the button in the render code below
+   */
   const handleSubmit = async (event) => {
     const form = event.currentTarget;
 
@@ -158,6 +211,10 @@ const LogInStep = function ({ navigation }) {
     }
   };
 
+  /**
+   * Used to validate if the username sent by the user follows the constraints set above
+   * @returns true if the username is valid, false otherwise
+   */
   const isUsernameValid = () => {
     if (validate({ username: inputs.username }, constraints)) {
       return false;

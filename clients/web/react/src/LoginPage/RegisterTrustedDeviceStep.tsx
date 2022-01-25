@@ -9,11 +9,24 @@ import { TrustedDeviceHelper } from "../_components/TrustedDevices/TrustedDevice
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Prompt allowing the user to register a trusted device
+ * Options include -
+ * Add Trusted Device - Allows the user to register their platform authenticator if available to the browser + platform
+ * Confirm Device - If the platform authenticator for the device has been registered, this will allow the user to confirm it's registrations and set local storage values
+ * Never Ask - Stops this prompt from appearing ot the user on every login
+ * Ask again - Will allow this prompt to appear to the user again
+ * NOTE - This confirmation is set on a browser to browser basis - If you add a trusted device using Chrome on your laptop, you will be able to login with that on Edge - but you will need to confirm the device
+ */
 function RegisterTrustedDeviceStep({ navigation }) {
   const [allowAdd, setAllowAdd] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * If the user has declared never to be asked for this step, then allow them to continue to the home page
+   * If the users Auth Token hasn't been set, then don't allow them to register a device
+   */
   useEffect(() => {
     const localTrustedDevice = localStorage.getItem("trustedDevice");
     if (localTrustedDevice === TrustedDeviceHelper.TrustedDeviceEnum.NEVER) {
@@ -25,6 +38,11 @@ function RegisterTrustedDeviceStep({ navigation }) {
     }
   }, []);
 
+  /**
+   * Used by the confirmation button
+   * If a user is able to authenticate with their platform authenticator, then it has been registered
+   * Otherwise send an error and instruct the user to add their device
+   */
   async function authenticate() {
     console.log("authenticate");
     setContinueSubmitted(true);
@@ -55,15 +73,25 @@ function RegisterTrustedDeviceStep({ navigation }) {
     }
   }
 
+  /**
+   * Declares on this browser instance not to ask the user to register a trusted device
+   * @param value uses the TrustedDeviceHelper Enums, this method should expect a value of NEVER
+   */
   const clickNeverAsk = (value) => {
     TrustedDeviceHelper.setTrustedDevice(value, undefined);
     history.push("/");
   };
 
+  /**
+   * If the user successfully registers a device, then show them the success prompt
+   */
   const continueStep = () => {
     navigation.go("RegisterDeviceSuccessStep");
   };
 
+  /**
+   * Do nothing if the user selects Ask Later, route the user to the home page
+   */
   const askLaterStep = () => {
     history.push("/");
   };

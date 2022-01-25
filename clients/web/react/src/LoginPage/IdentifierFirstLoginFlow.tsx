@@ -30,16 +30,22 @@ function IdentifierFirstLoginFlow() {
 
   const renderSwitch = (id) => {
     switch (id) {
+      // Step will be the default IF a trusted device is detected in the local application storage
       case "LogInTrustedDeviceStep":
         return <LogInTrustedDeviceStep {...props} />;
+      // Primary login step, allowing the user to enter their username - Also allows for the use of recovery codes, and usernamless login
       case "LogInStep":
         return <LogInStep {...props} />;
+      // Transitionary page initializing the users credentials and auth tokens for APIs
       case "InitUserStep":
         return <InitUserStep {...props} />;
+      // Allows the user to login with a recvoery code
       case "ForgotStep":
         return <ForgotStep {...props} />;
+      // Step to prompt the user to add a platform authenticator (trusted device)
       case "RegisterTrustedDeviceStep":
         return <RegisterTrustedDeviceStep {...props} />;
+      // Step indicating to the user that the registration of their trusted device was successful
       case "RegisterDeviceSuccessStep":
         return <RegisterDeviceSuccessStep {...props} />;
       default:

@@ -23,6 +23,7 @@
         "import/extensions": [0, "ignorePackages"],
         "import/no-unresolved": [0, { "commonjs": true }],
         "dot-notation": ["off"],
-        "react/jsx-props-no-spreading": [0, { "custom": "ignore"}]
+        "react/jsx-props-no-spreading": [0, { "custom": "ignore"}],
+        "no-use-before-define": [0]
     }
 }

@@ -7,13 +7,26 @@ import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
 
 const styles = require("../component.module.css");
 
+/**
+ * Displays a list of trusted devices
+ * Typically will be passed from the Home page after a getAll() request
+ * @param credentialItems list of trusted device items
+ */
 const TrustedDeviceList = function ({ credentialItems }) {
   const [showAddTrustedDevice, setShowAddTrustedDevice] = useState(false);
 
+  /**
+   * Calls to method to determine if the button should appear to register a trusted device
+   */
   useEffect(() => {
     checkSetShowAddButton();
   }, []);
 
+  /**
+   * Calls to the isUserVerifyingPlatformAuthenticatorAvailable() API to determine if
+   * a user should be allowed to register a trusted device
+   * Will also hide the button if a trusted device has already been confirmed on this browser
+   */
   async function checkSetShowAddButton() {
     const hasPlatformAuth =
       await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();

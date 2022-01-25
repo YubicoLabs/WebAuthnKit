@@ -167,6 +167,15 @@ async function getCreateCredentialChallegeResponse(
       publicKey
     );
 
+    /**
+     * The following section needs to be considered for devices that use Mac or iPhone on Safari
+     * WebKit requires a user gesture to trigger the create() method
+     * This section of code determines if the device is an iPhone or Mac using Safari
+     * Mac and iPhone are split to change the wording between FaceID or TouchID
+     * If the current device is not a device + browser combo above, then the create() api is called
+     * within this method
+     * Otherwise, a promise is triggered to display a button that will generate a user gesture to trigger the create() method
+     */
     const { userAgent } = navigator;
     let handleCreateOption;
 
@@ -197,16 +206,19 @@ async function getCreateCredentialChallegeResponse(
     let attestationResponse;
 
     if (handleCreateOption === -1) {
+      // Non Apple + Safari request, proceed as normal
       console.log(
         "WebAuthnClient getCreateCredentialChallegeResponse() handleCreationOption: Handling non-Apple/non-Safari login"
       );
       attestationResponse = await create(publicKey);
     } else if (handleCreateOption === 1) {
+      // Mac + Safari request, trigger promise with TouchID
       console.log(
         "WebAuthnClient getCreateCredentialChallegeResponse() handleCreationOption: Handling Mac Safari login"
       );
       attestationResponse = await registerWebKit("macos", publicKey);
     } else if (handleCreateOption === 2) {
+      // iPhone + Safari request, trigger promise with FaceID
       console.log(
         "WebAuthnClient getCreateCredentialChallegeResponse() handleCreationOption: Handling iPhone Safari login"
       );

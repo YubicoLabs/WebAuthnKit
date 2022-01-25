@@ -6,6 +6,12 @@ import Credential from "./Credential";
 
 const styles = require("../component.module.css");
 
+/**
+ * Lists all credentials, passed from the home page after a getAll() call
+ * If passed from the home page, then these items will only be non-platform authenticators
+ * @param credentialItems List of credentials
+ * @returns
+ */
 const CredentialList = function ({ credentialItems }) {
   return (
     <Card className={styles.default["cardSpacing"]}>

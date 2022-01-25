@@ -5,6 +5,10 @@ import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Transitionary page that is used to log out the user and remove any lingering items in the local storage
+ * @returns User is routed back to the login screen, with all credentials removed from the browser
+ */
 const LogoutPage = function () {
   const logoutUser = async () => {
     try {

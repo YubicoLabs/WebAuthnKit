@@ -17,7 +17,14 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
 
 const styles = require("../component.module.css");
 
+/**
+ * Component used to drive the addition of registering a new trusted device
+ * The component is a modal hidden behind a button, when clicked the registration process begins
+ * @param continueStep is the callback method that should be triggered once the registration is complete
+ *  This callback is primarily used when triggered from the RegisterTrustedDevice login step
+ */
 const AddTrustedDevice = function ({ continueStep }) {
+  // Loading indicator to prevent the user from triggering multiple registrations
   const [continueSubmitted, setContinueSubmitted] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -25,10 +32,17 @@ const AddTrustedDevice = function ({ continueStep }) {
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * Closes the modal
+   */
   const handleClose = () => {
     setContinueSubmitted(false);
     setShowAdd(false);
   };
+
+  /**
+   * Shows the modal
+   */
   const handleShow = () => {
     setNickname("");
     setContinueSubmitted(true);
@@ -43,6 +57,10 @@ const AddTrustedDevice = function ({ continueStep }) {
     },
   };
 
+  /**
+   * Handles the button click to begin registration
+   * First the nickname is validated, and if valid then the registration method in this component is called
+   */
   const handleSaveAdd = async () => {
     setSubmitted(true);
     setShowAdd(true);
@@ -74,6 +92,12 @@ const AddTrustedDevice = function ({ continueStep }) {
     return flags.uv;
   }
 
+  /**
+   * Primary logic of this method
+   * Calls to the register API, and creates the credential on the authenticator
+   * Keep in mind, this method will only allow the user to register a trusted device
+   * Removing requireAuthenticatorAttachment from the register POST will allow any key to be registered
+   */
   const register = async () => {
     console.log("register");
     console.log("nickname: ", nickname);
@@ -148,6 +172,10 @@ const AddTrustedDevice = function ({ continueStep }) {
       });
   };
 
+  /**
+   * Validates the credential nickname as the user types
+   * @param e Event triggered by user input
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNickname(value);

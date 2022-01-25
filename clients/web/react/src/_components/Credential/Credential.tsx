@@ -4,6 +4,11 @@ import EditCredential from "./EditCredential";
 
 const styles = require("../component.module.css");
 
+/**
+ * Checks if the credential has attestation metadata to display and to pass to the Edit component
+ * @param credential
+ * @returns
+ */
 const checkAttestation = (credential) => {
   const credAtt =
     credential.attestationMetadata?.value?.deviceProperties?.displayName;
@@ -11,6 +16,12 @@ const checkAttestation = (credential) => {
   return false;
 };
 
+/**
+ * Takes the image URL provided by the credential after attestation
+ * If no image is found, then a default is set
+ * @param credential
+ * @returns
+ */
 const getAttestationImage = (credential) => {
   const imgUrl =
     credential.attestationMetadata?.value?.deviceProperties?.imageUrl;
@@ -18,6 +29,13 @@ const getAttestationImage = (credential) => {
   return "https://www.yubico.com/wp-content/uploads//2021/02/illus-shield-lock-r1-dkteal.svg";
 };
 
+/**
+ * Component used to display the information of a single Credential
+ * Primarily used by the home scree to show base credential details
+ * More details can be seen if the user clicks the EDIT button
+ * @param param0
+ * @returns
+ */
 const Credential = function ({ credential }) {
   return (
     <>

@@ -6,9 +6,17 @@ import { validate } from "validate.js";
 
 const styles = require("../component.module.css");
 
-// props.type: "create" | "change" | "dispatch" [default]
-// props.saveCallback: method to call on save, passes fields as the argument
-// props.closeCallback: method to call when closing the flow, is used to reject a promise
+/**
+ * Modal that shows the server verified PIN menu allowing the user to SET or CHANGE the pin based on the type of request
+ * Request types can be seen below
+ * This component should be treated as a promise, due to the way that it's consumed by the WebAuthN component
+ * Handle Close will always resolve the closeCallback, resulting in an error
+ * Handle Save will always resolve the saveCallback, resulting in the sending of new PIN information
+ * @param props
+ *  props.type: "create" | "change" | "dispatch" [default]
+ *  props.saveCallback: method to call on save, passes fields as the argument
+ *  props.closeCallback: method to call when closing the flow, is used to reject a promise
+ */
 const ServerVerifiedPin = function (props) {
   const [pinCollection, setPinCollection] = useState({
     pin: "",
@@ -132,10 +140,16 @@ const ServerVerifiedPin = function (props) {
     return !pinResult;
   };
 
+  /**
+   * Displays the modal
+   */
   const handleShow = () => {
     setShow(true);
   };
 
+  /**
+   * Closes the modal, and calls to the reject promise indicating that an error occurred
+   */
   const handleClose = () => {
     props.closeCallback(
       new Error(
@@ -151,6 +165,10 @@ const ServerVerifiedPin = function (props) {
     });
   };
 
+  /**
+   * Handles the confirmation of new PINs by resolving the promise successfully with the
+   * PIN information
+   */
   const handleSave = () => {
     if (validForm(pinCollection.pin, pinCollection.confirmPin)) {
       props.saveCallback({ value: pinCollection.pin });
@@ -169,10 +187,16 @@ const ServerVerifiedPin = function (props) {
     }
   };
 
+  /**
+   * On initial load, set the modal configurations based on the type of request
+   */
   useEffect(() => {
     configureModal(props.type);
   }, []);
 
+  /**
+   * When a dispatch asking for a finishUVRequest is sent, show the modal
+   */
   useEffect(() => {
     if (finishUVRequest !== undefined && props.type !== "change") {
       console.log("showing sv-pin: ", finishUVRequest);

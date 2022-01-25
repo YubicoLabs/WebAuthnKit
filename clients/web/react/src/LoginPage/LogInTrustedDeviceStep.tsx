@@ -11,8 +11,10 @@ import { history } from "../_helpers";
 const styles = require("../_components/component.module.css");
 
 function LogInTrustedDeviceStep({ navigation }) {
+  // Loading indicator for the Continue Button, used to prevent the user from making multiple registration requests
   const [continueSubmitted, setContinueSubmitted] = useState(false);
 
+  // Triggered to get some Start Response if the user is trying to login without a username
   const webAuthnStartResponse = useSelector(
     (state: RootStateOrAny) => state.authentication.webAuthnStartResponse
   );
@@ -26,14 +28,23 @@ function LogInTrustedDeviceStep({ navigation }) {
     }
   }, [webAuthnStartResponse]);
 
+  /**
+   * Route the user back to the default login step if they don't want a usernameless login
+   */
   const LogInStep = () => {
     navigation.go("LogInStep");
   };
 
+  /**
+   * Once triggered by the user, send a dispatch to generate the webauthn start response
+   */
   const continueStep = () => {
     dispatch(userActions.webAuthnStart());
   };
 
+  /**
+   * Once the starter response is set, begin the the user sign in
+   */
   async function signIn() {
     try {
       setContinueSubmitted(true);
@@ -44,6 +55,9 @@ function LogInTrustedDeviceStep({ navigation }) {
     }
   }
 
+  /**
+   * Call to the get() api to get the credentials based on the public key value in the starter response
+   */
   async function signInWithoutUsername() {
     console.log("signInWithoutUsername");
     // get usernameless auth request
@@ -67,6 +81,7 @@ function LogInTrustedDeviceStep({ navigation }) {
       pinCode: defaultInvalidPIN,
     };
 
+    // If a credential is found, sign in the user with the provided username
     Auth.signIn(username)
       .then((user) => {
         if (

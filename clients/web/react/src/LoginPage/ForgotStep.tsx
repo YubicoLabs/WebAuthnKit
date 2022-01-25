@@ -14,6 +14,10 @@ import { alertActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Step to allow the user to login with a recovery code if they do not possess any of their authentication devices
+ * @returns Routes the user to the Home Page if the recovery code is valid
+ */
 function ForgotStep({ navigation }) {
   const [validated, setValidated] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
@@ -25,10 +29,15 @@ function ForgotStep({ navigation }) {
     recoveryCode: undefined,
   });
 
+  // Returns the user to the initial login page
   const LogInStep = () => {
     navigation.go("LogInStep");
   };
 
+  /**
+   * Validates the recovery code input by the user
+   * @param e Event sent by the button in the render code below
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInputs((inputs) => ({ ...inputs, [name]: value }));
@@ -36,6 +45,10 @@ function ForgotStep({ navigation }) {
     setValidated(false);
   };
 
+  /**
+   * Submits the code for review to determine if the user should be logged in
+   * @param e Event sent by the button in the render code below
+   */
   const handleSubmit = (event) => {
     const form = event.currentTarget;
 
@@ -53,16 +66,22 @@ function ForgotStep({ navigation }) {
     }
   };
 
+  /**
+   * Primary logic of this component, handles the review of the recovery code, adn determines if the user should be authenticated
+   */
   async function handleRecoveryCode(code) {
     try {
+      // Signs in the user with their current username
       const cognitoUser = await Auth.signIn(inputs.username);
       console.log("CognitoUser: ", cognitoUser);
 
+      // Sends the challenge answer from the login, along with the recoery code input by the user
       Auth.sendCustomChallengeAnswer(
         cognitoUser,
         JSON.stringify({ recoveryCode: code })
       )
         .then((user) => {
+          // IF the code is valid then log in the user
           console.log(user);
 
           Auth.currentSession()
@@ -84,12 +103,14 @@ function ForgotStep({ navigation }) {
             });
         })
         .catch((err) => {
+          // Error with the recovery code
           console.log("sendCustomChallengeAnswer error: ", err);
           setContinueSubmitted(false);
           const msg = "Invalid recovery code";
           dispatch(alertActions.error(msg));
         });
     } catch (error) {
+      // Error with the recovery code
       console.error("recovery code error");
       setContinueSubmitted(false);
       console.error(error);

@@ -8,16 +8,31 @@ import { history } from "../../_helpers";
 const PropTypes = require("prop-types");
 const styles = require("../component.module.css");
 
+/**
+ * Component allowing the user to delete their account, and remove any details in the user local storage
+ * Modal pops up asking for confirmation if the user wants to delete their account
+ * Sends the user back to the initial login screen - The user should not be able to relogin after this step is run
+ */
 const DeleteUser = function ({ userToken }) {
   const [show, setShow] = useState(false);
   const dispatch = useDispatch();
+  /**
+   * Used to show the modal
+   */
   const handleShow = () => {
     setShow(true);
   };
+  /**
+   * Used to hide the modal
+   */
   const handleClose = () => {
     setShow(false);
   };
 
+  /**
+   * This method is called once a user has confirmed the desire to delete their account
+   * Starts by getting the current user credentials - Once retrieved the user actions dispatch is used to send a call to the backend to delete the user
+   */
   const handleDelete = () => {
     setShow(false);
     Auth.currentAuthenticatedUser()

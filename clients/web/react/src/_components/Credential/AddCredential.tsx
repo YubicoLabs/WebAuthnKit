@@ -15,8 +15,12 @@ import aws_exports from "../../aws-exports";
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
 
+/**
+ * Component used to add a new credential
+ */
 const AddCredential = function () {
   const [showAdd, setShowAdd] = useState(false);
+  // Will load the SVPIN component if the new credential is non-FIDO2
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
   const [nickname, setNickname] = useState("");
   const [isResidentKey, setIsResidentKey] = useState(false);
@@ -24,11 +28,16 @@ const AddCredential = function () {
   const [submitted, setSubmitted] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * Closes the modal for registering a new credential
+   * @returns
+   */
   const handleClose = () => setShowAdd(false);
   const handleShow = () => {
     setNickname("");
     setShowAdd(true);
   };
+  // Default PIN used if this is a FIDO2 key
   const defaultInvalidPIN = -1;
   const constraints = {
     keyName: {
@@ -39,6 +48,10 @@ const AddCredential = function () {
     },
   };
 
+  /**
+   * Called when the user submits the new key registration
+   * First the nickname of the key is validated, then the register method in this component is called
+   */
   const handleSaveAdd = () => {
     setSubmitted(true);
 
@@ -52,6 +65,10 @@ const AddCredential = function () {
     }
   };
 
+  /**
+   * Updates the value of the checkbox if the user wishes to write a resident credential
+   * @param e Event triggered by a user action (clicking the checkbox)
+   */
   const handleCheckboxChange = (e) => {
     const { target } = e;
     const value = target.type === "checkbox" ? target.checked : target.value;
@@ -75,6 +92,13 @@ const AddCredential = function () {
     return flags.uv;
   }
 
+  /**
+   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
+   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
+   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
+   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start PIN registration
+   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   */
   const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
       const svpinCreateProps = {
@@ -87,6 +111,13 @@ const AddCredential = function () {
     });
   };
 
+  /**
+   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
+   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
+   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
+   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start PIN registration
+   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   */
   async function registerUV(challengeResponse) {
     dispatch(credentialActions.getUV(challengeResponse));
     const pinResult = await UVPromise();
@@ -94,6 +125,12 @@ const AddCredential = function () {
     return pinResult.value;
   }
 
+  /**
+   * Primary logic of this method
+   * Calls to the register API, and creates the credential on the security key
+   * Removing requireAuthenticatorAttachment will allow for the registration of both roaming authenticator and platform
+   * Current state will only allow for roaming authenticators
+   */
   const register = async () => {
     console.log("register");
     console.log("nickname: ", nickname);

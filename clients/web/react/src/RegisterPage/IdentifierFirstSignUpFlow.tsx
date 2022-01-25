@@ -6,7 +6,6 @@ import InitUserStep from "./InitUserStep";
 
 const steps = [
   { id: "SignUpStep" },
-  { id: "RegisterSvPinStep" },
   { id: "RegisterKeySuccessStep" },
   { id: "InitUserStep" },
 ];
@@ -27,10 +26,13 @@ function IdentifierFirstSignUpFlow() {
 
   const renderSwitch = (id) => {
     switch (id) {
+      // Step where the user is first registering a new account
       case "SignUpStep":
         return <SignUpStep {...props} />;
+      // Step to allow the user to rename their first key after a successful registration
       case "RegisterKeySuccessStep":
         return <RegisterKeySuccessStep {...props} />;
+      // Transitionary page initializing the users credentials and auth tokens for APIs
       case "InitUserStep":
         return <InitUserStep {...props} />;
       default:

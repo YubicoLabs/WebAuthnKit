@@ -7,8 +7,18 @@ import { credentialActions } from "../../_actions";
 const PropTypes = require("prop-types");
 const styles = require("../component.module.css");
 
+/**
+ * Component used to display information related to recovery codes including:
+ * Recovery code generation
+ * Listing recovery codes
+ * Displaying the number of recovery codes available to the user
+ * @param credentials generated from getAll() in home, includes information only specific to recovery codes
+ */
 const RecoveryCodes = function ({ credentials }) {
+  // Indicated if the recovery codes have been viewed - If they have then the application
+  // Should not re-display the codes, instead new codes should be generated
   const { recoveryCodesViewed } = credentials;
+  // Indicates if all codes have been consumed by login
   const { allRecoveryCodesUsed } = credentials;
   const recoveryCodes = useSelector(
     (state: RootStateOrAny) => state.recoveryCodes
@@ -16,18 +26,32 @@ const RecoveryCodes = function ({ credentials }) {
   const [showCodes, setShowCodes] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * Closes the modal
+   */
   const handleClose = () => {
     setShowCodes(false);
   };
+  /**
+   * Shows the modal once the button has been clicked
+   */
   const handleShow = () => {
     setShowCodes(true);
     dispatch(credentialActions.listRecoveryCodes());
   };
+
+  /**
+   * Generates new recovery codes by calling to the backend API using the credential action
+   */
   const handleGenerate = () => {
     setShowCodes(true);
     dispatch(credentialActions.generateRecoveryCodes());
   };
 
+  /**
+   * The modal will continue to appear on the parent component if the user has not generated new credentials
+   * OR if all the codes have been consumed
+   */
   useEffect(() => {
     if (!recoveryCodesViewed || allRecoveryCodesUsed) {
       handleShow();

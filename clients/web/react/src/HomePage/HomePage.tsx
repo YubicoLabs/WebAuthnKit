@@ -12,36 +12,62 @@ import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPi
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Primary page of the application - Allows the user to manage their credentials and allows them to perform actions like generate recovery codes, reset svpin, delete account, and sign out
+ */
 const HomePage = function () {
   const [username, setUsername] = useState("");
   const [jwt, setjwt] = useState("");
+  // Used to store a static version of the credentials, just in case an action triggers a credential change
   const credentials = useSelector((state: RootStateOrAny) => state.credentials);
   const user = useSelector((state: RootStateOrAny) => state.users);
   const alert = useSelector((state: RootStateOrAny) => state.alert);
+  // Stores all keys that are registered as roaming authenticators
   const [securityKeyItems, setSecurityKeyItems] = useState([]);
+  // Stores all keys that are registered as platform authenticators
   const [registeredDeviceItems, setRegisteredDeviceItems] = useState([]);
+  // Stores static values for data concerning recovery codes
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
     allRecoveryCodesUsed: false,
     recoveryCodesViewed: false,
   });
+  // Indicator that is set if new credentials are being generated
   const [credentialsLoading, setCredentialsLoading] = useState(true);
   const dispatch = useDispatch();
 
+  /**
+   * Sent to ServerVerifiedPIN prompt as a successful callback - dispatches any changes to the PIN
+   * @param newValue new value of the SVPIN
+   */
   function svpCallback(newValue) {
     const fields = { pin: newValue.value, confirmPin: newValue.value };
     dispatch(credentialActions.updatePin(fields));
   }
 
+  /**
+   * Closes the ServerVerifiedPIN callback if closed by the users
+   * Sends a warning message indicating to the developer that the component was closed
+   * @param message warning message sent from the promise callback
+   */
   function svpCloseCallback(message) {
     console.warn(message);
   }
 
+  /**
+   * Properties used to configure the ServerVerifiedPIN component
+   */
   const serverVerifiedProps = {
     type: "change",
     saveCallback: svpCallback,
     closeCallback: svpCloseCallback,
   };
 
+  /**
+   * Effect monitoring changes to credentials
+   * If loading, then sets the loading indicator to appear during updates
+   * If not loading, gets the new list of credentials, and segments them as either a platform authenticator, or roaming/default authenticator
+   * After a refresh, also updates any recovery code data is this is stored in the Credentials Store
+   */
   useEffect(() => {
     if (credentials === {} || credentials.loading) {
       setCredentialsLoading(true);
@@ -64,6 +90,9 @@ const HomePage = function () {
     }
   }, [credentials]);
 
+  /**
+   * Updates the alert messages that are shown on the top of the screen - Skips certain alerts as they causes an infinite loop of getting credentials
+   */
   useEffect(() => {
     if (alert.message && jwt) {
       if (
@@ -75,12 +104,18 @@ const HomePage = function () {
     }
   }, [alert]);
 
+  /**
+   * If the user auth token is changed, then refresh the credentials
+   */
   useEffect(() => {
     if (jwt) {
       dispatch(credentialActions.getAll(jwt));
     }
   }, [jwt]);
 
+  /**
+   * On initial load ensure that the user details have been added to local storage, otherwise attempt another call on user actions
+   */
   useEffect(() => {
     if (localStorage.getItem("user") === null) {
       dispatch(userActions.getCurrentAuthenticatedUser());
@@ -89,6 +124,9 @@ const HomePage = function () {
     }
   }, []);
 
+  /**
+   * If there are any  changes to the user, reset the JWT - This is also used to trigger a new retrieval of credentials
+   */
   useEffect(() => {
     const token = user?.token;
     if (token !== undefined) {
@@ -102,10 +140,18 @@ const HomePage = function () {
     setjwt(currentUser.token);
   };
 
+  /**
+   * Routes the user to the logout step
+   */
   const logout = async () => {
     history.push("/logout");
   };
 
+  /**
+   * Splits the credential list between authenticator type - Not necessary, but used for this example to differentiate between roaming and platform authenticators
+   * @param credList Full list of credentials from a getAll credentials retrieval
+   * @returns Two separate lists, one with all platform authenticators, and one with roaming
+   */
   function secKeyOrRegisteredDevice(credList) {
     const secKeys = [];
     const regDevice = [];

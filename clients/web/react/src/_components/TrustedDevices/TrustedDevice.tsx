@@ -5,9 +5,18 @@ import { credentialActions } from "../../_actions";
 
 const styles = require("../component.module.css");
 
+/**
+ * Component used to display the details of a Trusted Device
+ * @param credential credential item with details specific to a single credential
+ */
 const TrustedDevice = function ({ credential }) {
   const dispatch = useDispatch();
 
+  /**
+   * Handles the pressing of the delete button
+   * IF the ID of the deleted device matches the ID of the Trusted Device locally stored
+   * then it removes any local information related to the trusted device
+   */
   const handleDelete = () => {
     dispatch(
       credentialActions.delete(credential.credential.credentialId.base64)

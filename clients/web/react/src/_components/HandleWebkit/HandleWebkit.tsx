@@ -5,10 +5,20 @@ import { Button, Modal, ModalBody, Spinner } from "react-bootstrap";
 
 const styles = require("../component.module.css");
 
-// props.type: "ios" | "macos"
-// props.publicKey: Options needed to call create(publicKey) - Handling here as webkit requires credential creation to be triggered by a user event
-// props.saveCallback: method to call on save, passes fields as the argument
-// props.closeCallback: method to call when closing the flow, is used to reject a promise
+/**
+ * Modal that handles the registration of users using Safari on Mac and iPhone
+ * WebKit requires a user gesture in order to use the create() api for credentials
+ * The current registration flow is not within the same "context" for user generation
+ * So this button is required to trigger that user gesture to create the credential
+ * This modal is treated as a promise, once the attestationResponse is given by create()
+ * the flow will return back the the signUp() method in the WebAuthN component to finalize the
+ * registration process
+ * @param props
+ *  props.type: "ios" | "macos"
+ *  props.publicKey: Options needed to call create(publicKey) - Handling here as webkit requires credential creation to be triggered by a user event
+ *  props.saveCallback: method to call on save, passes fields as the argument
+ *  props.closeCallback: method to call when closing the flow, is used to reject a promise
+ */
 const HandleWebKit = function (props) {
   const [show, setShow] = useState(false);
   const [continueSubmitted, setContinueSubmitted] = useState(false);
@@ -52,12 +62,18 @@ const HandleWebKit = function (props) {
     }
   };
 
+  /**
+   * Shows the modal
+   */
   const handleShow = () => {
     console.log(`HandleWebKit Showing Modal`);
     setShow(true);
     setContinueSubmitted(false);
   };
 
+  /**
+   * Closes the modal
+   */
   const handleClose = () => {
     props.closeCallback(
       new Error(
@@ -68,7 +84,12 @@ const HandleWebKit = function (props) {
     setContinueSubmitted(false);
   };
 
-  const handleSecKey = async () => {
+  /**
+   * Handles the registration of a user
+   * This can resolve both security keys && platform authenticators (TouchID and FaceID)
+   * Note: TouchID will not be presented as an option if the user is using an external screen with their laptop lid closed
+   */
+  const handleRegistration = async () => {
     setContinueSubmitted(true);
     console.log("HandleWebKit handleSecKey() publicKey: ", props.publicKey);
 
@@ -83,26 +104,9 @@ const HandleWebKit = function (props) {
     }
   };
 
-  /* Saving for when Plat Auth are available on Safari on the Mac
-  const handlePlatAuth = async () => {
-    const publicKeyCopy = { ...props.publicKey };
-    publicKeyCopy.publicKey.authenticatorSelection.authenticatorAttachment =
-      "platform";
-    publicKeyCopy.publicKey.attestation = "direct";
-    console.log("HandleWebKit handlePlatAuth() publicKey: ", publicKeyCopy);
-    let attestationResponse = {};
-    try {
-      attestationResponse = await create(publicKeyCopy);
-      console.log(attestationResponse);
-    } catch (err) {
-      console.warn(err);
-    }
-    console.log(attestationResponse);
-    props.saveCallback({ ...attestationResponse });
-    setShow(false);
-  };
-  */
-
+  /**
+   * On initializing this component, shows the modal
+   */
   useEffect(() => {
     console.log(`HandleWebKit Configuring Props and Showing Modal`);
     configureModal(props.type);
@@ -121,7 +125,7 @@ const HandleWebKit = function (props) {
           size="lg"
           block
           disabled={continueSubmitted}
-          onClick={handleSecKey}>
+          onClick={handleRegistration}>
           {continueSubmitted && (
             <>
               <Spinner
@@ -138,11 +142,6 @@ const HandleWebKit = function (props) {
           )}
           {!continueSubmitted && <span>Complete your registration</span>}
         </Button>
-        {/**
-        <Button variant="secondary" size="lg" block onClick={handlePlatAuth}>
-          {label.modalPlatAuthButton}
-        </Button>
-        */}
       </ModalBody>
       <Modal.Footer>
         <Button variant="outline-secondary" onClick={handleClose}>

@@ -5,6 +5,10 @@ import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
 
+/**
+ * Quick prompt shown to the user showing their trusted device was registered successfully
+ * User can click continue to enter the home page
+ */
 function RegisterDeviceSuccessStep({ navigation }) {
   const accountSecurityStep = () => {
     history.push("/");
