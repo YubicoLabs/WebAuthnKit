@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from "react-bootstrap";
-
+import { useTranslation } from "react-i18next";
 import AddCredential from "./AddCredential";
 import Credential from "./Credential";
 
@@ -13,10 +13,12 @@ const styles = require("../component.module.css");
  * @returns
  */
 const CredentialList = function ({ credentialItems }) {
+  const { t } = useTranslation();
+
   return (
     <Card className={styles.default["cardSpacing"]}>
       <Card.Header>
-        <h5>Security Keys</h5>
+        <h5>{t("credential.credential-list-title")}</h5>
       </Card.Header>
       <Card.Body>
         {credentialItems.map((credential, index) => (

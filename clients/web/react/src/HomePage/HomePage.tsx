@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Button, Card, Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { credentialActions, userActions } from "../_actions";
-
 import { history } from "../_helpers";
 import CredentialList from "../_components/Credential/CredentialList";
 import TrustedDeviceList from "../_components/TrustedDevices/TrustedDeviceList";
@@ -16,21 +16,31 @@ const styles = require("../_components/component.module.css");
  * Primary page of the application - Allows the user to manage their credentials and allows them to perform actions like generate recovery codes, reset svpin, delete account, and sign out
  */
 const HomePage = function () {
+  const { t } = useTranslation();
+
   const [username, setUsername] = useState("");
+
   const [jwt, setjwt] = useState("");
+
   // Used to store a static version of the credentials, just in case an action triggers a credential change
   const credentials = useSelector((state: RootStateOrAny) => state.credentials);
+
   const user = useSelector((state: RootStateOrAny) => state.users);
+
   const alert = useSelector((state: RootStateOrAny) => state.alert);
+
   // Stores all keys that are registered as roaming authenticators
   const [securityKeyItems, setSecurityKeyItems] = useState([]);
+
   // Stores all keys that are registered as platform authenticators
   const [registeredDeviceItems, setRegisteredDeviceItems] = useState([]);
+
   // Stores static values for data concerning recovery codes
   const [recoveryCodeProps, setRecoveryCodeProps] = useState({
     allRecoveryCodesUsed: false,
     recoveryCodesViewed: false,
   });
+
   // Indicator that is set if new credentials are being generated
   const [credentialsLoading, setCredentialsLoading] = useState(true);
   const dispatch = useDispatch();
@@ -170,18 +180,20 @@ const HomePage = function () {
 
   return (
     <>
-      <h2 className={styles.default["usernameHeader"]}>Welcome {username}!</h2>
-      <h2>Account Security</h2>
+      <h2 className={styles.default["usernameHeader"]}>
+        {t("home.welcome")} {username}!
+      </h2>
+      <h2>{t("home.header")}</h2>
       <div>
         {credentialsLoading ? (
           <Card className={styles.default["cardSpacing"]}>
             <Card.Header>
-              <h5>Trusted Devices</h5>
+              <h5>{t("home.plat-auth-title")}</h5>
             </Card.Header>
             <Card.Body>
               <div className={styles.default["textCenter"]}>
                 <Spinner animation="border" role="status" variant="primary" />
-                <p>Getting your trusted devices!</p>
+                <p>{t("home.plat-auth-loading")}</p>
               </div>
             </Card.Body>
           </Card>
@@ -191,12 +203,12 @@ const HomePage = function () {
         {credentialsLoading ? (
           <Card className={styles.default["cardSpacing"]}>
             <Card.Header>
-              <h5>Security Keys</h5>
+              <h5>{t("home.roam-auth-title")}</h5>
             </Card.Header>
             <Card.Body>
               <div className={styles.default["textCenter"]}>
                 <Spinner animation="border" role="status" variant="primary" />
-                <p>Getting your security keys!</p>
+                <p>{t("home.roam-auth-loading")}</p>
               </div>
             </Card.Body>
           </Card>
@@ -205,7 +217,7 @@ const HomePage = function () {
         )}
         <Card className={styles.default["cardSpacing"]}>
           <Card.Header>
-            <h5>Server Verified PIN</h5>
+            <h5>{t("home.svpin-title")}</h5>
           </Card.Header>
           <Card.Body>
             <ServerVerifiedPin {...serverVerifiedProps} />
@@ -214,12 +226,12 @@ const HomePage = function () {
         {credentialsLoading ? (
           <Card className={styles.default["cardSpacing"]}>
             <Card.Header>
-              <h5>Recovery Options</h5>
+              <h5>{t("home.recovery-code-title")}</h5>
             </Card.Header>
             <Card.Body>
               <div className={styles.default["textCenter"]}>
                 <Spinner animation="border" role="status" variant="primary" />
-                <p>Getting your recovery codes!</p>
+                <p>{t("home.recovery-code-loading")}</p>
               </div>
             </Card.Body>
           </Card>
@@ -232,7 +244,7 @@ const HomePage = function () {
         </div>
         <div>
           <Button variant="secondary" onClick={logout}>
-            Sign Out
+            {t("home.sign-out")}
           </Button>
         </div>
       </div>

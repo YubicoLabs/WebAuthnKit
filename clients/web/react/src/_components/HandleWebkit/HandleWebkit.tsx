@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { create } from "@github/webauthn-json";
-
+import { useTranslation } from "react-i18next";
 import { Button, Modal, ModalBody, Spinner } from "react-bootstrap";
 
 const styles = require("../component.module.css");
@@ -20,8 +20,12 @@ const styles = require("../component.module.css");
  *  props.closeCallback: method to call when closing the flow, is used to reject a promise
  */
 const HandleWebKit = function (props) {
+  const { t } = useTranslation();
+
   const [show, setShow] = useState(false);
+
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+
   const [label, setLabel] = useState({
     modalHeader: "",
     modalText: "",
@@ -136,16 +140,16 @@ const HandleWebKit = function (props) {
                 aria-hidden="true"
               />
               <span className={styles.default["loaderSpan"]}>
-                Creating your account
+                {t("handle-webkit.button-loading")}
               </span>
             </>
           )}
-          {!continueSubmitted && <span>Complete your registration</span>}
+          {!continueSubmitted && <span>{t("handle-webkit.button")}</span>}
         </Button>
       </ModalBody>
       <Modal.Footer>
         <Button variant="outline-secondary" onClick={handleClose}>
-          Cancel
+          {t("handle-webkit.close-button")}
         </Button>
       </Modal.Footer>
     </Modal>

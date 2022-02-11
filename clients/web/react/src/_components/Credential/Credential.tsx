@@ -1,5 +1,6 @@
 import React from "react";
 import { Image } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import EditCredential from "./EditCredential";
 
 const styles = require("../component.module.css");
@@ -37,6 +38,8 @@ const getAttestationImage = (credential) => {
  * @returns
  */
 const Credential = function ({ credential }) {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="d-flex justify-content-center align-items-center">
@@ -58,7 +61,7 @@ const Credential = function ({ credential }) {
             </h6>
           )}
           <p>
-            Date Last used:{" "}
+            {t("credential.date-last-used")}:{" "}
             {new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()}
           </p>
         </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { Button, Image } from "react-bootstrap";
 import { credentialActions } from "../../_actions";
+import { useTranslation } from "react-i18next";
 
 const styles = require("../component.module.css");
 
@@ -10,6 +11,8 @@ const styles = require("../component.module.css");
  * @param credential credential item with details specific to a single credential
  */
 const TrustedDevice = function ({ credential }) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
 
   /**
@@ -43,13 +46,13 @@ const TrustedDevice = function ({ credential }) {
         <div className="p-2 flex-grow-1">
           <h5>{credential.credentialNickname.value}</h5>
           <p>
-            Date Last used:{" "}
+            {t("trusted-device.date-last-used")}{" "}
             {new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()}
           </p>
         </div>
         <div className="m-2">
           <Button variant="danger" onClick={handleDelete}>
-            Delete
+            {t("trusted-device.delete-button")}
           </Button>
         </div>
       </div>

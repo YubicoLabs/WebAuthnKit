@@ -7,9 +7,8 @@ import {
   Form,
   Spinner,
 } from "react-bootstrap";
-
+import { useTranslation } from "react-i18next";
 import { Auth } from "aws-amplify";
-
 import { alertActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
@@ -18,8 +17,11 @@ const styles = require("../_components/component.module.css");
  * Step to allow the user to login with a recovery code if they do not possess any of their authentication devices
  * @returns Routes the user to the Home Page if the recovery code is valid
  */
-function ForgotStep({ navigation }) {
+const ForgotStep = function ({ navigation }) {
+  const { t } = useTranslation();
+
   const [validated, setValidated] = useState(false);
+
   const [continueSubmitted, setContinueSubmitted] = useState(false);
 
   const dispatch = useDispatch();
@@ -121,12 +123,14 @@ function ForgotStep({ navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Forgot Your Security Key?</h2>
-        <label>Enter a recovery code to continue.</label>
+        <h2>{t("forgot-step.header")}</h2>
+        <label>{t("forgot-step.instructions")}</label>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <InputGroup className="mb-3">
-          <InputGroup.Text id="basic-addon1">Username</InputGroup.Text>
+          <InputGroup.Text id="basic-addon1">
+            {t("forgot-step.form-label-username")}
+          </InputGroup.Text>
           <FormControl
             placeholder={localStorage.getItem("username")}
             aria-label="Username"
@@ -136,11 +140,13 @@ function ForgotStep({ navigation }) {
         </InputGroup>
         <InputGroup className="mb-3">
           <InputGroup.Prepend>
-            <InputGroup.Text id="basic-addon1">Recovery Code</InputGroup.Text>
+            <InputGroup.Text id="basic-addon1">
+              {t("forgot-step.form-label-recoverycode")}
+            </InputGroup.Text>
           </InputGroup.Prepend>
           <FormControl
             name="recoveryCode"
-            placeholder="Enter Recovery Code"
+            placeholder={t("forgot-step.form-hint-recoverycode")}
             aria-label="Recovery Code"
             aria-describedby="basic-addon1"
             type="password"
@@ -148,7 +154,7 @@ function ForgotStep({ navigation }) {
             required
           />
           <Form.Control.Feedback type="invalid">
-            Please provide a recover code.
+            {t("forgot-step.alert-1")}
           </Form.Control.Feedback>
         </InputGroup>
         <Button
@@ -167,11 +173,11 @@ function ForgotStep({ navigation }) {
                 aria-hidden="true"
               />
               <span className={styles.default["loaderSpan"]}>
-                Fetching your profile
+                {t("forgot-step.primary-button-loading")}
               </span>
             </>
           )}
-          {!continueSubmitted && <span>Continue</span>}
+          {!continueSubmitted && <span>{t("forgot-step.primary-button")}</span>}
         </Button>
       </Form>
       <div className="mt-5">
@@ -180,12 +186,12 @@ function ForgotStep({ navigation }) {
       <div>
         <div className={styles.default["textCenter"]}>
           <span onClick={LogInStep} className="btn-link">
-            Back to Log In
+            {t("forgot-step.login-return")}
           </span>
         </div>
       </div>
     </>
   );
-}
+};
 
 export default ForgotStep;

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
 import { Button, Spinner } from "react-bootstrap";
-
 import { Auth } from "aws-amplify";
 import { get } from "@github/webauthn-json";
-
+import { useTranslation } from "react-i18next";
 import { userActions, alertActions } from "../_actions";
 import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
 
-function LogInTrustedDeviceStep({ navigation }) {
+const LogInTrustedDeviceStep = function ({ navigation }) {
+  const { t } = useTranslation();
+
   // Loading indicator for the Continue Button, used to prevent the user from making multiple registration requests
   const [continueSubmitted, setContinueSubmitted] = useState(false);
 
@@ -123,8 +124,8 @@ function LogInTrustedDeviceStep({ navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Welcome</h2>
-        <label>Log in to the WebAuthn Starter Kit to continue</label>
+        <h2>{t("login.welcome")}</h2>
+        <label>{t("login.instructions")}</label>
       </div>
       <div className="form mt-2">
         <div>
@@ -150,12 +151,12 @@ function LogInTrustedDeviceStep({ navigation }) {
                   aria-hidden="true"
                 />
                 <span className={styles.default["loaderSpan"]}>
-                  Fetching your profile
+                  {t("login.primary-button-loading")}
                 </span>
               </>
             )}
             {!continueSubmitted && (
-              <span>Continue with Trusted Device or Security Key</span>
+              <span>{t("login.trusted-device-button")}</span>
             )}
           </Button>
         </div>
@@ -165,13 +166,13 @@ function LogInTrustedDeviceStep({ navigation }) {
         <div>
           <div className={styles.default["textCenter"]}>
             <span onClick={LogInStep} className="btn-link">
-              Try Another Method
+              {t("login.alt-method")}
             </span>
           </div>
         </div>
       </div>
     </>
   );
-}
+};
 
 export default LogInTrustedDeviceStep;

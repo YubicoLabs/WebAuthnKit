@@ -10,6 +10,7 @@ import {
 import { useDispatch } from "react-redux";
 
 import validate from "validate.js";
+import { useTranslation } from "react-i18next";
 import { history } from "../_helpers";
 import { WebAuthnClient } from "../_components";
 import { credentialActions, alertActions } from "../_actions";
@@ -26,8 +27,12 @@ const styles = require("../_components/component.module.css");
  * @returns
  */
 const SignUpStep = function ({ setForm, formData, navigation }) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
+
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+
   const [handleWebKit, setHandleWebKit] = useState<ReactElement>();
 
   const { username, pin, nickname, credential } = formData;
@@ -35,9 +40,12 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   const [errors, setErrors] = useState({
     username: "",
   });
+
   const [validated, setValidated] = useState(false);
+
   // Loading indicator for the Continue Button, used to prevent the user from making multiple registration requests
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+
   // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
   const [initialInput, setInitialInput] = useState(false);
 
@@ -230,8 +238,8 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Welcome</h2>
-        <label>Sign up to the WebAuthn Starter Kit to continue</label>
+        <h2>{t("registration.welcome")}</h2>
+        <label>{t("registration.instructions")}</label>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group>
@@ -256,13 +264,13 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
           </InputGroup>
         </Form.Group>
         <div className={styles.default["textCenter"]}>
-          <h4>Add Your Security Key</h4>
-          <label>Security keys are the primary authentication factor</label>
+          <h4>{t("registration.add-key")}</h4>
+          <label>{t("registration.add-key-prompt")}</label>
         </div>
         <ol>
-          <li>Make sure your Security Key is nearby</li>
-          <li>Follow the steps in the browser</li>
-          <li>Give your Security Key a nickname to easily identify it later</li>
+          <li>{t("registration.add-key-1")}</li>
+          <li>{t("registration.add-key-2")}</li>
+          <li>{t("registration.add-key-3")}</li>
         </ol>
         <Button
           type="submit"
@@ -278,11 +286,13 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
                 aria-hidden="true"
               />
               <span className={styles.default["loaderSpan"]}>
-                Creating your account
+                {t("registration.primary-button-loading")}
               </span>
             </>
           )}
-          {!continueSubmitted && <span>Continue</span>}
+          {!continueSubmitted && (
+            <span>{t("registration.primary-button")}</span>
+          )}
         </Button>
       </Form>
       <div className="mt-5">

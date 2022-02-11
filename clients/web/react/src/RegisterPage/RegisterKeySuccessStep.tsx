@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Button, InputGroup, FormControl } from "react-bootstrap";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { history } from "../_helpers";
 import { userActions, credentialActions, alertActions } from "../_actions";
 
@@ -10,7 +11,9 @@ const styles = require("../_components/component.module.css");
  * Page to allow the user to rename their first security key before proceeding to the home page
  * If the user does not enter in a new name the default name will be kept as "Security Key"
  */
-function RegisterKeySuccessStep({ setForm, formData, navigation }) {
+const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
 
   const validNickname = useSelector(
@@ -77,12 +80,12 @@ function RegisterKeySuccessStep({ setForm, formData, navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Security Key Added</h2>
-        <label>You have successfully registered your security key.</label>
+        <h2>{t("registration.success-header")}</h2>
+        <label>{t("registration.success-prompt")}</label>
       </div>
       <div className="form mt-2">
         <div>
-          <label>Give your security key a nickname.</label>
+          <label>{t("registration.success-instructions")}</label>
           <InputGroup className="mb-3">
             <InputGroup.Prepend>
               <InputGroup.Text id="basic-addon1">
@@ -106,12 +109,12 @@ function RegisterKeySuccessStep({ setForm, formData, navigation }) {
           <Button
             onClick={() => continueStep()}
             variant="primary btn-block mt-3">
-            Continue
+            {t("registration.primary-button")}{" "}
           </Button>
         </div>
       </div>
     </>
   );
-}
+};
 
 export default RegisterKeySuccessStep;

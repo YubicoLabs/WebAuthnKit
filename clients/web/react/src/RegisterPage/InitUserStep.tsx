@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { userActions } from "../_actions";
 
 const styles = require("../_components/component.module.css");
@@ -10,7 +11,10 @@ const styles = require("../_components/component.module.css");
  * @returns User is routed back to the login screen, with all credentials removed from the browser
  */
 const InitUserStep = function ({ navigation }) {
+  const { t } = useTranslation();
+
   const user = useSelector((state: RootStateOrAny) => state.users);
+
   const dispatch = useDispatch();
 
   // Once the users details are configured, allow them to rename their first security key
@@ -40,7 +44,7 @@ const InitUserStep = function ({ navigation }) {
   return (
     <div className={styles.default["textCenter"]}>
       <Spinner animation="border" role="status" variant="primary" />
-      <h2>Loading your profile</h2>
+      <h2>{t("init-user")}</h2>
     </div>
   );
 };

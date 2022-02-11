@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 import { Auth } from "aws-amplify";
+import { useTranslation } from "react-i18next";
 import { history } from "../_helpers";
 
 const styles = require("../_components/component.module.css");
@@ -10,6 +11,8 @@ const styles = require("../_components/component.module.css");
  * @returns User is routed back to the login screen, with all credentials removed from the browser
  */
 const LogoutPage = function () {
+  const { t } = useTranslation();
+
   const logoutUser = async () => {
     try {
       await Auth.signOut();
@@ -30,7 +33,7 @@ const LogoutPage = function () {
   return (
     <div className={styles.default["textCenter"]}>
       <Spinner animation="border" role="status" variant="primary" />
-      <h2>Thank you for joining us!</h2>
+      <h2>{t("logout")}</h2>
     </div>
   );
 };

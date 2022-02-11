@@ -9,6 +9,7 @@ import validate from "validate.js";
 import { useDispatch } from "react-redux";
 import { credentialActions, alertActions } from "../../_actions";
 import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
+import { useTranslation } from "react-i18next";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
 
@@ -24,12 +25,19 @@ const styles = require("../component.module.css");
  *  This callback is primarily used when triggered from the RegisterTrustedDevice login step
  */
 const AddTrustedDevice = function ({ continueStep }) {
+  const { t } = useTranslation();
+
   // Loading indicator to prevent the user from triggering multiple registrations
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+
   const [showAdd, setShowAdd] = useState(false);
+
   const [nickname, setNickname] = useState("");
+
   const [invalidNickname, setInvalidNickname] = useState(undefined);
+
   const [submitted, setSubmitted] = useState(false);
+
   const dispatch = useDispatch();
 
   /**
@@ -187,10 +195,10 @@ const AddTrustedDevice = function ({ continueStep }) {
     <>
       <Modal show={showAdd} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Add a new trusted device</Modal.Title>
+          <Modal.Title>{t("trusted-device.add-form-title")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <label>Nickname</label>
+          <label>{t("trusted-device.add-form-label")}</label>
           <input
             type="text"
             name="nickname"
@@ -214,10 +222,10 @@ const AddTrustedDevice = function ({ continueStep }) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Cancel
+            {t("trusted-device.cancel-button")}
           </Button>
           <Button variant="primary" onClick={handleSaveAdd}>
-            Register Trusted Device
+            {t("trusted-device.register-button")}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -238,11 +246,11 @@ const AddTrustedDevice = function ({ continueStep }) {
               aria-hidden="true"
             />
             <span className={styles.default["loaderSpan"]}>
-              Adding your device
+              {t("trusted-device.add-button-loading")}
             </span>
           </>
         )}
-        {!continueSubmitted && <span>Add this device now</span>}
+        {!continueSubmitted && <span>{t("trusted-device.add-button")}</span>}
       </Button>
     </>
   );

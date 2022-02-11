@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
-
+import { useTranslation } from "react-i18next";
 import AddTrustedDevice from "./AddTrustedDevice";
 import TrustedDevice from "./TrustedDevice";
 import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
@@ -13,6 +13,8 @@ const styles = require("../component.module.css");
  * @param credentialItems list of trusted device items
  */
 const TrustedDeviceList = function ({ credentialItems }) {
+  const { t } = useTranslation();
+
   const [showAddTrustedDevice, setShowAddTrustedDevice] = useState(false);
 
   /**
@@ -44,7 +46,7 @@ const TrustedDeviceList = function ({ credentialItems }) {
   return (
     <Card className={styles.default["cardSpacing"]}>
       <Card.Header>
-        <h5>Trusted Devices</h5>
+        <h5>{t("trusted-device.trusted-devices")}</h5>
       </Card.Header>
       <Card.Body>
         {credentialItems.map((credential, index) => (

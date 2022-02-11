@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Card, Modal } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { Auth } from "aws-amplify";
+import { useTranslation } from "react-i18next";
 import { userActions, alertActions } from "../../_actions";
 import { history } from "../../_helpers";
 
@@ -14,14 +15,19 @@ const styles = require("../component.module.css");
  * Sends the user back to the initial login screen - The user should not be able to relogin after this step is run
  */
 const DeleteUser = function ({ userToken }) {
+  const { t } = useTranslation();
+
   const [show, setShow] = useState(false);
+
   const dispatch = useDispatch();
+
   /**
    * Used to show the modal
    */
   const handleShow = () => {
     setShow(true);
   };
+
   /**
    * Used to hide the modal
    */
@@ -59,30 +65,27 @@ const DeleteUser = function ({ userToken }) {
     <>
       <Card className={styles.cardSpacing}>
         <Card.Header>
-          <h5>Delete Account</h5>
+          <h5> {t("delete.header")}</h5>
         </Card.Header>
         <Card.Body>
           <Button variant="danger" onClick={handleShow}>
-            Permanently Delete Account
+            {t("delete.button-label")}
           </Button>
         </Card.Body>
       </Card>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Delete Account</Modal.Title>
+          <Modal.Title>{t("delete.modal-title")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>
-            Once you delete your account, there is no going back. Please be
-            certain.
-          </p>
+          <p>{t("delete.modal-note")}</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="danger" onClick={handleDelete}>
-            Delete
+            {t("delete.modal-delete-button")}
           </Button>
           <Button variant="primary" onClick={handleClose}>
-            Close
+            {t("delete.modal-close-button")}
           </Button>
         </Modal.Footer>
       </Modal>

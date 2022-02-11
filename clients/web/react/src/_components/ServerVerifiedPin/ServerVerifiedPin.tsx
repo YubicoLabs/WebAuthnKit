@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import { useTranslation } from "react-i18next";
 import { useSelector, RootStateOrAny } from "react-redux";
 import { Alert, Button, Card, Form, Modal, ModalBody } from "react-bootstrap";
 import { validate } from "validate.js";
@@ -18,26 +18,38 @@ const styles = require("../component.module.css");
  *  props.closeCallback: method to call when closing the flow, is used to reject a promise
  */
 const ServerVerifiedPin = function (props) {
+  const { t } = useTranslation();
+
   const [pinCollection, setPinCollection] = useState({
     pin: "",
     confirmPin: "",
   });
+
   const finishUVRequest = useSelector(
     (state: RootStateOrAny) => state.credentials.finishUVRequest
   );
+
   const [invalidPin, setInvalidPin] = useState(undefined);
+
   const [invalidConfirmPin, setInvalidConfirmPin] = useState(undefined);
+
   const [show, setShow] = useState(false);
+
   const [showButton, setShowButton] = useState(false);
+
   const [showConfirmPin, setShowConfirmPin] = useState(false);
+
   const inputRef = useRef(null);
+
   const inputRefNext = useRef(null);
+
   const [label, setLabel] = useState({
     buttonText: "",
     modalHeader: "",
     modalText: "",
     modalSubmitText: "",
   });
+
   const constraints = {
     pin: {
       presence: true,
@@ -221,7 +233,7 @@ const ServerVerifiedPin = function (props) {
           <ModalBody>
             <p>{label.modalText}</p>
             {/* Implement the main input for pin */}
-            <Form.Label>Enter PIN</Form.Label>
+            <Form.Label>{t("sv-pin.enter-pin")}</Form.Label>
             <Form.Control
               name="pin"
               value={pinCollection.pin}
@@ -246,7 +258,7 @@ const ServerVerifiedPin = function (props) {
                 This only appears if showConfirmPIn is set to true */}
             {showConfirmPin && (
               <>
-                <Form.Label>Confirm PIN</Form.Label>
+                <Form.Label>{t("sv-pin.confirm-pin")}</Form.Label>
                 <Form.Control
                   name="confirmPin"
                   value={pinCollection.confirmPin}
@@ -272,7 +284,7 @@ const ServerVerifiedPin = function (props) {
           </ModalBody>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClose}>
-              Cancel
+              {t("sv-pin.cancel")}
             </Button>
             <Button variant="primary" onClick={handleSave}>
               {label.modalSubmitText}

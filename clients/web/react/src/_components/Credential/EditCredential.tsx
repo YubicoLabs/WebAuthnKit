@@ -3,6 +3,7 @@ import React, { useState, useRef } from "react";
 import { Button, Modal, Alert } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import validate from "validate.js";
+import { useTranslation } from "react-i18next";
 import { credentialActions } from "../../_actions";
 
 /**
@@ -12,10 +13,16 @@ import { credentialActions } from "../../_actions";
  * @returns
  */
 const EditCredential = function ({ credential }) {
+  const { t } = useTranslation();
+
   const [show, setShow] = useState(false);
+
   const [nickname, setNickname] = useState("");
+
   const [invalidNickname, setInvalidNickname] = useState(undefined);
+
   const [submitted, setSubmitted] = useState(false);
+
   const dispatch = useDispatch();
 
   /**
@@ -98,15 +105,15 @@ const EditCredential = function ({ credential }) {
   return (
     <>
       <Button variant="secondary" onClick={handleShow}>
-        Edit
+        {t("credential.edit-button")}
       </Button>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit your security key</Modal.Title>
+          <Modal.Title>{t("credential.edit-header")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <label>
-            Nickname{" "}
+            {t("credential.edit-form-label")}{" "}
             <input
               type="text"
               name="nickname"
@@ -132,14 +139,14 @@ const EditCredential = function ({ credential }) {
           &nbsp;&nbsp;
           <br />
           <label>
-            <em>Usernameless a.k.a. Client-Side Discoverable Credential:</em>{" "}
+            <em>{t("credential.edit-usernameless")}</em>{" "}
             {credential.registrationRequest
               ? credential.registrationRequest.requireResidentKey.toString()
               : ""}
           </label>
           <br />
           <label>
-            <em>Last Used Time:</em>{" "}
+            <em>{t("credential.last-time-used")}</em>{" "}
             {credential.lastUsedTime
               ? new Date(
                   credential.lastUsedTime.seconds * 1000
@@ -148,7 +155,7 @@ const EditCredential = function ({ credential }) {
           </label>
           <br />
           <label>
-            <em>Last Updated Time:</em>{" "}
+            <em>{t("credential.last-update-time")}</em>{" "}
             {credential.lastUpdatedTime
               ? new Date(
                   credential.lastUpdatedTime.seconds * 1000
@@ -157,7 +164,7 @@ const EditCredential = function ({ credential }) {
           </label>
           <br />
           <label>
-            <em>Registration Time:</em>{" "}
+            <em>{t("credential.registration-time")}</em>{" "}
             {credential.registrationTime
               ? new Date(
                   credential.registrationTime.seconds * 1000
@@ -168,9 +175,11 @@ const EditCredential = function ({ credential }) {
           <br />
           {checkAttestation(credential) && (
             <>
-              <h4 style={{ color: "#9aca3c" }}>Yubico Device Information:</h4>
-              <label>
-                <em>Device Name:</em>{" "}
+              <h4 style={{ color: "#9aca3c" }}>
+                {t("credential.yubico-att-label")}
+              </h4>
+              <p>
+                <em>{t("credential.att-device-name")}</em>{" "}
                 {
                   credential.attestationMetadata.value.deviceProperties
                     .displayName
@@ -183,11 +192,11 @@ const EditCredential = function ({ credential }) {
                   }
                   target="_blank"
                   rel="noreferrer">
-                  Device Info
+                  {t("credential.att-device-info")}
                 </a>
-              </label>
-              <label>
-                <em>Available Interfaces:</em>{" "}
+              </p>
+              <div>
+                <em>{t("credential.att-device-interfaces")}</em>{" "}
                 <ul>
                   {credential.attestationMetadata.value.transports.map(
                     (transport, index) => (
@@ -195,19 +204,19 @@ const EditCredential = function ({ credential }) {
                     )
                   )}
                 </ul>
-              </label>
+              </div>
             </>
           )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Cancel
+            {t("credential.edit-cancel-button")}
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            Delete
+            {t("credential.edit-delete-button")}
           </Button>
           <Button variant="primary" onClick={handleSave}>
-            Save Changes
+            {t("credential.edit-save-button")}
           </Button>
         </Modal.Footer>
       </Modal>

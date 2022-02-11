@@ -3,6 +3,7 @@ import { Button, InputGroup, Form, Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 
 import validate from "validate.js";
+import { useTranslation } from "react-i18next";
 import { WebAuthnClient } from "../_components";
 import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
 import { history } from "../_helpers";
@@ -15,20 +16,28 @@ const styles = require("../_components/component.module.css");
  * This component will also allow the user to transition to other auth steps if needed
  */
 const LogInStep = function ({ navigation }) {
+  const { t } = useTranslation();
+
   const [inputs, setInputs] = useState({
     username: localStorage.getItem("username"),
     forgotStep: false,
     continue: false,
   });
+
   const [errors, setErrors] = useState({
     username: "",
   });
+
   const [validated, setValidated] = useState(false);
+
   // Loading indicator for the Continue Button, used to prevent the user from making multiple registration requests
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+
   // Loading indicator for the Usernameless Continue Button, used to prevent the user from making multiple registration requests
   const [usernamelessSubmitted, setUsernamelessSubmitted] = useState(false);
+
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+
   // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
   const [initialInput, setInitialInput] = useState(false);
 
@@ -119,12 +128,14 @@ const LogInStep = function ({ navigation }) {
   const InitUserStep = () => {
     navigation.go("InitUserStep");
   };
+
   /**
    * Routes the user to the first step of the register step
    */
   const signUpStep = () => {
     history.push("/register");
   };
+
   /**
    * Routes the user to the step allowing them to log in with a recovery code
    */
@@ -225,8 +236,8 @@ const LogInStep = function ({ navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Welcome</h2>
-        <label>Log in to the WebAuthn Starter Kit to continue</label>
+        <h2>{t("login.welcome")}</h2>
+        <label>{t("login.instructions")}</label>
       </div>
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group>
@@ -268,18 +279,18 @@ const LogInStep = function ({ navigation }) {
                 aria-hidden="true"
               />
               <span className={styles.default["loaderSpan"]}>
-                Fetching your profile
+                {t("login.primary-button-loading")}
               </span>
             </>
           )}
-          {!continueSubmitted && <span>Continue</span>}
+          {!continueSubmitted && <span>{t("login.primary-button")}</span>}
         </Button>
         <Button
           type="submit"
           onClick={forgotClickHandler}
           variant="link"
           className="float-right">
-          Forgot Your Security Key?
+          {t("login.forgot-key")}
         </Button>
         <br />
       </Form>
@@ -304,12 +315,12 @@ const LogInStep = function ({ navigation }) {
                 aria-hidden="true"
               />
               <span className={styles.default["loaderSpan"]}>
-                Fetching your credentials
+                {t("login.trusted-device-button-loading")}
               </span>
             </>
           )}
           {!usernamelessSubmitted && (
-            <span>Continue with Trusted Device or Security Key</span>
+            <span>{t("login.trusted-device-button")}</span>
           )}
         </Button>
       </div>

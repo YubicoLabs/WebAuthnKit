@@ -7,6 +7,7 @@ import cbor from "cbor";
 import axios from "axios";
 import validate from "validate.js";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { credentialActions, alertActions } from "../../_actions";
 import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
 // eslint-disable-next-line camelcase
@@ -19,13 +20,21 @@ axios.defaults.baseURL = aws_exports.apiEndpoint;
  * Component used to add a new credential
  */
 const AddCredential = function () {
+  const { t } = useTranslation();
+
   const [showAdd, setShowAdd] = useState(false);
+
   // Will load the SVPIN component if the new credential is non-FIDO2
   const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+
   const [nickname, setNickname] = useState("");
+
   const [isResidentKey, setIsResidentKey] = useState(false);
+
   const [invalidNickname, setInvalidNickname] = useState(undefined);
+
   const [submitted, setSubmitted] = useState(false);
+
   const dispatch = useDispatch();
 
   /**
@@ -215,10 +224,10 @@ const AddCredential = function () {
     <>
       <Modal show={showAdd} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Add a new security key</Modal.Title>
+          <Modal.Title>{t("credential.add-header")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <label>Nickname</label>
+          <label>{t("credential.add-form-label")}</label>
           <input
             type="text"
             name="nickname"
@@ -247,27 +256,24 @@ const AddCredential = function () {
               checked={isResidentKey}
               onChange={handleCheckboxChange}
             />{" "}
-            Enable usernameless login with this key
+            {t("credential.usernameless-label")}
             <br />
             <em>
-              <small>
-                Note: Passwordless requires a FIDO2 device and a browser that
-                supports it.
-              </small>
+              <small>{t("credential.usernameless-note")}</small>
             </em>
           </label>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Cancel
+            {t("credential.add-cancel-button")}
           </Button>
           <Button variant="primary" onClick={handleSaveAdd}>
-            Register security key
+            {t("credential.add-primary-button")}
           </Button>
         </Modal.Footer>
       </Modal>
       <Button variant="primary" onClick={handleShow}>
-        Add a new security key
+        {t("credential.add-header")}
       </Button>
       {serverVerifiedPin}
     </>

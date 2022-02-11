@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { history } from "../_helpers";
 import { WebAuthnClient } from "../_components";
 import { alertActions } from "../_actions";
@@ -18,9 +19,13 @@ const styles = require("../_components/component.module.css");
  * Ask again - Will allow this prompt to appear to the user again
  * NOTE - This confirmation is set on a browser to browser basis - If you add a trusted device using Chrome on your laptop, you will be able to login with that on Edge - but you will need to confirm the device
  */
-function RegisterTrustedDeviceStep({ navigation }) {
+const RegisterTrustedDeviceStep = function ({ navigation }) {
+  const { t } = useTranslation();
+
   const [allowAdd, setAllowAdd] = useState(false);
+
   const [continueSubmitted, setContinueSubmitted] = useState(false);
+
   const dispatch = useDispatch();
 
   /**
@@ -101,11 +106,8 @@ function RegisterTrustedDeviceStep({ navigation }) {
   return (
     <>
       <div className={styles.default["textCenter"]}>
-        <h2>Log In Faster on This Device</h2>
-        <label>
-          Trust this device? This will allow you to log in next time using this
-          device's fingerprint or face recognition.
-        </label>
+        <h2>{t("trusted-device.header")}</h2>
+        <label>{t("trusted-device.instructions")}</label>
       </div>
       <div className="form mt-2">
         <div>
@@ -113,12 +115,12 @@ function RegisterTrustedDeviceStep({ navigation }) {
             <AddTrustedDevice {...AddTrustedDeviceProps} />
           ) : (
             <Button variant="primary btn-block mt-3" disabled>
-              Add this device now
+              {t("trusted-device.add-button")}
             </Button>
           )}
           <hr />
           <div className={styles.default["textCenter"]}>
-            <label>Already registered this device before?</label>
+            <label> {t("trusted-device.confirm-prompt")}</label>
           </div>
           <Button
             type="submit"
@@ -137,22 +139,24 @@ function RegisterTrustedDeviceStep({ navigation }) {
                   aria-hidden="true"
                 />
                 <span className={styles.default["loaderSpan"]}>
-                  Confirming your device
+                  {t("trusted-device.confirm-button-loading")}
                 </span>
               </>
             )}
-            {!continueSubmitted && <span>Confirm Trusted Device</span>}
+            {!continueSubmitted && (
+              <span> {t("trusted-device.confirm-button")}</span>
+            )}
           </Button>
         </div>
         <div className="mt-3">
           <hr />
         </div>
         <div>
-          Don't want to register this device?
+          {t("trusted-device.ask-prompt")}
           <ul>
             <li>
               <span onClick={askLaterStep} className="btn-link">
-                Ask me later
+                {t("trusted-device.ask-later")}
               </span>
             </li>
             <li>
@@ -161,7 +165,7 @@ function RegisterTrustedDeviceStep({ navigation }) {
                   clickNeverAsk(TrustedDeviceHelper.TrustedDeviceEnum.NEVER)
                 }
                 className="btn-link">
-                Never ask me to register this device
+                {t("trusted-device.ask-never")}
               </span>
             </li>
           </ul>
@@ -169,6 +173,6 @@ function RegisterTrustedDeviceStep({ navigation }) {
       </div>
     </>
   );
-}
+};
 
 export default RegisterTrustedDeviceStep;
