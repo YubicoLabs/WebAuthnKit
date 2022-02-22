@@ -1,15 +1,12 @@
 import React, { useState, useRef } from "react";
 
-import { create } from "@github/webauthn-json";
 import { Button, Modal, Alert, Spinner } from "react-bootstrap";
-import base64url from "base64url";
-import cbor from "cbor";
 import axios from "axios";
 import validate from "validate.js";
 import { useDispatch } from "react-redux";
-import { credentialActions, alertActions } from "../../_actions";
-import { TrustedDeviceHelper } from "./TrustedDeviceHelper";
 import { useTranslation } from "react-i18next";
+import { WebAuthnClient } from "..";
+import { alertActions } from "../../_actions";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
 
@@ -56,7 +53,6 @@ const AddTrustedDevice = function ({ continueStep }) {
     setContinueSubmitted(true);
     setShowAdd(true);
   };
-  const defaultInvalidPIN = -1;
   const constraints = {
     nickname: {
       length: {
@@ -83,23 +79,6 @@ const AddTrustedDevice = function ({ continueStep }) {
     }
   };
 
-  function getUV(attestationObject) {
-    const attestationBuffer = base64url.toBuffer(attestationObject);
-    const attestationStruct = cbor.decodeAllSync(attestationBuffer)[0];
-    const buffer = attestationStruct.authData;
-
-    const flagsBuf = buffer.slice(32, 33);
-    const flagsInt = flagsBuf[0];
-    const flags = {
-      up: !!(flagsInt & 0x01),
-      uv: !!(flagsInt & 0x04),
-      at: !!(flagsInt & 0x40),
-      ed: !!(flagsInt & 0x80),
-      flagsInt,
-    };
-    return flags.uv;
-  }
-
   /**
    * Primary logic of this method
    * Calls to the register API, and creates the credential on the authenticator
@@ -110,74 +89,17 @@ const AddTrustedDevice = function ({ continueStep }) {
     console.log("register");
     console.log("nickname: ", nickname);
 
-    axios
-      .post("/users/credentials/fido2/register", {
+    try {
+      await WebAuthnClient.registerNewCredential(
         nickname,
-        requireResidentKey: true,
-        requireAuthenticatorAttachment: "PLATFORM",
-      })
-      .then(async (startRegistrationResponse) => {
-        console.log(startRegistrationResponse);
-
-        const { requestId } = startRegistrationResponse.data;
-
-        const publicKey = {
-          publicKey:
-            startRegistrationResponse.data.publicKeyCredentialCreationOptions,
-        };
-        console.log("publlicKey: ", publicKey);
-
-        create(publicKey)
-          .then(async (makeCredentialResponse) => {
-            console.log(
-              `make credential response: ${JSON.stringify(
-                makeCredentialResponse
-              )}`
-            );
-
-            const uv = getUV(makeCredentialResponse.response.attestationObject);
-            console.log("uv: ", uv);
-
-            const challengeResponse = {
-              credential: makeCredentialResponse,
-              requestId,
-              pinSet: startRegistrationResponse.data.pinSet,
-              pinCode: defaultInvalidPIN,
-              nickname,
-            };
-
-            console.log("challengeResponse: ", challengeResponse);
-
-            console.log("finishRegistration: ", challengeResponse);
-            dispatch(credentialActions.registerFinish(challengeResponse));
-            TrustedDeviceHelper.setTrustedDevice(
-              TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED,
-              challengeResponse.credential.id
-            );
-            continueStep();
-          })
-          .catch((error) => {
-            setContinueSubmitted(false);
-            if (
-              error.message ===
-              "The user attempted to register an authenticator that contains one of the credentials already registered with the relying party."
-            ) {
-              dispatch(
-                alertActions.success("Trusted Device is already registered")
-              );
-              continueStep();
-            } else {
-              console.error(error);
-              dispatch(alertActions.error(error.message));
-            }
-          });
-      })
-      .catch((error) => {
-        console.error(error);
-        setShowAdd(false);
-        setContinueSubmitted(false);
-        dispatch(alertActions.error(error.message));
-      });
+        true,
+        "PLATFORM",
+        null
+      );
+      dispatch(alertActions.success("Registration successful"));
+    } catch (error) {
+      dispatch(alertActions.error(error.message));
+    }
   };
 
   /**

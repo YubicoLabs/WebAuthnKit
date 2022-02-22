@@ -3,6 +3,8 @@ import base64url from "base64url";
 import cbor from "cbor";
 import { Auth } from "aws-amplify";
 import axios from "axios";
+import credentialService from "../_services/credential.service";
+import { TrustedDeviceHelper } from "./TrustedDevices/TrustedDeviceHelper";
 
 import aws_exports from "../aws-exports";
 
@@ -16,6 +18,7 @@ const WebAuthnClient = {
   sendChallengeAnswer,
   signIn,
   signUp,
+  registerNewCredential,
 };
 
 const defaultInvalidPIN = "-1";
@@ -481,6 +484,80 @@ async function signUp(name, requestUV, registerWebKit) {
   } catch (error) {
     console.error("WebAuthnClient signUp() error: ", error);
     throw error;
+  }
+}
+
+async function registerNewCredential(
+  nickname,
+  isResidentKey,
+  authenticatorAttachment = "CROSS_PLATFORM",
+  requestUV
+) {
+  try {
+    console.log("WebAuthnClient registerNewCredential() begin: ", {
+      nickname,
+      isResidentKey,
+      authenticatorAttachment,
+    });
+    const startRegistrationResponse = await axios.post(
+      "/users/credentials/fido2/register",
+      {
+        nickname,
+        requireResidentKey: isResidentKey,
+        requireAuthenticatorAttachment: authenticatorAttachment,
+      }
+    );
+
+    console.log(
+      "WebAuthnClient registerNewCredential() Registration Response: ",
+      startRegistrationResponse
+    );
+
+    const { requestId } = startRegistrationResponse.data;
+
+    const publicKey = {
+      publicKey:
+        startRegistrationResponse.data.publicKeyCredentialCreationOptions,
+    };
+    console.log("publlicKey: ", publicKey);
+
+    const makeCredentialResponse = await create(publicKey);
+    console.log(
+      "WebAuthnClient registerNewCredential() Make Credential: ",
+      makeCredentialResponse
+    );
+
+    const uv = getUVFromAttestation(
+      makeCredentialResponse.response.attestationObject
+    );
+    console.log("uv: ", uv);
+
+    const challengeResponse = {
+      credential: makeCredentialResponse,
+      requestId,
+      pinSet: startRegistrationResponse.data.pinSet,
+      pinCode: defaultInvalidPIN,
+      nickname,
+    };
+    console.log("challengeResponse: ", challengeResponse);
+
+    if (uv === true) {
+      await credentialService.registerFinish(challengeResponse);
+      if (authenticatorAttachment === "PLATFORM") {
+        TrustedDeviceHelper.setTrustedDevice(
+          TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED,
+          challengeResponse.credential.id
+        );
+      }
+    } else {
+      const uvPin = await requestUV(challengeResponse);
+      console.log("AddCredential, new Key PIN is: ", uvPin);
+      challengeResponse.pinCode = uvPin;
+      await credentialService.registerFinish(challengeResponse);
+    }
+  } catch (error) {
+    console.error("WebAuthnClient registerNewCredential() error: ", error);
+    return error;
   }
 }
 

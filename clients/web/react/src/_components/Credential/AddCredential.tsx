@@ -1,9 +1,6 @@
 import React, { useState, useRef, ReactElement } from "react";
 
-import { create } from "@github/webauthn-json";
 import { Button, Modal, Alert } from "react-bootstrap";
-import base64url from "base64url";
-import cbor from "cbor";
 import axios from "axios";
 import validate from "validate.js";
 import { useDispatch } from "react-redux";
@@ -12,6 +9,7 @@ import { credentialActions, alertActions } from "../../_actions";
 import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
+import { WebAuthnClient } from "..";
 
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
@@ -84,23 +82,6 @@ const AddCredential = function () {
     setIsResidentKey(value);
   };
 
-  function getUV(attestationObject) {
-    const attestationBuffer = base64url.toBuffer(attestationObject);
-    const attestationStruct = cbor.decodeAllSync(attestationBuffer)[0];
-    const buffer = attestationStruct.authData;
-
-    const flagsBuf = buffer.slice(32, 33);
-    const flagsInt = flagsBuf[0];
-    const flags = {
-      up: !!(flagsInt & 0x01),
-      uv: !!(flagsInt & 0x04),
-      at: !!(flagsInt & 0x40),
-      ed: !!(flagsInt & 0x80),
-      flagsInt,
-    };
-    return flags.uv;
-  }
-
   /**
    * If the key is a U2F key, then a SVPIN needs to be configured on key registration
    * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
@@ -144,74 +125,25 @@ const AddCredential = function () {
     console.log("register");
     console.log("nickname: ", nickname);
 
-    axios
-      .post("/users/credentials/fido2/register", {
+    try {
+      await WebAuthnClient.registerNewCredential(
         nickname,
-        requireResidentKey: isResidentKey,
-        requireAuthenticatorAttachment: "CROSS_PLATFORM",
-      })
-      .then(async (startRegistrationResponse) => {
-        console.log(startRegistrationResponse);
-
-        const { requestId } = startRegistrationResponse.data;
-
-        const publicKey = {
-          publicKey:
-            startRegistrationResponse.data.publicKeyCredentialCreationOptions,
-        };
-        console.log("publlicKey: ", publicKey);
-
-        create(publicKey)
-          .then(async (makeCredentialResponse) => {
-            console.log(
-              `make credential response: ${JSON.stringify(
-                makeCredentialResponse
-              )}`
-            );
-
-            const uv = getUV(makeCredentialResponse.response.attestationObject);
-            console.log("uv: ", uv);
-
-            const challengeResponse = {
-              credential: makeCredentialResponse,
-              requestId,
-              pinSet: startRegistrationResponse.data.pinSet,
-              pinCode: defaultInvalidPIN,
-              nickname,
-            };
-
-            console.log("challengeResponse: ", challengeResponse);
-
-            if (uv === true) {
-              console.log("finishRegistration: ", challengeResponse);
-              dispatch(credentialActions.registerFinish(challengeResponse));
-            } else {
-              const uvPin = await registerUV(challengeResponse);
-              console.log("AddCredential, new Key PIN is: ", uvPin);
-              challengeResponse.pinCode = uvPin;
-              dispatch(credentialActions.registerFinish(challengeResponse));
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-            dispatch(alertActions.error(error.message));
-          });
-      })
-      .catch((error) => {
-        console.error(error);
-        dispatch(alertActions.error(error.message));
-      });
+        isResidentKey,
+        "CROSS_PLATFORM",
+        registerUV
+      );
+      dispatch(alertActions.success("Registration successful"));
+    } catch (error) {
+      dispatch(alertActions.error(error.message));
+    }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNickname(value);
 
-    console.log(value);
-
     const result = validate({ keyName: value }, constraints);
     if (result) {
-      console.log("Here");
       setInvalidNickname(result.keyName.join(". "));
     } else {
       setInvalidNickname(undefined);
