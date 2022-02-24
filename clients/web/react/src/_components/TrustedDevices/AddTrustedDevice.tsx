@@ -7,8 +7,12 @@ import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { WebAuthnClient } from "..";
 import { alertActions } from "../../_actions";
+import DetectBrowser from "../../_helpers/DetectBrowser";
+import AddTrustedDeviceGuidance from "./AddTrustedDeviceGuidance";
+
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
+// import AddTrustedDeviceGuidance from "./AddTrustedDeviceGuidance";
 
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
@@ -35,6 +39,12 @@ const AddTrustedDevice = function ({ continueStep }) {
 
   const [submitted, setSubmitted] = useState(false);
 
+  const PLAT_AUTH = DetectBrowser.getPlatform();
+
+  const [loading, setLoading] = useState(false);
+
+  const [alertMessage, setAlertMessage] = useState("");
+
   const dispatch = useDispatch();
 
   /**
@@ -56,6 +66,7 @@ const AddTrustedDevice = function ({ continueStep }) {
   const constraints = {
     nickname: {
       length: {
+        minimum: 1,
         maximum: 20,
       },
     },
@@ -67,15 +78,19 @@ const AddTrustedDevice = function ({ continueStep }) {
    */
   const handleSaveAdd = async () => {
     setSubmitted(true);
-    setShowAdd(true);
 
     const result = validate({ nickname }, constraints);
     if (result) {
       setInvalidNickname(result.nickname.join(". "));
     } else {
       setInvalidNickname(undefined);
-      setShowAdd(false);
-      await register();
+      setLoading(true);
+      try {
+        await register();
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
     }
   };
 
@@ -97,8 +112,11 @@ const AddTrustedDevice = function ({ continueStep }) {
         null
       );
       dispatch(alertActions.success("Registration successful"));
+      setAlertMessage("");
     } catch (error) {
       dispatch(alertActions.error(error.message));
+      setAlertMessage(error.message);
+      throw error;
     }
   };
 
@@ -120,6 +138,12 @@ const AddTrustedDevice = function ({ continueStep }) {
           <Modal.Title>{t("trusted-device.add-form-title")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {alertMessage !== "" ? (
+            <Alert variant="danger">{alertMessage}</Alert>
+          ) : (
+            <></>
+          )}
+          <AddTrustedDeviceGuidance PLAT_AUTH={PLAT_AUTH} />
           <label>{t("trusted-device.add-form-label")}</label>
           <input
             type="text"
@@ -146,8 +170,22 @@ const AddTrustedDevice = function ({ continueStep }) {
           <Button variant="secondary" onClick={handleClose}>
             {t("trusted-device.cancel-button")}
           </Button>
-          <Button variant="primary" onClick={handleSaveAdd}>
-            {t("trusted-device.register-button")}
+          <Button variant="primary" onClick={handleSaveAdd} disabled={loading}>
+            {loading && (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+                <span className={styles.default["loaderSpan"]}>
+                  {t("trusted-device.register-button-loading")}
+                </span>
+              </>
+            )}
+            {!loading && <span>{t("trusted-device.register-button")}</span>}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -172,7 +210,11 @@ const AddTrustedDevice = function ({ continueStep }) {
             </span>
           </>
         )}
-        {!continueSubmitted && <span>{t("trusted-device.add-button")}</span>}
+        {!continueSubmitted && (
+          <span>
+            {t("trusted-device.add-button", { PLAT_AUTH: PLAT_AUTH.platName })}
+          </span>
+        )}
       </Button>
     </>
   );

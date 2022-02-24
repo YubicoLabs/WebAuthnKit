@@ -60,6 +60,16 @@
   padding: 1em 0em;
 }
 
+.addCredIcon {
+  max-height: 100px;
+  width: auto;
+  margin: 25px;
+}
+
+ol li {
+  margin-bottom: .5em;
+}
+
 .appText {
   @media screen and (max-width: 767px) {
       font-size: 2.5rem;

@@ -1,18 +1,21 @@
 import React, { useState, useRef, ReactElement } from "react";
 
-import { Button, Modal, Alert } from "react-bootstrap";
+import { Button, Modal, Alert, Spinner } from "react-bootstrap";
 import axios from "axios";
 import validate from "validate.js";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { credentialActions, alertActions } from "../../_actions";
 import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
+import AddCredentialGuidance from "./AddCredentialGuidance";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
 import { WebAuthnClient } from "..";
 
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
+
+const styles = require("../component.module.css");
 
 /**
  * Component used to add a new credential
@@ -33,6 +36,10 @@ const AddCredential = function () {
 
   const [submitted, setSubmitted] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
+  const [alertMessage, setAlertMessage] = useState("");
+
   const dispatch = useDispatch();
 
   /**
@@ -43,6 +50,7 @@ const AddCredential = function () {
   const handleShow = () => {
     setNickname("");
     setShowAdd(true);
+    setAlertMessage("");
   };
   // Default PIN used if this is a FIDO2 key
   const defaultInvalidPIN = -1;
@@ -59,7 +67,7 @@ const AddCredential = function () {
    * Called when the user submits the new key registration
    * First the nickname of the key is validated, then the register method in this component is called
    */
-  const handleSaveAdd = () => {
+  const handleSaveAdd = async () => {
     setSubmitted(true);
 
     const result = validate({ keyName: nickname }, constraints);
@@ -67,8 +75,13 @@ const AddCredential = function () {
       setInvalidNickname(result.keyName.join(". "));
     } else {
       setInvalidNickname(undefined);
-      setShowAdd(false);
-      register();
+      setLoading(true);
+      try {
+        await register();
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
     }
   };
 
@@ -133,8 +146,11 @@ const AddCredential = function () {
         registerUV
       );
       dispatch(alertActions.success("Registration successful"));
+      setAlertMessage("");
     } catch (error) {
       dispatch(alertActions.error(error.message));
+      setAlertMessage(error.message);
+      throw error;
     }
   };
 
@@ -159,6 +175,13 @@ const AddCredential = function () {
           <Modal.Title>{t("credential.add-header")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {alertMessage !== "" ? (
+            <Alert variant="danger">{alertMessage}</Alert>
+          ) : (
+            <></>
+          )}
+          <AddCredentialGuidance />
+
           <label>{t("credential.add-form-label")}</label>
           <input
             type="text"
@@ -199,8 +222,27 @@ const AddCredential = function () {
           <Button variant="secondary" onClick={handleClose}>
             {t("credential.add-cancel-button")}
           </Button>
-          <Button variant="primary" onClick={handleSaveAdd}>
-            {t("credential.add-primary-button")}
+
+          <Button
+            type="submit"
+            onClick={handleSaveAdd}
+            variant="primary"
+            disabled={loading}>
+            {loading && (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+                <span className={styles.default["loaderSpan"]}>
+                  {t("credential.add-primary-button-loading")}
+                </span>
+              </>
+            )}
+            {!loading && <span>{t("credential.add-primary-button")}</span>}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -21,7 +21,15 @@ const TrustedDeviceList = function ({ credentialItems }) {
    * Calls to method to determine if the button should appear to register a trusted device
    */
   useEffect(() => {
-    checkSetShowAddButton();
+    let isMounted = true;
+    checkSetShowAddButton().then((value) => {
+      if (isMounted) {
+        setShowAddTrustedDevice(value);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   /**
@@ -29,7 +37,7 @@ const TrustedDeviceList = function ({ credentialItems }) {
    * a user should be allowed to register a trusted device
    * Will also hide the button if a trusted device has already been confirmed on this browser
    */
-  async function checkSetShowAddButton() {
+  const checkSetShowAddButton = async () => {
     const hasPlatformAuth =
       await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     const currTrustedDevice = localStorage.getItem("trustedDevice");
@@ -37,9 +45,10 @@ const TrustedDeviceList = function ({ credentialItems }) {
       hasPlatformAuth &&
       currTrustedDevice !== TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED
     ) {
-      setShowAddTrustedDevice(true);
+      return true;
     }
-  }
+    return false;
+  };
 
   const AddTrustedDeviceProps = { continueStep() {} };
 

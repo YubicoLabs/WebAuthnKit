@@ -557,7 +557,7 @@ async function registerNewCredential(
     }
   } catch (error) {
     console.error("WebAuthnClient registerNewCredential() error: ", error);
-    return error;
+    throw error;
   }
 }
 

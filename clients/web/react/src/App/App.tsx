@@ -14,6 +14,8 @@ import LogoutPage from "../LogoutPage/LogoutPage";
 
 import aws_exports from "../aws-exports";
 
+const styles = require("../_components/component.module.css");
+
 Amplify.configure(aws_exports);
 
 /**
@@ -28,7 +30,11 @@ const App = function () {
 
   return (
     <Suspense
-      fallback={<Spinner animation="border" role="status" variant="primary" />}>
+      fallback={
+        <div className={styles.default["textCenter"]}>
+          <Spinner animation="border" role="status" variant="primary" />
+        </div>
+      }>
       <Jumbotron>
         <Row className="justify-content-md-center">
           <Col md={12} lg={6}>
