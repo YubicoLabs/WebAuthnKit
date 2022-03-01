@@ -27,14 +27,11 @@ const ERROR_CODE = "ERROR_CODE";
 const INVALID_CHALLENGE_TYPE = "INVALID_CHALLENGE_TYPE";
 
 function WebAuthnClientException(message, code = ERROR_CODE) {
-  const error = new Error(message);
   const formattedError = {
-    ...error,
+    message,
     code,
     name: webAuthnClientExceptionName,
   };
-  // error.code = code;
-  // error.name = webAuthnClientExceptionName;
   return formattedError;
 }
 
@@ -427,6 +424,7 @@ async function signUp(name, requestUV, registerWebKit) {
   } catch (error) {
     // A user can get here if they come back to register after the initial registration was interrupted
     console.log(error);
+    throw error;
   }
 
   // Second, register a webauthn credential associated with the user account

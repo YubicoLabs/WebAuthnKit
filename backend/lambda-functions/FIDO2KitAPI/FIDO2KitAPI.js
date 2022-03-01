@@ -388,7 +388,7 @@ async function finishRegisterFIDO2Credential(userName, body) {
             console.log("isPinVerified: ", isPinVerified);
             
             if(!isPinVerified){ 
-                let err = "Incorrect pin.";
+                let err = "The provided PIN was incorrect. Please attempt again.";
                 console.log("error"+ err);
                 return error(err);
             }

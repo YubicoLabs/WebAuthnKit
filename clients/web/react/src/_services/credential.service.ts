@@ -73,6 +73,7 @@ async function getAll(jwt) {
   } catch (error) {
     console.error(error);
     Promise.reject(error);
+    throw Error(error);
   }
 }
 
@@ -111,8 +112,10 @@ async function registerFinish(registration) {
     console.log(response);
     return response.data;
   } catch (error) {
-    console.error(error);
-    Promise.reject(error);
+    console.error(error.response);
+    Promise.reject(error.response.data);
+
+    throw new Error(error.response.data);
   }
 }
 

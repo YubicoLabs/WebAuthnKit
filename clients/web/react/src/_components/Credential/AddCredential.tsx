@@ -109,7 +109,6 @@ const AddCredential = function () {
         saveCallback: resolve,
         closeCallback: reject,
       };
-      console.log("SignUpStep UVPromise(): ", svpinCreateProps);
       setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
     });
   };
@@ -124,7 +123,6 @@ const AddCredential = function () {
   async function registerUV(challengeResponse) {
     dispatch(credentialActions.getUV(challengeResponse));
     const pinResult = await UVPromise();
-    console.log("SignUpStep PIN Result: ", pinResult.value);
     return pinResult.value;
   }
 
@@ -135,8 +133,8 @@ const AddCredential = function () {
    * Current state will only allow for roaming authenticators
    */
   const register = async () => {
-    console.log("register");
-    console.log("nickname: ", nickname);
+    console.log("Beginning key registration process");
+    console.log("register() nickname: ", nickname);
 
     try {
       await WebAuthnClient.registerNewCredential(

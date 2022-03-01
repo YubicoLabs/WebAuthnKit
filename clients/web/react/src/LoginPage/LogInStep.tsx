@@ -115,6 +115,7 @@ const LogInStep = function ({ navigation }) {
       console.log("LoginStep signin error");
       console.log(error);
       setUsernamelessSubmitted(false);
+      setContinueSubmitted(false);
       dispatch(alertActions.error(error.message));
       if (error.code === "UserNotFoundException") {
         signUpStep();

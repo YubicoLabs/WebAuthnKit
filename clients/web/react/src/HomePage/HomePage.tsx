@@ -79,6 +79,14 @@ const HomePage = function () {
    * After a refresh, also updates any recovery code data is this is stored in the Credentials Store
    */
   useEffect(() => {
+    /**
+     * This first conditional is needed - Occasionally the app will lose track of the current user
+     * so you will need to re-acquire the users credentials by calling getCurrentAuthenticatedUser
+     * Optional chaining used as the error field will not be there on a successful call, and could break the app
+     */
+    if (credentials?.error) {
+      dispatch(userActions.getCurrentAuthenticatedUser());
+    }
     if (credentials === {} || credentials.loading) {
       setCredentialsLoading(true);
     } else {
@@ -112,6 +120,7 @@ const HomePage = function () {
         dispatch(credentialActions.getAll(jwt));
       }
     }
+    console.log(alert);
   }, [alert]);
 
   /**

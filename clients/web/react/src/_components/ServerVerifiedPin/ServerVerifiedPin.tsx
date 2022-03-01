@@ -119,7 +119,6 @@ const ServerVerifiedPin = function (props) {
 
   const validForm = (currentPin, currentConfirmPin) => {
     const pinResult = validate({ pin: currentPin }, constraints);
-    console.log(pinResult);
     if (pinResult) {
       setInvalidPin(pinResult.pin.join(". "));
     } else {
@@ -211,7 +210,6 @@ const ServerVerifiedPin = function (props) {
    */
   useEffect(() => {
     if (finishUVRequest !== undefined && props.type !== "change") {
-      console.log("showing sv-pin: ", finishUVRequest);
       handleShow();
     }
   }, [finishUVRequest]);
