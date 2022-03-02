@@ -423,8 +423,12 @@ async function signUp(name, requestUV, registerWebKit) {
     console.log("SignUp: ", user);
   } catch (error) {
     // A user can get here if they come back to register after the initial registration was interrupted
-    console.log(error);
-    throw error;
+    if (error.code === "UsernameExistsException") {
+      console.error(error);
+      console.log("Will attempt to continue the method");
+    } else {
+      throw error;
+    }
   }
 
   // Second, register a webauthn credential associated with the user account

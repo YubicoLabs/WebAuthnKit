@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -25,6 +26,12 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
+    new CopyPlugin([
+      {
+        from: "public",
+        to: "public",
+      },
+    ]),
   ],
   devServer: {
     historyApiFallback: true,
