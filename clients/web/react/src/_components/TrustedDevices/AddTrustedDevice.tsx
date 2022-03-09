@@ -87,6 +87,7 @@ const AddTrustedDevice = function ({ continueStep }) {
       setLoading(true);
       try {
         await register();
+        continueStep();
       } catch (error) {
         console.error(error);
         setLoading(false);
