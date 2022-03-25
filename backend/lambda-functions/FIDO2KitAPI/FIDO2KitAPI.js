@@ -180,7 +180,7 @@ async function updateFIDO2CredentialNickname(username, body) {
     const payload = JSON.stringify({
         "type": "updateCredentialNickname",
         "username": username,
-        "credentialId": data.credential.credentialId.base64,
+        "credentialId": data.credential.credentialId.base64url,
         "nickname": data.credentialNickname.value,
     });
     console.log("updateCredentialNickname request payload: "+payload);
@@ -264,15 +264,15 @@ async function startUsernamelessAuthentication() {
         let startAuthPayload = JSON.parse(JSON.parse(response.Payload));
         console.log("startAuthPayload: ", startAuthPayload);
 
-        startAuthPayload.requestId = startAuthPayload.requestId.base64;
+        startAuthPayload.requestId = startAuthPayload.requestId.base64url;
         console.log("requestId: ", startAuthPayload.requestId);
         startAuthPayload.publicKeyCredentialRequestOptions.userVerification = startAuthPayload.publicKeyCredentialRequestOptions.userVerification.toLowerCase();
-        startAuthPayload.publicKeyCredentialRequestOptions.challenge = startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64;
+        startAuthPayload.publicKeyCredentialRequestOptions.challenge = startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64url;
         console.log("challenge: ", startAuthPayload.publicKeyCredentialRequestOptions.challenge);
         if(startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials){
             startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials = startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials.map( (cred) => { 
                 cred.type = cred.type.toLowerCase().replace('_','-');
-                cred.id = cred.id.base64;
+                cred.id = cred.id.url;
                 return cred
             });
         }
@@ -322,9 +322,9 @@ async function startRegisterFIDO2Credential(profile, body, uid) {
 
         const coseLookup = {"ES256": -7, "EdDSA": -8, "RS256": -257};
         
-        startRegisterPayload.requestId = startRegisterPayload.requestId.base64;
-        startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64;
-        startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64;
+        startRegisterPayload.requestId = startRegisterPayload.requestId.base64url;
+        startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64url;
+        startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64url;
         startRegisterPayload.publicKeyCredentialCreationOptions.attestation = startRegisterPayload.publicKeyCredentialCreationOptions.attestation.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey.toLowerCase();
@@ -341,7 +341,7 @@ async function startRegisterFIDO2Credential(profile, body, uid) {
         });
         startRegisterPayload.publicKeyCredentialCreationOptions.excludeCredentials = startRegisterPayload.publicKeyCredentialCreationOptions.excludeCredentials.map( (cred) => { 
             cred.type = cred.type.toLowerCase().replace('_','-');
-            cred.id = cred.id.base64;
+            cred.id = cred.id.base64url;
             console.log("cred: "+ JSON.stringify(cred));
             return cred;
         });

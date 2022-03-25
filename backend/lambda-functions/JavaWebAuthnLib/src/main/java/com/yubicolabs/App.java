@@ -19,31 +19,24 @@ import com.yubico.webauthn.RegistrationResult;
 import com.yubico.webauthn.RelyingParty;
 import com.yubico.webauthn.StartAssertionOptions;
 import com.yubico.webauthn.StartRegistrationOptions;
-import com.yubico.webauthn.attestation.Attestation;
-import com.yubico.webauthn.attestation.AttestationResolver;
-import com.yubico.webauthn.attestation.MetadataObject;
-import com.yubico.webauthn.attestation.MetadataService;
-import com.yubico.webauthn.attestation.StandardMetadataService;
-import com.yubico.webauthn.attestation.TrustResolver;
-import com.yubico.webauthn.attestation.resolver.CompositeAttestationResolver;
-import com.yubico.webauthn.attestation.resolver.CompositeTrustResolver;
-import com.yubico.webauthn.attestation.resolver.SimpleAttestationResolver;
-import com.yubico.webauthn.attestation.resolver.SimpleTrustResolverWithEquality;
 import com.yubico.webauthn.data.AttestationConveyancePreference;
 import com.yubico.webauthn.data.AuthenticatorSelectionCriteria;
 import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
+import com.yubico.webauthn.data.ResidentKeyRequirement;
 import com.yubico.webauthn.data.UserIdentity;
 import com.yubico.webauthn.data.exception.Base64UrlException;
 import com.yubico.webauthn.exception.AssertionFailedException;
 import com.yubico.webauthn.exception.RegistrationFailedException;
 import com.yubicolabs.data.AssertionRequestWrapper;
 import com.yubicolabs.data.AssertionResponse;
+import com.yubicolabs.data.AttestationResult;
 import com.yubico.webauthn.data.AuthenticatorAttachment;
 import com.yubicolabs.data.CredentialRegistration;
 import com.yubicolabs.data.RegistrationRequest;
 import com.yubicolabs.data.RegistrationResponse;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXRevocationChecker.Option;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
@@ -53,6 +46,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+
+import com.yubico.fido.metadata.FidoMetadataService;
+import com.yubico.fido.metadata.MetadataBLOB;
+import com.yubico.fido.metadata.FidoMetadataDownloader;
+import com.yubico.fido.metadata.MetadataBLOBPayloadEntry;
+import com.yubico.fido.metadata.MetadataStatement;
+
+import java.io.File;
+import java.util.Set;
 
 /**
  * Lambda function entry point. You can change to use other pojo type or
@@ -79,86 +81,39 @@ public class App implements RequestHandler<Object, Object> {
     private final RegistrationRequestStorage registerRequestStorage = new RegistrationRequestStorage();
     private final RegistrationStorage userStorage = new RDSRegistrationStorage();
 
-    private static final String METADATA_PATH = "/metadata.json";
+    private final FidoMetadataService mds = initMDS();
 
-    private final TrustResolver trustResolver = createTrustResolver();
+    private FidoMetadataService initMDS() {
+        try {
+            MetadataBLOB downloader = FidoMetadataDownloader.builder()
+                    .expectLegalHeader(
+                            "Retrieval and use of this BLOB indicates acceptance of the appropriate agreement located at https://fidoalliance.org/metadata/metadata-legal-terms/")
+                    .useDefaultTrustRoot()
+                    .useTrustRootCacheFile(new File("/tmp/fido-mds-trust-root-cache.bin"))
+                    .useDefaultBlob()
+                    .useBlobCacheFile(new File("/tmp/fido-mds-blob-cache.bin"))
+                    .build()
+                    .loadBlob();
 
-    private final MetadataService metadataService = createMetaDataService();
+            FidoMetadataService mds = FidoMetadataService.builder()
+                    .useBlob(downloader)
+                    .build();
+            return mds;
+        } catch (Exception e) {
+            log.info("Error initializing MDS: {}", gson.toJson(e));
+            return null;
+        }
+    }
 
     private final RelyingParty rp = RelyingParty.builder()
             .identity(Config.getRpIdentity())
             .credentialRepository(this.userStorage)
             .origins(Config.getOrigins())
             .attestationConveyancePreference(Optional.of(AttestationConveyancePreference.DIRECT))
-            .metadataService(Optional.of(metadataService))
-            .allowUnrequestedExtensions(true)
+            .attestationTrustSource(mds)
             .allowUntrustedAttestation(true)
             .validateSignatureCounter(true)
             .build();
-
-    private static MetadataObject readMetadata() {
-        InputStream is = App.class.getResourceAsStream(METADATA_PATH);
-        try {
-            return JacksonCodecs.json().readValue(is, MetadataObject.class);
-        } catch (IOException e) {
-            log.error("Failed to read metadata from " + METADATA_PATH, e);
-            throw new RuntimeException(e.getMessage());
-        } finally {
-            Closeables.closeQuietly(is);
-        }
-    }
-
-    private TrustResolver createTrustResolver() {
-        try {
-            return new CompositeTrustResolver(
-                    Arrays.asList(
-                            StandardMetadataService.createDefaultTrustResolver(), createExtraTrustResolver()));
-        } catch (CertificateException e) {
-            log.error("Failed to read trusted certificate(s)", e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    private MetadataService createMetaDataService() {
-        try {
-            return new StandardMetadataService(
-                    new CompositeAttestationResolver(
-                            Arrays.asList(
-                                    StandardMetadataService.createDefaultAttestationResolver(trustResolver),
-                                    createExtraMetadataResolver(trustResolver))));
-        } catch (CertificateException e) {
-            log.error("Failed to read trusted certificate(s)", e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    /**
-     * Create a {@link TrustResolver} that accepts attestation certificates that are
-     * directly recognised as trust anchors.
-     */
-    private static TrustResolver createExtraTrustResolver() {
-        try {
-            MetadataObject metadata = readMetadata();
-            return new SimpleTrustResolverWithEquality(metadata.getParsedTrustedCertificates());
-        } catch (CertificateException e) {
-            log.error("Failed to read trusted certificate(s)", e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    /**
-     * Create a {@link AttestationResolver} with additional metadata for YubiKey
-     * devices.
-     */
-    private static AttestationResolver createExtraMetadataResolver(TrustResolver trustResolver) {
-        try {
-            MetadataObject metadata = readMetadata();
-            return new SimpleAttestationResolver(Collections.singleton(metadata), trustResolver);
-        } catch (CertificateException e) {
-            log.error("Failed to read trusted certificate(s)", e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 
     public App() {
         jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -255,7 +210,8 @@ public class App implements RequestHandler<Object, Object> {
                         StartRegistrationOptions.builder()
                                 .user(registrationUserId)
                                 .authenticatorSelection(AuthenticatorSelectionCriteria.builder()
-                                        .requireResidentKey(requireResidentKey)
+                                        .residentKey(requireResidentKey ? ResidentKeyRequirement.REQUIRED
+                                                : ResidentKeyRequirement.DISCOURAGED)
                                         .authenticatorAttachment(
                                                 requireAuthenticatorAttachment != null
                                                         ? requireAuthenticatorAttachment
@@ -286,7 +242,8 @@ public class App implements RequestHandler<Object, Object> {
         RegistrationResponse response;
 
         try {
-            response = jsonMapper.readValue(responseJson.toString(), RegistrationResponse.class);
+            response = jsonMapper.readValue(responseJson.toString(),
+                    RegistrationResponse.class);
         } catch (Exception e) {
             log.error("JSON error in finishRegistration. Failed to decode response object.", e);
             return e;
@@ -359,7 +316,8 @@ public class App implements RequestHandler<Object, Object> {
 
         final AssertionResponse response;
         try {
-            response = jsonMapper.readValue(responseJson.toString(), AssertionResponse.class);
+            response = jsonMapper.readValue(responseJson.toString(),
+                    AssertionResponse.class);
         } catch (Exception e) {
             log.error("Assertion failed! Failed to decode response object", e);
             return e;
@@ -496,6 +454,17 @@ public class App implements RequestHandler<Object, Object> {
             RegistrationResponse response,
             RegistrationResult result,
             RegistrationRequest request) {
+        Optional<AttestationResult> attestationMetadata;
+        if (result.isAttestationTrusted()) {
+            Optional<MetadataStatement> thisAtt = mds.findEntries(result).stream().findAny()
+                    .flatMap(MetadataBLOBPayloadEntry::getMetadataStatement);
+            attestationMetadata = Optional
+                    .ofNullable(AttestationResult.builder().aaguid(thisAtt.flatMap(MetadataStatement::getAaguid))
+                            .attachmentHint(thisAtt.flatMap(MetadataStatement::getAttachmentHint))
+                            .icon(thisAtt.flatMap(MetadataStatement::getIcon)).build());
+        } else {
+            attestationMetadata = Optional.empty();
+        }
         return addRegistration(
                 userIdentity,
                 nickname,
@@ -507,7 +476,9 @@ public class App implements RequestHandler<Object, Object> {
                         .signatureCount(response.getCredential().getResponse().getParsedAuthenticatorData()
                                 .getSignatureCounter())
                         .build(),
-                result.getAttestationMetadata(),
+
+                attestationMetadata,
+                // mds.findEntries(result).stream().findAny().flatMap(MetadataBLOBPayloadEntry::getMetadataStatement),
                 request);
     }
 
@@ -516,7 +487,7 @@ public class App implements RequestHandler<Object, Object> {
             Optional<String> nickname,
             long signatureCount,
             RegisteredCredential credential,
-            Optional<Attestation> attestationMetadata,
+            Optional<AttestationResult> attestationMetadata,
             RegistrationRequest request) {
         CredentialRegistration reg = CredentialRegistration.builder()
                 .userIdentity(userIdentity)

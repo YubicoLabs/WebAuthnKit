@@ -56,7 +56,7 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
       const credentialToUpdate = {
         credential: {
           credentialId: {
-            base64: ls_credential.id,
+            base64url: ls_credential.id,
           },
         },
         credentialNickname: {

@@ -40,7 +40,7 @@ const EditCredential = function ({ credential }) {
   const handleDelete = () => {
     setShow(false);
     dispatch(
-      credentialActions.delete(credential.credential.credentialId.base64)
+      credentialActions.delete(credential.credential.credentialId.base64url)
     );
   };
   const constraints = {

@@ -1,8 +1,8 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { Button, Image } from "react-bootstrap";
-import { credentialActions } from "../../_actions";
 import { useTranslation } from "react-i18next";
+import { credentialActions } from "../../_actions";
 
 const styles = require("../component.module.css");
 
@@ -22,10 +22,10 @@ const TrustedDevice = function ({ credential }) {
    */
   const handleDelete = () => {
     dispatch(
-      credentialActions.delete(credential.credential.credentialId.base64)
+      credentialActions.delete(credential.credential.credentialId.base64url)
     );
     if (
-      credential.credential.credentialId.base64 ===
+      credential.credential.credentialId.base64url ===
       localStorage.getItem("trustedDeviceID")
     ) {
       localStorage.removeItem("trustedDevice");
