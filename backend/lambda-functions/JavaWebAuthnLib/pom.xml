@@ -65,6 +65,30 @@
         </dependency>
 
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.13.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>url-connection-client</artifactId>
         </dependency>
@@ -124,13 +148,32 @@
         <dependency>
             <groupId>com.yubico</groupId>
             <artifactId>webauthn-server-core</artifactId>
-            <version>1.12.1</version>
+            <version>1.13.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.yubico</groupId>
             <artifactId>webauthn-server-attestation</artifactId>
-            <version>1.12.1</version>
+            <version>1.13.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yubico</groupId>
+            <artifactId>yubico-util</artifactId>
+            <version>1.13.0</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.upokecenter</groupId>
+            <artifactId>cbor</artifactId>
+            <version>4.5.2</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.augustcellars.cose</groupId>
+            <artifactId>cose-java</artifactId>
+            <version>1.1.0</version>
         </dependency>
 
         <!-- Test Dependencies -->

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yubico.fido.metadata.AAGUID;
 import com.yubico.fido.metadata.AttachmentHint;
+import com.yubico.fido.metadata.ProtocolFamily;
 import com.yubico.webauthn.RegisteredCredential;
+import com.yubico.webauthn.data.AuthenticatorTransport;
 import com.yubico.webauthn.data.UserIdentity;
 import java.time.Instant;
 import java.util.Optional;
@@ -21,4 +23,6 @@ public class AttestationResult {
   Optional<AAGUID> aaguid;
   Optional<Set<AttachmentHint>> attachmentHint;
   Optional<String> icon;
+  Optional<String> description;
+  Optional<Set<AuthenticatorTransport>> authenticatorTransport;
 }

@@ -21,6 +21,7 @@ import com.yubico.webauthn.StartAssertionOptions;
 import com.yubico.webauthn.StartRegistrationOptions;
 import com.yubico.webauthn.data.AttestationConveyancePreference;
 import com.yubico.webauthn.data.AuthenticatorSelectionCriteria;
+import com.yubico.webauthn.data.AuthenticatorTransport;
 import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import com.yubico.webauthn.data.ResidentKeyRequirement;
@@ -49,9 +50,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.yubico.fido.metadata.FidoMetadataService;
 import com.yubico.fido.metadata.MetadataBLOB;
+import com.yubico.fido.metadata.AAGUID;
+import com.yubico.fido.metadata.AttachmentHint;
+import com.yubico.fido.metadata.AuthenticatorGetInfo;
 import com.yubico.fido.metadata.FidoMetadataDownloader;
 import com.yubico.fido.metadata.MetadataBLOBPayloadEntry;
 import com.yubico.fido.metadata.MetadataStatement;
+import com.yubico.fido.metadata.ProtocolFamily;
 
 import java.io.File;
 import java.util.Set;
@@ -456,12 +461,7 @@ public class App implements RequestHandler<Object, Object> {
             RegistrationRequest request) {
         Optional<AttestationResult> attestationMetadata;
         if (result.isAttestationTrusted()) {
-            Optional<MetadataStatement> thisAtt = mds.findEntries(result).stream().findAny()
-                    .flatMap(MetadataBLOBPayloadEntry::getMetadataStatement);
-            attestationMetadata = Optional
-                    .ofNullable(AttestationResult.builder().aaguid(thisAtt.flatMap(MetadataStatement::getAaguid))
-                            .attachmentHint(thisAtt.flatMap(MetadataStatement::getAttachmentHint))
-                            .icon(thisAtt.flatMap(MetadataStatement::getIcon)).build());
+            attestationMetadata = buildAttestationResult(result);
         } else {
             attestationMetadata = Optional.empty();
         }
@@ -508,5 +508,21 @@ public class App implements RequestHandler<Object, Object> {
                 credential);
         userStorage.addRegistrationByUsername(userIdentity.getName(), reg);
         return reg;
+    }
+
+    private Optional<AttestationResult> buildAttestationResult(RegistrationResult result) {
+        Optional<MetadataStatement> thisAtt = mds.findEntries(new AAGUID(result.getAaguid())).stream().findAny()
+                .flatMap(MetadataBLOBPayloadEntry::getMetadataStatement);
+        log.debug("Here is the found entry: {}", thisAtt);
+        Optional<AAGUID> aaguid = thisAtt.flatMap(MetadataStatement::getAaguid);
+        Optional<Set<AttachmentHint>> attachmentHint = thisAtt.flatMap(MetadataStatement::getAttachmentHint);
+        Optional<String> icon = thisAtt.flatMap(MetadataStatement::getIcon);
+        Optional<String> description = thisAtt.flatMap(MetadataStatement::getDescription);
+        Optional<Set<AuthenticatorTransport>> authenticatorTransport = thisAtt
+                .flatMap(MetadataStatement::getAuthenticatorGetInfo).flatMap(AuthenticatorGetInfo::getTransports);
+        AttestationResult attestationResult = AttestationResult.builder().aaguid(aaguid).attachmentHint(attachmentHint)
+                .icon(icon)
+                .description(description).authenticatorTransport(authenticatorTransport).build();
+        return Optional.ofNullable(attestationResult);
     }
 }
