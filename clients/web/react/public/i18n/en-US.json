@@ -66,7 +66,7 @@
     "plat-auth-loading": "Getting your Trusted Devices!",
     "roam-auth-title": "Security Keys",
     "roam-auth-loading": "Getting your Security Keys!",
-    "svpin-title": "Server Verified PIN",
+    "svpin-title": "U2F Password",
     "recovery-code-title": "Recovery Options",
     "recovery-code-loading": "Getting your Recovery Codes!",
     "sign-out": "Sign Out"
@@ -128,8 +128,8 @@
     "close-button": "Close"
   },
   "sv-pin": {
-    "enter-pin": "Enter PIN",
-    "confirm-pin": "Confirm PIN",
+    "enter-pin": "Enter U2F Password",
+    "confirm-pin": "Confirm U2F Password",
     "cancel": "Cancel"
   },
   "add-credential-guidance": {

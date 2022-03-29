@@ -79,19 +79,19 @@ const ServerVerifiedPin = function (props) {
       case "create":
         setLabel({
           buttonText: "",
-          modalHeader: "Create Server-Verified PIN",
-          modalText: "Please create a Server-Verified PIN",
-          modalSubmitText: "Submit PIN",
+          modalHeader: "Create U2F Password",
+          modalText: "Please create a U2F Password",
+          modalSubmitText: "Submit U2F Password",
         });
         setShowButton(false);
         setShowConfirmPin(true);
         break;
       case "change":
         setLabel({
-          buttonText: "Change your Server-Verified PIN",
-          modalHeader: "Change your Server-Verified PIN",
-          modalText: "Enter your new PIN information",
-          modalSubmitText: "Change PIN",
+          buttonText: "Change your U2F Password",
+          modalHeader: "Change your U2F Password",
+          modalText: "Enter your new U2F Password information",
+          modalSubmitText: "Change U2F Password",
         });
         setShowButton(true);
         setShowConfirmPin(true);
@@ -99,8 +99,8 @@ const ServerVerifiedPin = function (props) {
       case "dispatch":
         setLabel({
           buttonText: "",
-          modalHeader: "Server-Verified PIN",
-          modalText: "Enter your Server-Verified PIN",
+          modalHeader: "U2F Password",
+          modalText: "Enter your U2F Password",
           modalSubmitText: "Submit",
         });
         setShowButton(false);
