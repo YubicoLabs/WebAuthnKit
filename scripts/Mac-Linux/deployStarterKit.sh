@@ -213,7 +213,7 @@ docker run -w /webauthnkit/clients/web/react --volume=$STARTER_KIT_DIR:/webauthn
 # Archive /dist contents of React Web App
 # Zip up all the files under React  ~/dist directory, but not the directory itself
 echo "Step 8 [Web Client] Zipping up the React app in preperation for Amplify deployment"
-zip -r -j ../.././clients/web/react/dist/Archive.zip ../.././clients/web/react/dist/* 
+(cd ../.././clients/web/react/dist && zip -r Archive.zip *)
 
 #9 |************** Upload React Web App Archive to S3 *****************************|
 echo "Step 9 [Web Client] Uploading Web Client to S3 for staging..."
