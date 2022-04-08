@@ -36,7 +36,14 @@ const InitUserStep = function ({ navigation }) {
           }
         })
         .catch(function (err) {
-          console.error(err);
+          console.error(
+            t("console.error", {
+              COMPONENT: "InitUserStep",
+              METHOD: "registerTrustedDeviceOrContinue",
+              REASON: t("console.reason.initUserStep0"),
+            }),
+            err
+          );
           history.push("/");
         });
     } else {

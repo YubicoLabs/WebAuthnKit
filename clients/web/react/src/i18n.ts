@@ -28,4 +28,10 @@ function onLanguageChanged(callback: (language: string) => void) {
   return i18n.on("languageChanged", callback);
 }
 
-export { initI18n, getCurrentLanguage, changeLanguage, onLanguageChanged };
+export {
+  initI18n,
+  getCurrentLanguage,
+  changeLanguage,
+  onLanguageChanged,
+  i18n,
+};

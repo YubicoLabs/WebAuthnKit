@@ -60,21 +60,56 @@ const LogInTrustedDeviceStep = function ({ navigation }) {
    * Call to the get() api to get the credentials based on the public key value in the starter response
    */
   async function signInWithoutUsername() {
-    console.log("signInWithoutUsername");
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginTrustedDeviceStep",
+        METHOD: "signInWithoutUsername()",
+        LOG_REASON: t("console.reason.loginTrustedDevice0"),
+      })
+    );
+
     // get usernameless auth request
-    console.log("webAuthnStartResponse: ", webAuthnStartResponse);
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginTrustedDeviceStep",
+        METHOD: "signInWithoutUsername()",
+        LOG_REASON: t("console.reason.loginTrustedDevice1"),
+      }),
+      webAuthnStartResponse
+    );
 
     const publicKey = {
       publicKey: webAuthnStartResponse.publicKeyCredentialRequestOptions,
     };
-    console.log("publicKey: ", publicKey);
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginTrustedDeviceStep",
+        METHOD: "signInWithoutUsername()",
+        LOG_REASON: t("console.reason.loginTrustedDevice2"),
+      }),
+      publicKey
+    );
 
     const assertionResponse = await get(publicKey);
-    console.log("assertionResponse: ", assertionResponse);
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginTrustedDeviceStep",
+        METHOD: "signInWithoutUsername()",
+        LOG_REASON: t("console.reason.loginTrustedDevice3"),
+      }),
+      assertionResponse
+    );
 
     // get username from assertionResponse
     const username = assertionResponse.response.userHandle;
-    console.log("userhandle: ", username);
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginTrustedDeviceStep",
+        METHOD: "signInWithoutUsername()",
+        LOG_REASON: t("console.reason.loginTrustedDevice4"),
+      }),
+      username
+    );
 
     const challengeResponse = {
       credential: assertionResponse,
@@ -89,33 +124,51 @@ const LogInTrustedDeviceStep = function ({ navigation }) {
           user.challengeName === "CUSTOM_CHALLENGE" &&
           user.challengeParam.type === "webauthn.create"
         ) {
-          dispatch(alertActions.error("Please register an account"));
+          dispatch(alertActions.error(t("alerts.register-account")));
           history.push("/register");
         } else if (
           user.challengeName === "CUSTOM_CHALLENGE" &&
           user.challengeParam.type === "webauthn.get"
         ) {
           // to send the answer of the custom challenge
-          console.log("uv sending Custom Challenge Answer");
+          console.info(
+            t("console.info", {
+              COMPONENT: "LoginTrustedDeviceStep",
+              METHOD: "signInWithoutUsername()",
+              LOG_REASON: t("console.reason.loginTrustedDevice5"),
+            })
+          );
           Auth.sendCustomChallengeAnswer(
             user,
             JSON.stringify(challengeResponse)
           )
             .then((user) => {
-              console.log("someUser Stuff", user);
               navigation.go("InitUserStep");
             })
             .catch((err) => {
-              console.error("sendCustomChallengeAnswer error: ", err);
+              console.error(
+                t("console.error", {
+                  COMPONENT: "LoginTrustedDeviceStep",
+                  METHOD: "signInWithoutUsername()",
+                  REASON: t("console.reason.loginTrustedDevice6"),
+                }),
+                err
+              );
               dispatch(alertActions.error(err.message));
             });
         } else {
-          dispatch(alertActions.error("Invalid server response"));
+          dispatch(alertActions.error(t("alerts.invalid-server-response")));
         }
       })
       .catch((error) => {
-        console.error("signIn error");
-        console.error(error);
+        console.error(
+          t("console.error", {
+            COMPONENT: "LoginTrustedDeviceStep",
+            METHOD: "signInWithoutUsername()",
+            REASON: t("console.reason.loginTrustedDevice7"),
+          }),
+          error
+        );
         dispatch(alertActions.error(error.message));
         setContinueSubmitted(false);
       });

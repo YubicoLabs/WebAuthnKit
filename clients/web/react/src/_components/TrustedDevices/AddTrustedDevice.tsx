@@ -89,7 +89,14 @@ const AddTrustedDevice = function ({ continueStep }) {
         await register();
         continueStep();
       } catch (error) {
-        console.error(error);
+        console.error(
+          t("console.error", {
+            COMPONENT: "AddTrustedDevice",
+            METHOD: "handleSaveAdd()",
+            REASON: t("console.reason.addTrustedDevice0"),
+          }),
+          error
+        );
         setLoading(false);
       }
     }
@@ -102,10 +109,13 @@ const AddTrustedDevice = function ({ continueStep }) {
    * Removing requireAuthenticatorAttachment from the register POST will allow any key to be registered
    */
   const register = async () => {
-    console.log("register");
-    console.log("nickname: ", nickname);
-
     try {
+      /**
+       * PLATFORM specified as the authenticator attachment to force
+       * credential creation to use a platform authenticator
+       * More information can be found here: https://www.w3.org/TR/webauthn-2/#dom-authenticatorselectioncriteria-residentkey
+       * true required to force discoverable credentials to be created on the platform authenticator, which is required
+       */
       await WebAuthnClient.registerNewCredential(
         nickname,
         true,

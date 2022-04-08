@@ -75,7 +75,14 @@ const ForgotStep = function ({ navigation }) {
     try {
       // Signs in the user with their current username
       const cognitoUser = await Auth.signIn(inputs.username);
-      console.log("CognitoUser: ", cognitoUser);
+      console.info(
+        t("console.info", {
+          COMPONENT: "ForgotStep",
+          METHOD: "handleRecoveryCode",
+          LOG_REASON: t("console.reason.forgotStep0"),
+        }),
+        cognitoUser
+      );
 
       // Sends the challenge answer from the login, along with the recoery code input by the user
       Auth.sendCustomChallengeAnswer(
@@ -83,39 +90,58 @@ const ForgotStep = function ({ navigation }) {
         JSON.stringify({ recoveryCode: code })
       )
         .then((user) => {
-          // IF the code is valid then log in the user
-          console.log(user);
-
           Auth.currentSession()
             .then((data) => {
-              dispatch(alertActions.success("Authentication successful"));
+              dispatch(alertActions.success(t("alerts.auth-successful")));
               const userData = {
                 id: 1,
                 username: user.attributes.name,
                 token: data.getAccessToken().getJwtToken(),
               };
               localStorage.setItem("user", JSON.stringify(userData));
-              console.log("userData ", localStorage.getItem("user"));
               navigation.go("InitUserStep");
             })
             .catch((err) => {
-              console.log("currentSession error: ", err);
-              const errorAlert = `Something went wrong. ${err.message}`;
+              console.error(
+                t("console.error", {
+                  COMPONENT: "ForgotStep",
+                  METHOD: "handleRecoveryCode",
+                  REASON: t("console.reason.forgotStep1"),
+                }),
+                err
+              );
+
+              const errorAlert = `${t("alerts.something-went-wrong")}. ${
+                err.message
+              }`;
               dispatch(alertActions.error(errorAlert));
             });
         })
         .catch((err) => {
           // Error with the recovery code
-          console.log("sendCustomChallengeAnswer error: ", err);
+          console.error(
+            t("console.error", {
+              COMPONENT: "ForgotStep",
+              METHOD: "handleRecoveryCode",
+              REASON: t("console.reason.forgotStep2"),
+            }),
+            err
+          );
           setContinueSubmitted(false);
-          const msg = "Invalid recovery code";
-          dispatch(alertActions.error(msg));
+          dispatch(alertActions.error(t("alerts.invalid-rec-code")));
         });
     } catch (error) {
       // Error with the recovery code
-      console.error("recovery code error");
       setContinueSubmitted(false);
-      console.error(error);
+      console.error(
+        t("console.error", {
+          COMPONENT: "ForgotStep",
+          METHOD: "handleRecoveryCode",
+          REASON: t("console.reason.forgotStep3"),
+        }),
+        error
+      );
+
       dispatch(alertActions.error(error.message));
     }
   }

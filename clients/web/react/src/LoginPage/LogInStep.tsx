@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import validate from "validate.js";
 import { useTranslation } from "react-i18next";
 import { WebAuthnClient } from "../_components";
-import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
+import U2FPassword from "../_components/u2fPassword/u2fPassword";
 import { history } from "../_helpers";
 import { credentialActions, alertActions } from "../_actions";
 
@@ -36,7 +36,7 @@ const LogInStep = function ({ navigation }) {
   // Loading indicator for the Usernameless Continue Button, used to prevent the user from making multiple registration requests
   const [usernamelessSubmitted, setUsernamelessSubmitted] = useState(false);
 
-  const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+  const [u2fPassword, setu2fPassword] = useState<ReactElement>();
 
   // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
   const [initialInput, setInitialInput] = useState(false);
@@ -59,33 +59,31 @@ const LogInStep = function ({ navigation }) {
   const dispatch = useDispatch();
 
   /**
-   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
-   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
-   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
+   * If the key is a U2F key, then a U2F Password needs to be configured on key registration
+   * This promise allows the U2F Password to be initialized by the WebAuthN component through a promise
+   * This Step will configure the U2F Password components properties, and await for a Save response to be sent from the component
    * @returns A promise containing the PIN to be used for registration in the WebAuthN component
    */
   const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
-      const svpinCreateProps = {
+      const u2fPassCreateProps = {
         type: "dispatch",
         saveCallback: resolve,
         closeCallback: reject,
       };
-      console.log("SignUpStep UVPromise(): ", svpinCreateProps);
-      setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
+      setu2fPassword(<U2FPassword {...u2fPassCreateProps} />);
     });
   };
 
   /**
-   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
-   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
-   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
-   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   * If the key is a U2F key, then a U2F Password needs to be configured on key registration
+   * This promise allows the U2F Password to be initialized by the WebAuthn component through a promise
+   * This Step will configure the U2F Password components properties, and await for a Save response to be sent from the component
+   * @returns A promise containing the U2F Password to be used for registration in the WebAuthn component
    */
   async function uv(challengeResponse) {
     dispatch(credentialActions.getUV(challengeResponse));
     const pinResult = await UVPromise();
-    console.log("SignUpStep PIN Result: ", pinResult.value);
     return pinResult.value;
   }
 
@@ -95,25 +93,59 @@ const LogInStep = function ({ navigation }) {
    * If successful the user will proceed to the init user step
    */
   async function signIn(username) {
-    console.log("LoginStep Signing In User, ", username);
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginStep",
+        METHOD: "signIn()",
+        LOG_REASON: t("console.reason.loginStep0"),
+      }),
+      username
+    );
 
     try {
       const userData = await WebAuthnClient.signIn(username, uv);
-      console.log("LogInStep signin userData: ", userData);
+      console.info(
+        t("console.info", {
+          COMPONENT: "LoginStep",
+          METHOD: "signIn()",
+          LOG_REASON: t("console.reason.loginStep1"),
+        }),
+        userData
+      );
 
       if (userData === undefined) {
-        console.log("LogInStep error: userData undefined");
-        dispatch(alertActions.error("Something went wrong. Please try again."));
+        console.info(
+          t("console.info", {
+            COMPONENT: "LoginStep",
+            METHOD: "signIn()",
+            LOG_REASON: t("console.reason.loginStep2"),
+          })
+        );
+        dispatch(alertActions.error(t("alerts.something-went-wrong")));
       } else {
-        dispatch(alertActions.success("Login Successful"));
+        dispatch(alertActions.success(t("alerts.login-successful")));
         localStorage.setItem("credential", JSON.stringify(userData.credential));
         localStorage.setItem("username", userData.username);
-        console.log("LogInStep Successful credential ", userData.credential);
+        console.info(
+          t("console.info", {
+            COMPONENT: "LoginStep",
+            METHOD: "signIn()",
+            LOG_REASON: t("console.reason.loginStep3"),
+          }),
+          userData.credential
+        );
         InitUserStep();
       }
     } catch (error) {
-      console.log("LoginStep signin error");
-      console.log(error);
+      console.error(
+        t("console.error", {
+          COMPONENT: "LoginStep",
+          METHOD: "signIn()",
+          REASON: t("console.reason.loginStep4"),
+        }),
+        error
+      );
+
       setUsernamelessSubmitted(false);
       setContinueSubmitted(false);
       dispatch(alertActions.error(error.message));
@@ -149,7 +181,13 @@ const LogInStep = function ({ navigation }) {
    * Sends undefined to the WebAuthN component, logic to handle undefined is defined there
    */
   const usernamelessLogin = async () => {
-    console.log("LoginStep, beginning usernamelessLogin");
+    console.info(
+      t("console.info", {
+        COMPONENT: "LoginStep",
+        METHOD: "signIn()",
+        LOG_REASON: t("console.reason.loginStep5"),
+      })
+    );
     setUsernamelessSubmitted(true);
     await signIn(undefined);
   };
@@ -336,7 +374,7 @@ const LogInStep = function ({ navigation }) {
           </span>
         </div>
       </div>
-      {serverVerifiedPin}
+      {u2fPassword}
     </>
   );
 };

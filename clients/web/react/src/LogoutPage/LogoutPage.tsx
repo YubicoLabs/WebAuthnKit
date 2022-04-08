@@ -22,7 +22,14 @@ const LogoutPage = function () {
       history.push("/");
       setTimeout(() => window.location.reload(), 100);
     } catch (err) {
-      console.error("There was an error signing out the user: ", err);
+      console.error(
+        t("console.error", {
+          COMPONENT: "LogoutPage",
+          METHOD: "logoutUser",
+          REASON: t("console.reason.logout0"),
+        }),
+        err
+      );
     }
   };
 

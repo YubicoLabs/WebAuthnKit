@@ -56,7 +56,14 @@ const DeleteUser = function ({ userToken }) {
           })
       )
       .catch((error) => {
-        console.error(error);
+        console.error(
+          t("console.error", {
+            COMPONENT: "DeleteUser",
+            METHOD: "handleDelete()",
+            REASON: t("console.reason.deleteUser0"),
+          }),
+          error
+        );
         dispatch(alertActions.error(error.message));
       });
   };

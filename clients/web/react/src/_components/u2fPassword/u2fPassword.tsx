@@ -7,17 +7,17 @@ import { validate } from "validate.js";
 const styles = require("../component.module.css");
 
 /**
- * Modal that shows the server verified PIN menu allowing the user to SET or CHANGE the pin based on the type of request
+ * Modal that shows the U2F Password menu allowing the user to SET or CHANGE the pin based on the type of request
  * Request types can be seen below
- * This component should be treated as a promise, due to the way that it's consumed by the WebAuthN component
+ * This component should be treated as a promise, due to the way that it's consumed by the WebAuthn component
  * Handle Close will always resolve the closeCallback, resulting in an error
- * Handle Save will always resolve the saveCallback, resulting in the sending of new PIN information
+ * Handle Save will always resolve the saveCallback, resulting in the sending of new U2F Password information
  * @param props
  *  props.type: "create" | "change" | "dispatch" [default]
  *  props.saveCallback: method to call on save, passes fields as the argument
  *  props.closeCallback: method to call when closing the flow, is used to reject a promise
  */
-const ServerVerifiedPin = function (props) {
+const U2FPassword = function (props) {
   const { t } = useTranslation();
 
   const [pinCollection, setPinCollection] = useState({
@@ -44,10 +44,10 @@ const ServerVerifiedPin = function (props) {
   const inputRefNext = useRef(null);
 
   const [label, setLabel] = useState({
-    buttonText: "",
-    modalHeader: "",
-    modalText: "",
-    modalSubmitText: "",
+    buttonText: t("sv-pin.modal-default"),
+    modalHeader: t("sv-pin.modal-default"),
+    modalText: t("sv-pin.modal-default"),
+    modalSubmitText: t("sv-pin.modal-default"),
   });
 
   const constraints = {
@@ -70,48 +70,48 @@ const ServerVerifiedPin = function (props) {
   /**
    * This method is used to configure the labels on the component depending on the type of UV dispatch that is sent from the parent component
    * @param {*} type possible values are:
-   * create: Sent by the registration flow to create a new SVPIN upon initial registration
-   * change: Sent by the homepage when a user wants to change their SVPIN
-   * dispatch: Sent by login when a user needs to enter their SVPIN when logging into the service
+   * create: Sent by the registration flow to create a new U2F Password upon initial registration
+   * change: Sent by the homepage when a user wants to change their U2F Password
+   * dispatch: Sent by login when a user needs to enter their U2F Password when logging into the service
    */
   const configureModal = (type) => {
     switch (type) {
       case "create":
         setLabel({
-          buttonText: "",
-          modalHeader: "Create U2F Password",
-          modalText: "Please create a U2F Password",
-          modalSubmitText: "Submit U2F Password",
+          buttonText: t("sv-pin.modal-buttontext-create"),
+          modalHeader: t("sv-pin.modal-header-create"),
+          modalText: t("sv-pin.modal-text-create"),
+          modalSubmitText: t("sv-pin.modal-submittext-create"),
         });
         setShowButton(false);
         setShowConfirmPin(true);
         break;
       case "change":
         setLabel({
-          buttonText: "Change your U2F Password",
-          modalHeader: "Change your U2F Password",
-          modalText: "Enter your new U2F Password information",
-          modalSubmitText: "Change U2F Password",
+          buttonText: t("sv-pin.modal-buttontext-change"),
+          modalHeader: t("sv-pin.modal-header-change"),
+          modalText: t("sv-pin.modal-text-change"),
+          modalSubmitText: t("sv-pin.modal-submittext-change"),
         });
         setShowButton(true);
         setShowConfirmPin(true);
         break;
       case "dispatch":
         setLabel({
-          buttonText: "",
-          modalHeader: "U2F Password",
-          modalText: "Enter your U2F Password",
-          modalSubmitText: "Submit",
+          buttonText: t("sv-pin.modal-buttontext-dispatch"),
+          modalHeader: t("sv-pin.modal-header-dispatch"),
+          modalText: t("sv-pin.modal-text-dispatch"),
+          modalSubmitText: t("sv-pin.modal-submittext-dispatch"),
         });
         setShowButton(false);
         setShowConfirmPin(false);
         break;
       default:
         setLabel({
-          buttonText: "",
-          modalHeader: "",
-          modalText: "",
-          modalSubmitText: "",
+          buttonText: t("sv-pin.modal-default"),
+          modalHeader: t("sv-pin.modal-default"),
+          modalText: t("sv-pin.modal-default"),
+          modalSubmitText: t("sv-pin.modal-default"),
         });
         break;
     }
@@ -162,11 +162,7 @@ const ServerVerifiedPin = function (props) {
    * Closes the modal, and calls to the reject promise indicating that an error occurred
    */
   const handleClose = () => {
-    props.closeCallback(
-      new Error(
-        "PIN Registration Ended - Please attempt to register your security key"
-      )
-    );
+    props.closeCallback(new Error(t("sv-pin.pin-error")));
     setShow(false);
     setInvalidPin(undefined);
     setInvalidConfirmPin(undefined);
@@ -294,4 +290,4 @@ const ServerVerifiedPin = function (props) {
   );
 };
 
-export default ServerVerifiedPin;
+export default U2FPassword;

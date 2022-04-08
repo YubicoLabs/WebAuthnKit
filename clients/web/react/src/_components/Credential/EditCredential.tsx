@@ -77,12 +77,8 @@ const EditCredential = function ({ credential }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setNickname(value);
-
-    console.log(value);
-
     const result = validate({ nickname: value }, constraints);
     if (result) {
-      console.log("Here");
       setInvalidNickname(result.nickname.join(". "));
     } else {
       setInvalidNickname(undefined);

@@ -8,12 +8,12 @@ import CredentialList from "../_components/Credential/CredentialList";
 import TrustedDeviceList from "../_components/TrustedDevices/TrustedDeviceList";
 import RecoveryCodes from "../_components/RecoveryCodes/RecoveryCodes";
 import DeleteUser from "../_components/DeleteUser/DeleteUser";
-import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
+import U2FPassword from "../_components/u2fPassword/u2fPassword";
 
 const styles = require("../_components/component.module.css");
 
 /**
- * Primary page of the application - Allows the user to manage their credentials and allows them to perform actions like generate recovery codes, reset svpin, delete account, and sign out
+ * Primary page of the application - Allows the user to manage their credentials and allows them to perform actions like generate recovery codes, reset U2F Password, delete account, and sign out
  */
 const HomePage = function () {
   const { t } = useTranslation();
@@ -46,30 +46,36 @@ const HomePage = function () {
   const dispatch = useDispatch();
 
   /**
-   * Sent to ServerVerifiedPIN prompt as a successful callback - dispatches any changes to the PIN
-   * @param newValue new value of the SVPIN
+   * Sent to U2F Password prompt as a successful callback - dispatches any changes to the PIN
+   * @param newValue new value of the U2F Password
    */
-  function svpCallback(newValue) {
+  function u2fPassCallback(newValue) {
     const fields = { pin: newValue.value, confirmPin: newValue.value };
     dispatch(credentialActions.updatePin(fields));
   }
 
   /**
-   * Closes the ServerVerifiedPIN callback if closed by the users
+   * Closes the U2F Password callback if closed by the users
    * Sends a warning message indicating to the developer that the component was closed
    * @param message warning message sent from the promise callback
    */
-  function svpCloseCallback(message) {
-    console.warn(message);
+  function u2fCloseCallback(message) {
+    console.warn(
+      t("console.warn", {
+        COMPONENT: "HomePage",
+        METHOD: "u2fCloseCallback",
+        REASON: message,
+      })
+    );
   }
 
   /**
-   * Properties used to configure the ServerVerifiedPIN component
+   * Properties used to configure the U2F Password component
    */
-  const serverVerifiedProps = {
+  const u2fProps = {
     type: "change",
-    saveCallback: svpCallback,
-    closeCallback: svpCloseCallback,
+    saveCallback: u2fPassCallback,
+    closeCallback: u2fCloseCallback,
   };
 
   /**
@@ -114,13 +120,12 @@ const HomePage = function () {
   useEffect(() => {
     if (alert.message && jwt) {
       if (
-        alert.message === "Registration successful" ||
-        alert.message === "Delete credential successful"
+        alert.message === t("alerts.registration-successful") ||
+        alert.message === t("alerts.delete-successful")
       ) {
         dispatch(credentialActions.getAll(jwt));
       }
     }
-    console.log(alert);
   }, [alert]);
 
   /**
@@ -226,10 +231,10 @@ const HomePage = function () {
         )}
         <Card className={styles.default["cardSpacing"]}>
           <Card.Header>
-            <h5>{t("home.svpin-title")}</h5>
+            <h5>{t("home.u2fpassword-title")}</h5>
           </Card.Header>
           <Card.Body>
-            <ServerVerifiedPin {...serverVerifiedProps} />
+            <U2FPassword {...u2fProps} />
           </Card.Body>
         </Card>
         {credentialsLoading ? (

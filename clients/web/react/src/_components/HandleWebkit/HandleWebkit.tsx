@@ -35,32 +35,31 @@ const HandleWebKit = function (props) {
   /**
    * This method is used to configure the labels on the component depending on the type of UV dispatch that is sent from the parent component
    * @param {*} type possible values are:
-   * create: Sent by the registration flow to create a new SVPIN upon initial registration
-   * change: Sent by the homepage when a user wants to change their SVPIN
-   * dispatch: Sent by login when a user needs to enter their SVPIN when logging into the service
+   * create: Sent by the registration flow to create a new U2F Password upon initial registration
+   * change: Sent by the homepage when a user wants to change their U2F Password
+   * dispatch: Sent by login when a user needs to enter their U2F Password when logging into the service
    */
   const configureModal = (type) => {
     switch (type) {
       case "ios":
         setLabel({
-          modalHeader: "Select your registration method",
-          modalText:
-            "Click the button below to register with FaceID or your security key",
-          modalPlatAuthButton: "FaceID",
+          modalHeader: t("handle-webkit.modal-header-ios"),
+          modalText: t("handle-webkit.modal-text-ios"),
+          modalPlatAuthButton: t("handle-webkit.modal-platauth-button-ios"),
         });
         break;
       case "macos":
         setLabel({
-          modalHeader: "Select your registration method",
-          modalText: "Click the button below to register your security key",
-          modalPlatAuthButton: "TouchID",
+          modalHeader: t("handle-webkit.modal-header-macos"),
+          modalText: t("handle-webkit.modal-text-macos"),
+          modalPlatAuthButton: t("handle-webkit.modal-platauth-button-macos"),
         });
         break;
       default:
         setLabel({
-          modalHeader: "",
-          modalText: "",
-          modalPlatAuthButton: "",
+          modalHeader: t("handle-webkit.modal-default"),
+          modalText: t("handle-webkit.modal-default"),
+          modalPlatAuthButton: t("handle-webkit.modal-default"),
         });
         break;
     }
@@ -70,7 +69,13 @@ const HandleWebKit = function (props) {
    * Shows the modal
    */
   const handleShow = () => {
-    console.log(`HandleWebKit Showing Modal`);
+    console.info(
+      t("console.info", {
+        COMPONENT: "HandleWebKit",
+        METHOD: "handleShow()",
+        LOG_REASON: t("console.reason.handlewebkit0"),
+      })
+    );
     setShow(true);
     setContinueSubmitted(false);
   };
@@ -79,11 +84,7 @@ const HandleWebKit = function (props) {
    * Closes the modal
    */
   const handleClose = () => {
-    props.closeCallback(
-      new Error(
-        "PIN Registration Ended - Please attempt to register your security key"
-      )
-    );
+    props.closeCallback(new Error(t("handle-webkit.pin-error")));
     setShow(false);
     setContinueSubmitted(false);
   };
@@ -95,7 +96,14 @@ const HandleWebKit = function (props) {
    */
   const handleRegistration = async () => {
     setContinueSubmitted(true);
-    console.log("HandleWebKit handleSecKey() publicKey: ", props.publicKey);
+    console.info(
+      t("console.info", {
+        COMPONENT: "HandleWebKit",
+        METHOD: "handleRegistration()",
+        LOG_REASON: t("console.reason.handlewebkit1"),
+      }),
+      props.publicKey
+    );
 
     try {
       const attestationResponse = await create(props.publicKey);
@@ -104,7 +112,14 @@ const HandleWebKit = function (props) {
       setContinueSubmitted(false);
     } catch (error) {
       setContinueSubmitted(false);
-      console.error("HandleWebKit handleSecKey() Error: ", error);
+      console.error(
+        t("console.error", {
+          COMPONENT: "HandleWebKit",
+          METHOD: "handleRegistration()",
+          REASON: t("console.reason.handlewebkit2"),
+        }),
+        error
+      );
     }
   };
 
@@ -112,7 +127,13 @@ const HandleWebKit = function (props) {
    * On initializing this component, shows the modal
    */
   useEffect(() => {
-    console.log(`HandleWebKit Configuring Props and Showing Modal`);
+    console.info(
+      t("console.info", {
+        COMPONENT: "HandleWebKit",
+        METHOD: "useEffect()",
+        LOG_REASON: t("console.reason.handlewebkit3"),
+      })
+    );
     configureModal(props.type);
     handleShow();
   }, []);

@@ -42,14 +42,22 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
   const { username, pin, nickname, credential } = formData;
 
   async function updateCredential(nickname) {
-    console.log(
-      "RegisterKeySuccessStep updateCredential() nickname:",
+    console.info(
+      t("console.info", {
+        COMPONENT: "RegisterKeySuccessStep",
+        METHOD: "updateCredential()",
+        LOG_REASON: t("console.reason.registerKeySuccessStep0"),
+      }),
       nickname
     );
     try {
       const ls_credential = JSON.parse(localStorage.getItem("credential"));
-      console.log(
-        "RegisterKeySuccessStep updateCredential() ls_credential:",
+      console.info(
+        t("console.info", {
+          COMPONENT: "RegisterKeySuccessStep",
+          METHOD: "updateCredential()",
+          LOG_REASON: t("console.reason.registerKeySuccessStep1"),
+        }),
         ls_credential
       );
 
@@ -66,8 +74,14 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
 
       dispatch(credentialActions.update(credentialToUpdate));
     } catch (err) {
-      console.error("RegisterKeySuccessStep continueStep() error");
-      console.error(err);
+      console.error(
+        t("console.error", {
+          COMPONENT: "RegisterKeySuccessStep",
+          METHOD: "continueStep()",
+          REASON: t("console.reason.registerKeySuccessStep2"),
+        }),
+        err
+      );
       dispatch(alertActions.error(err.message));
     }
     localStorage.removeItem("credential");

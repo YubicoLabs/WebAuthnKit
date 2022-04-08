@@ -49,22 +49,39 @@ const RegisterTrustedDeviceStep = function ({ navigation }) {
    * Otherwise send an error and instruct the user to add their device
    */
   async function authenticate() {
-    console.log("authenticate");
+    console.info(
+      t("console.info", {
+        COMPONENT: "RegisterTrustedDeviceStep",
+        METHOD: "authenticate()",
+        LOG_REASON: t("console.reason.registerTrustedDeviceStep0"),
+      })
+    );
     setContinueSubmitted(true);
     const username = localStorage.getItem("username");
     try {
       const options = "";
       const userData = await WebAuthnClient.signIn(username, options);
-      console.log("RegisterTrustedDevice authenticate userData: ", userData);
+      console.info(
+        t("console.info", {
+          COMPONENT: "RegisterTrustedDeviceStep",
+          METHOD: "authenticate()",
+          LOG_REASON: t("console.reason.registerTrustedDeviceStep1"),
+        }),
+        userData
+      );
 
       if (userData === undefined) {
         console.error(
-          "RegisterTrustedDeviceStep authenticate error: userData undefined"
+          t("console.error", {
+            COMPONENT: "RegisterTrustedDeviceStep",
+            METHOD: "authenticate()",
+            REASON: t("console.reason.registerTrustedDeviceStep2"),
+          })
         );
-        dispatch(alertActions.error("Something went wrong. Please try again."));
+        dispatch(alertActions.error(t("alerts.something-went-wrong")));
         setContinueSubmitted(false);
       } else {
-        dispatch(alertActions.success("Authentication successful"));
+        dispatch(alertActions.success(t("alerts.auth-successful")));
         TrustedDeviceHelper.setTrustedDevice(
           TrustedDeviceHelper.TrustedDeviceEnum.CONFIRMED,
           userData.credential.id
@@ -72,7 +89,13 @@ const RegisterTrustedDeviceStep = function ({ navigation }) {
         continueStep();
       }
     } catch (err) {
-      console.error("RegisterTrustedDeviceStep authenticate error");
+      console.error(
+        t("console.error", {
+          COMPONENT: "RegisterTrustedDeviceStep",
+          METHOD: "authenticate()",
+          REASON: t("console.reason.registerTrustedDeviceStep3"),
+        })
+      );
       setContinueSubmitted(false);
       dispatch(alertActions.error(err.message));
     }

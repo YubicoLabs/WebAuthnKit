@@ -6,7 +6,7 @@ import validate from "validate.js";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { credentialActions, alertActions } from "../../_actions";
-import ServerVerifiedPin from "../ServerVerifiedPin/ServerVerifiedPin";
+import U2FPassword from "../u2fPassword/u2fPassword";
 import AddCredentialGuidance from "./AddCredentialGuidance";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
@@ -25,8 +25,8 @@ const AddCredential = function () {
 
   const [showAdd, setShowAdd] = useState(false);
 
-  // Will load the SVPIN component if the new credential is non-FIDO2
-  const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+  // Will load the U2F Password component if the new credential is non-FIDO2
+  const [u2fPassword, setu2fPassword] = useState<ReactElement>();
 
   const [nickname, setNickname] = useState("");
 
@@ -79,7 +79,14 @@ const AddCredential = function () {
       try {
         await register();
       } catch (error) {
-        console.error(error);
+        console.error(
+          t("console.error", {
+            COMPONENT: "AddCredential",
+            METHOD: "handleSaveAdd()",
+            REASON: t("console.reason.addCredential0"),
+          }),
+          error
+        );
         setLoading(false);
       }
     }
@@ -96,29 +103,29 @@ const AddCredential = function () {
   };
 
   /**
-   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
-   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
-   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
-   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start PIN registration
-   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   * If the key is a U2F key, then a U2F Password needs to be configured on key registration
+   * This promise allows the a U2F Password to be initialized by the WebAuthn component through a promise
+   * This Step will configure the a U2F Password components properties, and await for a Save response to be sent from the component
+   * @param challengeResponse sent from WebAuthn component that is used to dispatch the event to start U2F Password registration
+   * @returns A promise containing the U2F Password to be used for registration in the WebAuthn component
    */
   const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
-      const svpinCreateProps = {
+      const u2fPassCreateProps = {
         type: "create",
         saveCallback: resolve,
         closeCallback: reject,
       };
-      setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
+      setu2fPassword(<U2FPassword {...u2fPassCreateProps} />);
     });
   };
 
   /**
-   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
-   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
-   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
-   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start PIN registration
-   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   * If the key is a U2F key, then a U2F Password needs to be configured on key registration
+   * This promise allows the U2F Password to be initialized by the WebAuthn component through a promise
+   * This Step will configure the U2F Password components properties, and await for a Save response to be sent from the component
+   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start U2F Password registration
+   * @returns A promise containing the U2F Password to be used for registration in the WebAuthN component
    */
   async function registerUV(challengeResponse) {
     dispatch(credentialActions.getUV(challengeResponse));
@@ -133,10 +140,12 @@ const AddCredential = function () {
    * Current state will only allow for roaming authenticators
    */
   const register = async () => {
-    console.log("Beginning key registration process");
-    console.log("register() nickname: ", nickname);
-
     try {
+      /**
+       * CROSS_PLATFORM specified as the authenticator attachment to force
+       * credential creation to use a roaming authenticator
+       * More information can be found here: https://www.w3.org/TR/webauthn-2/#enum-attachment
+       */
       await WebAuthnClient.registerNewCredential(
         nickname,
         isResidentKey,
@@ -247,7 +256,7 @@ const AddCredential = function () {
       <Button variant="primary" onClick={handleShow}>
         {t("credential.add-header")}
       </Button>
-      {serverVerifiedPin}
+      {u2fPassword}
     </>
   );
 };

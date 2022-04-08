@@ -1,4 +1,5 @@
 import validate from "validate.js";
+import { i18n } from "../i18n";
 import { credentialConstants } from "../_constants";
 import credentialService from "../_services/credential.service";
 import { alertActions } from ".";
@@ -24,6 +25,8 @@ const constraints = {
     },
   },
 };
+
+const { t } = i18n;
 
 function generateRecoveryCodes() {
   return (dispatch) => {
@@ -111,7 +114,7 @@ function updatePin(fields) {
     credentialService.updatePin(fields).then(
       (response) => {
         dispatch(success(response));
-        dispatch(alertActions.success("Update successful"));
+        dispatch(alertActions.success(t("alerts.update-successful")));
       },
       (error) => {
         dispatch(failure(error.toString()));
@@ -163,16 +166,20 @@ function registerFinish(registration) {
 
     credentialService.registerFinish(registration).then(
       (registration) => {
-        console.log(
-          "credential.actions registerFinish registration: ",
+        console.info(
+          t("console.info", {
+            COMPONENT: "credential.actions",
+            METHOD: "registerFinish()",
+            LOG_REASON: "registration",
+          }),
           registration
         );
         if (registration === undefined) {
-          dispatch(failure("Registration failed"));
-          dispatch(alertActions.error("Registration failed"));
+          dispatch(failure(t("alerts.registration-failed")));
+          dispatch(alertActions.error(t("alerts.registration-failed")));
         } else {
           dispatch(success(registration));
-          dispatch(alertActions.success("Registration successful"));
+          dispatch(alertActions.success(t("alerts.registration-successful")));
         }
       },
       (error) => {
@@ -217,12 +224,6 @@ function getAll(id) {
 function getUV(uvRequest) {
   return (dispatch) => {
     dispatch(request(uvRequest));
-
-    /* credentialService.getAll(id)
-            .then(
-                credentials => dispatch(success(credentials)),
-                error => dispatch(failure(error.toString()))
-            ); */
   };
 
   function request(uvRequest) {
@@ -235,12 +236,6 @@ function getUV(uvRequest) {
 function completeUV() {
   return (dispatch) => {
     dispatch(success());
-
-    /* credentialService.getAll(id)
-            .then(
-                credentials => dispatch(success(credentials)),
-                error => dispatch(failure(error.toString()))
-            ); */
   };
 
   // function request(uvRequest) { return { type: credentialConstants.GETUV_REQUEST, uvRequest } }
@@ -258,7 +253,7 @@ function _delete(id) {
     credentialService.delete(id).then(
       (credentials) => {
         dispatch(success(id));
-        dispatch(alertActions.success("Delete credential successful"));
+        dispatch(alertActions.success(t("alerts.delete-successful")));
       },
       (error) => {
         dispatch(failure(id, error.toString()));

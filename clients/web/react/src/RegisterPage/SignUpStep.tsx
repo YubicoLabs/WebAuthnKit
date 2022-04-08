@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { history } from "../_helpers";
 import { WebAuthnClient } from "../_components";
 import { credentialActions, alertActions } from "../_actions";
-import ServerVerifiedPin from "../_components/ServerVerifiedPin/ServerVerifiedPin";
+import U2FPassword from "../_components/u2fPassword/u2fPassword";
 import HandleWebKit from "../_components/HandleWebkit/HandleWebkit";
 
 const styles = require("../_components/component.module.css");
@@ -31,7 +31,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
 
   const dispatch = useDispatch();
 
-  const [serverVerifiedPin, setServerVerifiedPin] = useState<ReactElement>();
+  const [u2fPassword, setu2fPassword] = useState<ReactElement>();
 
   const [handleWebKit, setHandleWebKit] = useState<ReactElement>();
 
@@ -75,24 +75,49 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
    * Primary logic of the register step
    */
   async function register() {
-    console.log("register");
+    console.info(
+      t("console.info", {
+        COMPONENT: "SignUpStep",
+        METHOD: "register",
+        LOG_REASON: t("console.reason.signUp0"),
+      })
+    );
 
     try {
       const userData = await WebAuthnClient.signUp(username, uv, webKitMethod);
-      console.log("SignUpStep register userData: ", userData);
+      console.info(
+        t("console.info", {
+          COMPONENT: "SignUpStep",
+          METHOD: "register",
+          LOG_REASON: t("console.reason.signUp1"),
+        }),
+        userData
+      );
 
       if (userData === undefined) {
-        console.error("SignUpStep register error: userData undefined");
-        dispatch(alertActions.error("Something went wrong. Please try again."));
+        console.error(
+          t("console.error", {
+            COMPONENT: "SignUpStep",
+            METHOD: "register",
+            REASON: t("console.reason.signUp2"),
+          })
+        );
+        dispatch(alertActions.error(t("alerts.something-went-wrong")));
       } else {
-        dispatch(alertActions.success("Registration successful"));
+        dispatch(alertActions.success(t("alerts.registration-successful")));
         setForm({ target: { name: "credential", value: userData.credential } });
         registerKeySuccessStep(userData.credential);
         navigation.go("InitUserStep");
       }
     } catch (err) {
-      console.error("SignUpStep register error");
-      console.error(err);
+      console.error(
+        t("console.error", {
+          COMPONENT: "SignUpStep",
+          METHOD: "register",
+          REASON: t("console.reason.signUp3"),
+        }),
+        err
+      );
       setContinueSubmitted(false);
       dispatch(alertActions.error(err.message));
       setHandleWebKit(null);
@@ -100,34 +125,32 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
   }
 
   /**
-   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
-   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
-   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
-   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   * If the key is a U2F key, then a U2F Password needs to be configured on key registration
+   * This promise allows the U2F Password to be initialized by the WebAuthn component through a promise
+   * This Step will configure the U2F Password components properties, and await for a Save response to be sent from the component
+   * @returns A promise containing the U2F Password to be used for registration in the WebAuthN component
    */
   const UVPromise = (): Promise<{ value: number }> => {
     return new Promise((resolve, reject) => {
-      const svpinCreateProps = {
+      const u2fPassCreateProps = {
         type: "create",
         saveCallback: resolve,
         closeCallback: reject,
       };
-      console.log("SignUpStep UVPromise(): ", svpinCreateProps);
-      setServerVerifiedPin(<ServerVerifiedPin {...svpinCreateProps} />);
+      setu2fPassword(<U2FPassword {...u2fPassCreateProps} />);
     });
   };
 
   /**
-   * If the key is a U2F key, then a SVPIN needs to be configured on key registration
-   * This promise allows the ServerVerifiedPIN to be initialized by the WebAuthN component through a promise
-   * This Step will configure the ServerVerifiedPIN components properties, and await for a Save response to be sent from the component
-   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start PIN registration
-   * @returns A promise containing the PIN to be used for registration in the WebAuthN component
+   * If the key is a U2F key, then a U2F Password needs to be configured on key registration
+   * This promise allows the U2F Password to be initialized by the WebAuthn component through a promise
+   * This Step will configure the U2F Password components properties, and await for a Save response to be sent from the component
+   * @param challengeResponse sent from WebAuthN component that is used to dispatch the event to start U2F Password registration
+   * @returns A promise containing the U2F Password to be used for registration in the WebAuthN component
    */
   async function uv(challengeResponse) {
     dispatch(credentialActions.getUV(challengeResponse));
     const pinResult = await UVPromise();
-    console.log("SignUpStep PIN Result: ", pinResult.value);
     return pinResult.value;
   }
 
@@ -150,7 +173,6 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
         saveCallback: resolve,
         closeCallback: reject,
       };
-      console.log("SignUpStep WebKitPromise(): ", handleWebKitProps);
       setHandleWebKit(<HandleWebKit {...handleWebKitProps} />);
     });
   };
@@ -165,7 +187,6 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
    */
   async function webKitMethod(type, publicKey) {
     const attestationResponse = await WebKitPromise(type, publicKey);
-    console.log("SignUpStep webKitMethod Result: ", attestationResponse);
     return attestationResponse;
   }
 
@@ -175,7 +196,14 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
    */
   const registerKeySuccessStep = (userCredential) => {
     localStorage.setItem("credential", JSON.stringify(userCredential));
-    console.log("registerKeySuccessStep credential ", userCredential);
+    console.info(
+      t("console.info", {
+        COMPONENT: "SignUpStep",
+        METHOD: "registerKeySuccessStep",
+        REASON: t("console.reason.signUp4"),
+      }),
+      userCredential
+    );
   };
 
   /**
@@ -306,7 +334,7 @@ const SignUpStep = function ({ setForm, formData, navigation }) {
           </span>
         </div>
       </div>
-      {serverVerifiedPin}
+      {u2fPassword}
       {handleWebKit}
     </>
   );

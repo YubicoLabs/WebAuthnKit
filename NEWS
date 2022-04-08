@@ -1,63 +1,66 @@
+== Version 2.0.0 RC ==
+
+- Updated look and feel of UI
+- Attestation data now displayed to the user (if they are using a YubiKey)
+- Added prompts to guide users when registering a Platform Authenticator
+- Changed SV-PIN to U2F Password
+- Code changes to include better error handling, linting, and migrated to TypeScript
+
 == Version 1.0.0 ==
 
 GA release
 
-* Added Docker deployment
-* Apache License 2.0
+- Added Docker deployment
+- Apache License 2.0
 
 == Version 0.0.6 ==
 
 Beta release
 
-* Speed up recovery code generation and validation
-* Internal variable naming standardization and cleanup
-* Configure URL redirects for SPA
-
+- Speed up recovery code generation and validation
+- Internal variable naming standardization and cleanup
+- Configure URL redirects for SPA
 
 == Version 0.0.5 ==
 
 Beta release
 
-* Initial iOS app commit
-* Code cleanup (remove magic numbers, internal variable naming, etc.)
-* Update dependencies
-* Add more sanity checks to scripts
-
+- Initial iOS app commit
+- Code cleanup (remove magic numbers, internal variable naming, etc.)
+- Update dependencies
+- Add more sanity checks to scripts
 
 == Version 0.0.4 ==
 
 Beta release
 
-* Fixed cascading delete bug
-* Updated packages/dependencies and removed unused packages/dependencies
-* Added recovery code and SV-PIN validation, max attempts, and hashing
-* Deployment script bugfixes
-
+- Fixed cascading delete bug
+- Updated packages/dependencies and removed unused packages/dependencies
+- Added recovery code and SV-PIN validation, max attempts, and hashing
+- Deployment script bugfixes
 
 == Version 0.0.3 ==
 
 Beta release
 
-* Added release notes & license
-
+- Added release notes & license
 
 == Version 0.0.2 ==
 
 Beta release
 
-* Client-Side Discoverable Credential, a.k.a. Usernameless, WebAuthn credential registration and authentication
-* Improved error handling
-* Delete user account feature
-* Scripted deployment of backend and frontend
-
+- Client-Side Discoverable Credential, a.k.a. Usernameless, WebAuthn credential registration and authentication
+- Improved error handling
+- Delete user account feature
+- Scripted deployment of backend and frontend
 
 == Version 0.0.1 ==
 
 Alpha release
 
-* AWS Cognito Custom Auth identifier-first WebAuthn registration and login flow
-* WebAuthn lifecycle management (add/edit/remove WebAuthn credentials)
-* Server-Verified PIN feature for authenticators without user verification capability
-* Account recovery backup codes
-* AWS SAM backend deployment based on CloudFormation template
-* AWS Amplify hosted react web app
+- AWS Cognito Custom Auth identifier-first WebAuthn registration and login flow
+- WebAuthn lifecycle management (add/edit/remove WebAuthn credentials)
+- Server-Verified PIN feature for authenticators without user verification capability
+- Account recovery backup codes
+- AWS SAM backend deployment based on CloudFormation template
+- AWS Amplify hosted react web app
