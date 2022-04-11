@@ -1,0 +1,78 @@
+.text-divider {
+  display: flex;
+  align-items: center;
+  --text-divider-gap: 1rem; 
+}
+
+.text-divider::before,
+.text-divider::after {
+  content: '';
+  height: 1px;
+  background-color: silver;
+  flex-grow: 1;
+}
+
+.text-divider::before {
+  margin-right: var(--text-divider-gap);
+}
+
+.text-divider::after {
+  margin-left: var(--text-divider-gap);
+}
+
+.rcorners {
+  border-radius: 25px;
+  background-color: white;
+}
+
+.security-key-image {
+  border: 3px #e7e7e7 solid;
+  padding: 10px;
+  width: 75px;
+  height: 75px
+}
+
+.security-key-image-col {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.section-divider {
+  border-top: 2px #e7e7e7 solid;
+}
+
+.cardSpacing {
+  margin-bottom: 1em;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.loaderSpan {
+  margin-left: 1em;
+}
+
+.usernameHeader {
+  color: #9aca3c;
+  text-align: center; 
+  padding: 1em 0em;
+}
+
+.addCredIcon {
+  max-height: 100px;
+  width: auto;
+  margin: 25px;
+}
+
+ol li {
+  margin-bottom: .5em;
+}
+
+.appText {
+  @media screen and (max-width: 767px) {
+      font-size: 2.5rem;
+      background-color: #9aca3c;
+  }
+}

@@ -31,6 +31,10 @@ var constraints = {
         }
     }
 };
+const authSelectorResolve = {
+    "PLATFORM": "platform",
+    "CROSS_PLATFORM": "cross-platform"
+};
 
 // Using npmjs.com/package/data-api-client package for accessing an Aurora Serverless Database with Data API enabled
 const data = require('data-api-client')({
@@ -132,6 +136,7 @@ async function getCreateCredentialsOptions(event, creds) {
         startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64;
         startRegisterPayload.publicKeyCredentialCreationOptions.attestation = startRegisterPayload.publicKeyCredentialCreationOptions.attestation.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
+        startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment = authSelectorResolve[startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment];
         startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams = startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams.map( (cred) => { 
             cred.type = cred.type.toLowerCase().replace('_','-');
             cred.alg = coseLookup[cred.alg];

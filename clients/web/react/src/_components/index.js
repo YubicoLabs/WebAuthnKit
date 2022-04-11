@@ -1,2 +1,2 @@
-export * from './PrivateRoute';
-export * from './ServerVerifiedPin';
+export { PrivateRoute } from "./PrivateRoute";
+export { WebAuthnClient } from "./WebAuthnClient";

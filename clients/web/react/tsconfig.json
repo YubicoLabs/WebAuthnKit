@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "outDir": "./built",
+    "jsx": "react",
+    "target": "ES6",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "module": "AMD",
+    "esModuleInterop": true
+  }
+}
