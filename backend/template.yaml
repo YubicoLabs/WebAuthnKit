@@ -1,17 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description:
-  WebAuthn Starter Kit - Backend Serverless Deployment
+Description: WebAuthn Starter Kit - Backend Serverless Deployment
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: yubico-webauthn-starter-kit
-    Description:
-      Custom authentication using Amazon Cognito, AWS Lambda, API Gateway, Aurora Serverless (DB), and a YubiKey
-    Author: 'Yubico AB'
-    SpdxLicenseId: 'Apache-2.0'
-    LicenseUrl: '../COPYING'
+    Description: Custom authentication using Amazon Cognito, AWS Lambda, API Gateway, Aurora Serverless (DB), and a YubiKey
+    Author: "Yubico AB"
+    SpdxLicenseId: "Apache-2.0"
+    LicenseUrl: "../COPYING"
     ReadmeUrl: README.md
-    Labels: ['passwordless', 'YubiKey', 'WebAuthn', 'serverless', 'FIDO2', 'Yubico']
+    Labels:
+      ["passwordless", "YubiKey", "WebAuthn", "serverless", "FIDO2", "Yubico"]
     HomepageUrl: https://github.com/YubicoLabs/WebAuthnKit
     SemanticVersion: 1.0.0
     SourceCodeUrl: https://github.com/YubicoLabs/WebAuthnKit
@@ -23,19 +22,19 @@ Globals:
 Parameters:
   UserPoolName:
     Type: String
-    Default: 'FIDO2UserPool'
+    Default: "FIDO2UserPool"
     Description: The name you want to give the Cognito User Pool being created
   DatabaseName:
     Type: String
-    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: must begin with a letter and contain only alphanumeric characters
-    Default: 'fido2database'
+    Default: "fido2database"
     Description: The RDS Aurora Serverless Database Name
   MasterUserName:
     Type: String
     MinLength: 8
     ConstraintDescription: must be 8 characters or more
-    Default: 'masterusername'
+    Default: "masterusername"
     Description: The RDS Aurora Serverless Master UserName
   MasterUserPassword:
     Type: String
@@ -43,66 +42,66 @@ Parameters:
     NoEcho: true
   DefineAuthChallengeFuncName:
     Type: String
-    Default: 'DefineChallenge-FIDO2'
+    Default: "DefineChallenge-FIDO2"
     Description: Cognito Define Auth function name
   CreateAuthChallengeFuncName:
     Type: String
-    Default: 'CreateChallenge-FIDO2'
+    Default: "CreateChallenge-FIDO2"
     Description: Cognito Create Auth function name
   VerifyAuthChallengeFuncName:
     Type: String
-    Default: 'VerifyChallenge-FIDO2'
+    Default: "VerifyChallenge-FIDO2"
     Description: Cognito Verify Auth function name
   JavaWebAuthnFuncName:
     Type: String
-    Default: 'WebAuthn-Java-Lib'
+    Default: "WebAuthn-Java-Lib"
     Description: Yubico Java WebAuthn Library
   WebAuthnKitAPIName:
     Type: String
-    Default: 'WebAuthnKitAPI'
+    Default: "WebAuthnKitAPI"
     Description: WebAuthnKitAPI API name
   WebAuthnKitAPIFuncName:
     Type: String
-    Default: 'WebAuthnKitAPI'
+    Default: "WebAuthnKitAPI"
     Description: WebAuthnKitAPI Lambda function name
   PreSignUpFuncName:
     Type: String
-    Default: 'PreSignUp-FIDO2'
+    Default: "PreSignUp-FIDO2"
     Description: Cognito PreSignUp function name
   CreateDBSchemaFuncName:
     Type: String
-    Default: 'CreateFIDO2DBSchema'
+    Default: "CreateFIDO2DBSchema"
     Description: Create FIDO2 DB function name
   CreateDBSchemaCallerFuncName:
     Type: String
-    Default: 'CreateFIDO2DBSchemaCaller'
+    Default: "CreateFIDO2DBSchemaCaller"
     Description: Calls the DB creation schema function
   AmplifyHostingAppName:
     Type: String
-    Default: 'WebAuthnKit-React-Client'
+    Default: "WebAuthnKit-React-Client"
     Description: Hosting App for React Web Client
   AmplifyHostingBranchName:
     Type: String
-    Default: 'dev'
+    Default: "dev"
     Description: Hosting Branch for React Web Client
   APICorsOrigin:
     Type: String
     Default: "'*'"
   APICorsHeaders:
     Type: String
-    Default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'" 
+    Default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
   APICorsMethods:
     Type: String
     Default: "'DELETE,GET,HEAD,OPTIONS,POST,PUT'"
   AmplifyDeployType:
     Type: String
-    Default: 'manual'
+    Default: "manual"
     AllowedValues: [manual]
 
 # Used for Amplify Hosting
 Conditions:
   isManual: !Equals [!Ref AmplifyDeployType, "manual"]
-    
+
 Resources:
   # RDS Aurora Serverless Cluster - Encryption enabled by default
   # Warning: NOT FREE TIER - Aurora Serverless does not support free tier instance class
@@ -113,13 +112,13 @@ Resources:
     Type: AWS::RDS::DBCluster
     DeletionPolicy: Delete
     Properties:
-      DBClusterIdentifier: 
+      DBClusterIdentifier:
         Ref: DatabaseName
       MasterUsername:
         Ref: MasterUserName
       MasterUserPassword:
         Ref: MasterUserPassword
-      DatabaseName: 
+      DatabaseName:
         Ref: DatabaseName
       Engine: aurora
       EngineMode: serverless
@@ -132,114 +131,130 @@ Resources:
         #SecondsUntilAutoPause: 7200
   # Create a SecretsManager to manage the Aurora Serverless credentials
   RDSAuroraClusterMasterSecret:
-    Type: 'AWS::SecretsManager::Secret'
+    Type: "AWS::SecretsManager::Secret"
     Properties:
-      Name:  
+      Name:
         Ref: DatabaseName
       Description: This contains the RDS Master user credentials for RDS Aurora Serverless Cluster
-      SecretString: 
-        !Sub |
-          {
-            "username": "${MasterUserName}",
-            "password": "${MasterUserPassword}"
-          }
+      SecretString: !Sub |
+        {
+          "username": "${MasterUserName}",
+          "password": "${MasterUserPassword}"
+        }
 
   #############
   # IAM Roles #
   #############
-  
+
   # IAM Role and Policy for the CreateDBSchema function
-  CreateDBSchemaLambdaExecutionRole: 
+  CreateDBSchemaLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Path: "/" 
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-      Policies: 
-        -
-          PolicyName: "LambdaToRDSAuroraServerless"
-          PolicyDocument: 
+      Policies:
+        - PolicyName: "LambdaToRDSAuroraServerless"
+          PolicyDocument:
             Version: "2012-10-17"
-            Statement: 
-              - 
-                Effect: "Allow"
-                Action: 
+            Statement:
+              - Effect: "Allow"
+                Action:
                   - "rds-data:DeleteItems"
                   - "rds-data:ExecuteStatement"
                   - "rds-data:GetItems"
                   - "rds-data:InsertItems"
                   - "rds-data:UpdateItems"
-                Resource: 
-                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster]]
-                  - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster, ':*']]
-        - 
-          PolicyName: "LambdaToAWSSecrets"
-          PolicyDocument: 
+                Resource:
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:rds:",
+                        !Ref AWS::Region,
+                        ":",
+                        !Ref AWS::AccountId,
+                        ":cluster:",
+                        !Ref RDSAuroraServerlessCluster,
+                      ],
+                    ]
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:rds:",
+                        !Ref AWS::Region,
+                        ":",
+                        !Ref AWS::AccountId,
+                        ":cluster:",
+                        !Ref RDSAuroraServerlessCluster,
+                        ":*",
+                      ],
+                    ]
+        - PolicyName: "LambdaToAWSSecrets"
+          PolicyDocument:
             Version: "2012-10-17"
-            Statement: 
-              - 
-                Effect: "Allow"
+            Statement:
+              - Effect: "Allow"
                 Action: "secretsmanager:GetSecretValue"
-                Resource: 
-                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
-                  - !Join ['', [!Ref RDSAuroraClusterMasterSecret, ':*']]
+                Resource:
+                  - !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
+                  - !Join ["", [!Ref RDSAuroraClusterMasterSecret, ":*"]]
 
   # IAM Role and Policy for the JavaWebAuthnLib function
-  JavaLibLambdaExecutionRole: 
+  JavaLibLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   # IAM Role and Policy for the FIDO2 API function
-  APILambdaExecutionRole: 
+  APILambdaExecutionRole:
     Type: "AWS::IAM::Role"
     DependsOn:
-    - JavaWebAuthnFunction
+      - JavaWebAuthnFunction
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   # IAM Role and Policy for the CreateAuth and VerifyAuth functions
-  CreateVerifyLambdaExecutionRole: 
+  CreateVerifyLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     DependsOn:
-    - JavaWebAuthnFunction
+      - JavaWebAuthnFunction
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
@@ -251,17 +266,26 @@ Resources:
   LambdaToWebAuthnLibPolicy:
     Type: "AWS::IAM::Policy"
     DependsOn:
-    - JavaWebAuthnFunction
+      - JavaWebAuthnFunction
     Properties:
       PolicyName: LambdaToWebAuthnLibPolicy
       PolicyDocument:
         Version: 2012-10-17
-        Statement: 
-          - 
-            Effect: "Allow"
+        Statement:
+          - Effect: "Allow"
             Action: "lambda:InvokeFunction"
             Resource:
-              - !Join ['', ['arn:aws:lambda:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':function:', !Ref JavaWebAuthnFuncName]]
+              - !Join [
+                  "",
+                  [
+                    "arn:aws:lambda:",
+                    !Ref AWS::Region,
+                    ":",
+                    !Ref AWS::AccountId,
+                    ":function:",
+                    !Ref JavaWebAuthnFuncName,
+                  ],
+                ]
       Roles:
         - !Ref CreateVerifyLambdaExecutionRole
         - !Ref APILambdaExecutionRole
@@ -270,23 +294,43 @@ Resources:
   RDSAuroraServerlessPolicy:
     Type: "AWS::IAM::Policy"
     DependsOn:
-    - RDSAuroraServerlessCluster
+      - RDSAuroraServerlessCluster
     Properties:
       PolicyName: RDSAuroraServerlessPolicy
       PolicyDocument:
         Version: 2012-10-17
-        Statement: 
-          - 
-            Effect: "Allow"
-            Action: 
+        Statement:
+          - Effect: "Allow"
+            Action:
               - "rds-data:DeleteItems"
               - "rds-data:ExecuteStatement"
               - "rds-data:GetItems"
               - "rds-data:InsertItems"
               - "rds-data:UpdateItems"
-            Resource: 
-              - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster]]
-              - !Join ['', ['arn:aws:rds:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':cluster:', !Ref RDSAuroraServerlessCluster, ':*']]
+            Resource:
+              - !Join [
+                  "",
+                  [
+                    "arn:aws:rds:",
+                    !Ref AWS::Region,
+                    ":",
+                    !Ref AWS::AccountId,
+                    ":cluster:",
+                    !Ref RDSAuroraServerlessCluster,
+                  ],
+                ]
+              - !Join [
+                  "",
+                  [
+                    "arn:aws:rds:",
+                    !Ref AWS::Region,
+                    ":",
+                    !Ref AWS::AccountId,
+                    ":cluster:",
+                    !Ref RDSAuroraServerlessCluster,
+                    ":*",
+                  ],
+                ]
       Roles:
         - !Ref JavaLibLambdaExecutionRole
         - !Ref APILambdaExecutionRole
@@ -296,18 +340,17 @@ Resources:
   AWSSecretsPolicy:
     Type: "AWS::IAM::Policy"
     DependsOn:
-    - RDSAuroraClusterMasterSecret
+      - RDSAuroraClusterMasterSecret
     Properties:
       PolicyName: AWSSecretsPolicy
       PolicyDocument:
         Version: 2012-10-17
-        Statement: 
-          - 
-            Effect: "Allow"
+        Statement:
+          - Effect: "Allow"
             Action: "secretsmanager:GetSecretValue"
-            Resource: 
-              - !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
-              - !Join ['', [!Ref RDSAuroraClusterMasterSecret, ':*']]
+            Resource:
+              - !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
+              - !Join ["", [!Ref RDSAuroraClusterMasterSecret, ":*"]]
       Roles:
         - !Ref JavaLibLambdaExecutionRole
         - !Ref APILambdaExecutionRole
@@ -320,12 +363,21 @@ Resources:
       PolicyName: CognitoAdminPolicy
       PolicyDocument:
         Version: 2012-10-17
-        Statement: 
-          - 
-            Effect: "Allow"
+        Statement:
+          - Effect: "Allow"
             Action: "cognito-idp:AdminUpdateUserAttributes"
-            Resource: 
-              - !Join ['', ['arn:aws:cognito-idp:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':userpool/', !Ref UserPool]]
+            Resource:
+              - !Join [
+                  "",
+                  [
+                    "arn:aws:cognito-idp:",
+                    !Ref AWS::Region,
+                    ":",
+                    !Ref AWS::AccountId,
+                    ":userpool/",
+                    !Ref UserPool,
+                  ],
+                ]
       Roles:
         - !Ref CreateVerifyLambdaExecutionRole
 
@@ -333,7 +385,7 @@ Resources:
   DefineAuthChallenge:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: DefineAuthChallengeFuncName
       CodeUri: lambda-functions/DefineAuth/
       Handler: DefineAuthChallengeFIDO2.handler
@@ -342,7 +394,7 @@ Resources:
   CreateAuthChallenge:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: CreateAuthChallengeFuncName
       CodeUri: lambda-functions/CreateAuth/
       Handler: CreateAuthChallengeFIDO2.handler
@@ -351,23 +403,21 @@ Resources:
       Environment:
         Variables:
           DatabaseName: !Ref DatabaseName
-          DBAuroraClusterArn: 
-            !Join
-              - ''
-              -
-                - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:'
-                - !Ref RDSAuroraServerlessCluster
-          DBSecretsStoreArn: !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+          DBAuroraClusterArn: !Join
+            - ""
+            - - !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:"
+              - !Ref RDSAuroraServerlessCluster
+          DBSecretsStoreArn: !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
           WebAuthnLibFunction: !Ref JavaWebAuthnFuncName
-      Role: 
-        Fn::GetAtt: 
+      Role:
+        Fn::GetAtt:
           - "CreateVerifyLambdaExecutionRole"
           - "Arn"
   # Verify Auth Challenge - Function trigger
   VerifyAuthChallengeResponse:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: VerifyAuthChallengeFuncName
       CodeUri: lambda-functions/VerifyAuth/
       Handler: VerifyAuthChallengeFIDO2.handler
@@ -376,16 +426,14 @@ Resources:
       Environment:
         Variables:
           DatabaseName: !Ref DatabaseName
-          DBAuroraClusterArn: 
-            !Join
-              - ''
-              -
-                - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:'
-                - !Ref RDSAuroraServerlessCluster
-          DBSecretsStoreArn: !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+          DBAuroraClusterArn: !Join
+            - ""
+            - - !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:"
+              - !Ref RDSAuroraServerlessCluster
+          DBSecretsStoreArn: !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
           WebAuthnLibFunction: !Ref JavaWebAuthnFuncName
-      Role: 
-        Fn::GetAtt: 
+      Role:
+        Fn::GetAtt:
           - "CreateVerifyLambdaExecutionRole"
           - "Arn"
 
@@ -393,7 +441,7 @@ Resources:
   PreSignUp:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: PreSignUpFuncName
       CodeUri: lambda-functions/PreSignUp/
       Handler: PreSignUpFIDO2.handler
@@ -403,7 +451,7 @@ Resources:
   WebAuthnKitAPIFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: WebAuthnKitAPIFuncName
       CodeUri: lambda-functions/FIDO2KitAPI/
       Handler: FIDO2KitAPI.handler
@@ -412,16 +460,14 @@ Resources:
       Environment:
         Variables:
           DatabaseName: !Ref DatabaseName
-          DBAuroraClusterArn: 
-            !Join
-              - ''
-              -
-                - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:'
-                - !Ref RDSAuroraServerlessCluster
-          DBSecretsStoreArn: !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+          DBAuroraClusterArn: !Join
+            - ""
+            - - !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:"
+              - !Ref RDSAuroraServerlessCluster
+          DBSecretsStoreArn: !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
           WebAuthnLibFunction: !Ref JavaWebAuthnFuncName
-      Role: 
-        Fn::GetAtt: 
+      Role:
+        Fn::GetAtt:
           - "APILambdaExecutionRole"
           - "Arn"
 
@@ -429,7 +475,7 @@ Resources:
   CreateDBSchemaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: CreateDBSchemaFuncName
       CodeUri: lambda-functions/CreateDBSchema/
       Handler: CreateDBSchema.handler
@@ -438,64 +484,69 @@ Resources:
       Environment:
         Variables:
           DatabaseName: !Ref DatabaseName
-          DBAuroraClusterArn: 
-            !Join
-              - ''
-              -
-                - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:'
-                - !Ref RDSAuroraServerlessCluster
-          DBSecretsStoreArn: !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
-      Role: 
-        Fn::GetAtt: 
+          DBAuroraClusterArn: !Join
+            - ""
+            - - !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:"
+              - !Ref RDSAuroraServerlessCluster
+          DBSecretsStoreArn: !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
+      Role:
+        Fn::GetAtt:
           - "CreateDBSchemaLambdaExecutionRole"
           - "Arn"
-          
+
   # IAM Role and Policy for the Lambda function CreateDBSchemaCaller which invokes the createDBSchema function
-  CreateDBSchemaCallerLambdaExecutionRole: 
+  CreateDBSchemaCallerLambdaExecutionRole:
     Type: "AWS::IAM::Role"
     DependsOn:
-    - CreateDBSchemaFunction
+      - CreateDBSchemaFunction
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-          Action:
-          - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
       Path: "/"
       Policies:
-        -
-          PolicyName: LambdaToCreateDBSchemaPolicy
+        - PolicyName: LambdaToCreateDBSchemaPolicy
           PolicyDocument:
             Version: 2012-10-17
-            Statement: 
-              - 
-                Effect: "Allow"
+            Statement:
+              - Effect: "Allow"
                 Action: "lambda:InvokeFunction"
                 Resource:
-                  - !Join ['', ['arn:aws:lambda:', !Ref AWS::Region, ':', !Ref AWS::AccountId, ':function:', !Ref CreateDBSchemaFuncName]]
-         
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:lambda:",
+                        !Ref AWS::Region,
+                        ":",
+                        !Ref AWS::AccountId,
+                        ":function:",
+                        !Ref CreateDBSchemaFuncName,
+                      ],
+                    ]
+
   # AWS Amplify Hosting - Service Role
-  AmplifyHostingServiceRole: 
+  AmplifyHostingServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - amplify.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Path: "/" 
-      Policies: 
-        -
-          PolicyName: "WebAuthnKitAmplifyHostingPolicy"
-          PolicyDocument: 
+          - Effect: Allow
+            Principal:
+              Service:
+                - amplify.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: "WebAuthnKitAmplifyHostingPolicy"
+          PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: "Allow"
@@ -506,18 +557,18 @@ Resources:
   AWSAmplifyHostingApp:
     Condition: isManual
     Type: AWS::Amplify::App
-    Properties: 
-      Name: 
+    Properties:
+      Name:
         Ref: AmplifyHostingAppName
       Description: "WebAuthn Starter Kit React Web Client Amplify App"
-      IAMServiceRole: 
-        Fn::GetAtt: 
+      IAMServiceRole:
+        Fn::GetAtt:
           - "AmplifyHostingServiceRole"
           - "Arn"
-      CustomRules: 
+      CustomRules:
         - Source: </^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|map|json)$)([^.]+$)/>
           Target: /index.html
-          Status: '200'
+          Status: "200"
 
   # AWS Amplify Hosting - Branch
   AWSAmplifyHostingBranch:
@@ -535,11 +586,11 @@ Resources:
   JavaWebAuthnFunction:
     Type: AWS::Serverless::Function
     DependsOn:
-    - AWSAmplifyHostingBranch
+      - AWSAmplifyHostingBranch
     Metadata:
       BuildMethod: makefile
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: JavaWebAuthnFuncName
       CodeUri: lambda-functions/JavaWebAuthnLib/
       Runtime: java8.al2
@@ -549,34 +600,29 @@ Resources:
       # Environment variables for connecting to RDS
       Environment:
         Variables:
+          JAVA_TOOL_OPTIONS: "-Dcom.sun.security.enableCRLDP=true"
           DatabaseName: !Ref DatabaseName
-          DBAuroraClusterArn: 
-            !Join
-              - ''
-              -
-                - !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:'
-                - !Ref RDSAuroraServerlessCluster
-          DBSecretsStoreArn: !Join ['', [!Ref RDSAuroraClusterMasterSecret]]
+          DBAuroraClusterArn: !Join
+            - ""
+            - - !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:"
+              - !Ref RDSAuroraServerlessCluster
+          DBSecretsStoreArn: !Join ["", [!Ref RDSAuroraClusterMasterSecret]]
           YUBICO_WEBAUTHN_RP_NAME: "WebAuthn Starter Kit"
-          YUBICO_WEBAUTHN_RP_ID: 
-            !Join
-              - ''
-              -
-                - Fn::GetAtt: 
+          YUBICO_WEBAUTHN_RP_ID: !Join
+            - ""
+            - - Fn::GetAtt:
                   - "AWSAmplifyHostingApp"
                   - "DefaultDomain"
-          YUBICO_WEBAUTHN_ALLOWED_ORIGINS:
-            !Join
-              - ''
-              -
-                - "https://"
-                - !Ref AmplifyHostingBranchName
-                - "."
-                - Fn::GetAtt: 
+          YUBICO_WEBAUTHN_ALLOWED_ORIGINS: !Join
+            - ""
+            - - "https://"
+              - !Ref AmplifyHostingBranchName
+              - "."
+              - Fn::GetAtt:
                   - "AWSAmplifyHostingApp"
                   - "DefaultDomain"
-      Role: 
-        Fn::GetAtt: 
+      Role:
+        Fn::GetAtt:
           - "JavaLibLambdaExecutionRole"
           - "Arn"
 
@@ -585,7 +631,7 @@ Resources:
   CreateDBSchemaFunctionCaller:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 
+      FunctionName:
         Ref: CreateDBSchemaCallerFuncName
       InlineCode: |
         var aws = require('aws-sdk');
@@ -615,11 +661,11 @@ Resources:
       Description: Invokes the database schema creation function.
       MemorySize: 128
       Timeout: 20
-      Role: 
-        Fn::GetAtt: 
+      Role:
+        Fn::GetAtt:
           - "CreateDBSchemaCallerLambdaExecutionRole"
           - "Arn"
-      
+
   # Amazon Cognito User Pool as our identity provider
   UserPool:
     Type: "AWS::Cognito::UserPool"
@@ -646,77 +692,32 @@ Resources:
   # API Gateway - WebAuthn Kit REST API
   # Using OpenAPI + AWS Extensions (this is a modified OpenAPI 3 export)
   #
-  Api: 
+  Api:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: 
+      Name:
         Ref: WebAuthnKitAPIName
-      Body: 
+      Body:
         openapi: "3.0.1"
         info:
           version: "2020-09-11T04:20:00Z"
           title: "WebAuthn Kit API"
         paths:
           /users:
-              options:
-                responses: 
-                  "200":
-                      description: "200 response"
-                      headers:
-                        Access-Control-Allow-Origin:
-                          schema:
-                            type: "string"
-                        Access-Control-Allow-Methods:
-                          schema:
-                            type: "string"
-                        Access-Control-Allow-Headers:
-                          schema:
-                            type: "string"
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
-                      statusCode: "200"
-                      responseParameters:
-                        method.response.header.Access-Control-Allow-Origin: !Ref APICorsOrigin
-                        method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
-                        method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
-                      responseTemplates:
-                        application/json: ''
-                  passthroughBehavior: "WHEN_NO_TEMPLATES"
-                  requestTemplates:
-                    application/json: "{\"statusCode\": 200}"
-                  type: "mock"
-              x-amazon-apigateway-any-method:
-                responses:
-                  "200":
-                    description: "200 response"
-                security:
-                - cognito-userpool-authorizer: []
-                x-amazon-apigateway-integration:
-                  type: "aws_proxy"
-                  uri: !Sub
-                    - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
-                    - lambdaArn: !GetAtt "WebAuthnKitAPIFunction.Arn"
-                  responses:
-                    default:
-                      statusCode: "200"
-                  passthroughBehavior: "when_no_match"
-                  httpMethod: "POST"
-          /users/credentials:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -726,17 +727,62 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
                 "200":
                   description: "200 response"
               security:
-              - cognito-userpool-authorizer: []
+                - cognito-userpool-authorizer: []
+              x-amazon-apigateway-integration:
+                type: "aws_proxy"
+                uri: !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+                  - lambdaArn: !GetAtt "WebAuthnKitAPIFunction.Arn"
+                responses:
+                  default:
+                    statusCode: "200"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+          /users/credentials:
+            options:
+              responses:
+                "200":
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: !Ref APICorsOrigin
+                      method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
+                      method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
+                    responseTemplates:
+                      application/json: ""
+                passthroughBehavior: "WHEN_NO_TEMPLATES"
+                requestTemplates:
+                  application/json: '{"statusCode": 200}'
+                type: "mock"
+            x-amazon-apigateway-any-method:
+              responses:
+                "200":
+                  description: "200 response"
+              security:
+                - cognito-userpool-authorizer: []
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 uri: !Sub
@@ -749,19 +795,19 @@ Resources:
                 httpMethod: "POST"
           /users/credentials/pin:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -771,17 +817,17 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
                 "200":
                   description: "200 response"
               security:
-              - cognito-userpool-authorizer: []
+                - cognito-userpool-authorizer: []
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 uri: !Sub
@@ -794,19 +840,19 @@ Resources:
                 httpMethod: "POST"
           /users/credentials/codes:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -816,17 +862,17 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
                 "200":
                   description: "200 response"
               security:
-              - cognito-userpool-authorizer: []
+                - cognito-userpool-authorizer: []
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 uri: !Sub
@@ -839,19 +885,19 @@ Resources:
                 httpMethod: "POST"
           /users/credentials/fido2:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -861,17 +907,17 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
                 "200":
                   description: "200 response"
               security:
-              - cognito-userpool-authorizer: []
+                - cognito-userpool-authorizer: []
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 uri: !Sub
@@ -884,19 +930,19 @@ Resources:
                 httpMethod: "POST"
           /users/credentials/fido2/authenticate:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -906,10 +952,10 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
@@ -929,19 +975,19 @@ Resources:
                 httpMethod: "POST"
           /users/credentials/fido2/register:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -951,17 +997,17 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
                 "200":
                   description: "200 response"
               security:
-              - cognito-userpool-authorizer: []
+                - cognito-userpool-authorizer: []
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 uri: !Sub
@@ -974,19 +1020,19 @@ Resources:
                 httpMethod: "POST"
           /users/credentials/fido2/register/finish:
             options:
-              responses: 
+              responses:
                 "200":
-                    description: "200 response"
-                    headers:
-                      Access-Control-Allow-Origin:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Methods:
-                        schema:
-                          type: "string"
-                      Access-Control-Allow-Headers:
-                        schema:
-                          type: "string"
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -996,17 +1042,17 @@ Resources:
                       method.response.header.Access-Control-Allow-Headers: !Ref APICorsHeaders
                       method.response.header.Access-Control-Allow-Methods: !Ref APICorsMethods
                     responseTemplates:
-                      application/json: ''
+                      application/json: ""
                 passthroughBehavior: "WHEN_NO_TEMPLATES"
                 requestTemplates:
-                  application/json: "{\"statusCode\": 200}"
+                  application/json: '{"statusCode": 200}'
                 type: "mock"
             x-amazon-apigateway-any-method:
               responses:
                 "200":
                   description: "200 response"
               security:
-              - cognito-userpool-authorizer: []
+                - cognito-userpool-authorizer: []
               x-amazon-apigateway-integration:
                 type: "aws_proxy"
                 uri: !Sub
@@ -1026,25 +1072,24 @@ Resources:
               x-amazon-apigateway-authtype: "cognito_user_pools"
               x-amazon-apigateway-authorizer:
                 type: "cognito_user_pools"
-                providerARNs: 
-                - !GetAtt UserPool.Arn
-      Description: 'WebAuthn Starter API for User Credential Management'
+                providerARNs:
+                  - !GetAtt UserPool.Arn
+      Description: "WebAuthn Starter API for User Credential Management"
       FailOnWarnings: true
   # Create DBSchema Callout
   DBCreationSchemaCaller:
     Type: Custom::LambdaDatabaseSchemaCallout
     Properties:
-      ServiceToken: 
-        !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${CreateDBSchemaCallerFuncName}
+      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${CreateDBSchemaCallerFuncName}
       FunctionName: !Ref CreateDBSchemaFuncName
     DependsOn:
-    - CreateDBSchemaFunctionCaller
-    - CreateDBSchemaFunction
+      - CreateDBSchemaFunctionCaller
+      - CreateDBSchemaFunction
   # Allow API Gateway to invoke Lambda function API from Console
   APIGWLambdaPermission:
     Type: "AWS::Lambda::Permission"
     DependsOn:
-    - WebAuthnKitAPIFunction
+      - WebAuthnKitAPIFunction
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref WebAuthnKitAPIFunction
@@ -1097,13 +1142,13 @@ Resources:
         - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
 
-#######  ##     ## ######## ########  ##     ## ######## 
-##     ## ##     ##    ##    ##     ## ##     ##    ##    
-##     ## ##     ##    ##    ##     ## ##     ##    ##    
-##     ## ##     ##    ##    ########  ##     ##    ##    
-##     ## ##     ##    ##    ##        ##     ##    ##    
-##     ## ##     ##    ##    ##        ##     ##    ##    
- #######   #######     ##    ##         #######     ## 
+#######  ##     ## ######## ########  ##     ## ########
+##     ## ##     ##    ##    ##     ## ##     ##    ##
+##     ## ##     ##    ##    ##     ## ##     ##    ##
+##     ## ##     ##    ##    ########  ##     ##    ##
+##     ## ##     ##    ##    ##        ##     ##    ##
+##     ## ##     ##    ##    ##        ##     ##    ##
+#######   #######     ##    ##         #######     ##
 
 Outputs:
   UserPoolId:
@@ -1119,8 +1164,8 @@ Outputs:
     Value: !Ref RDSAuroraClusterMasterSecret
     Description: AWS Secrets Manager Arn
   DBClusterArn:
-    Value: !Join 
-      - ''
+    Value: !Join
+      - ""
       - - "arn:aws:rds:"
         - !Ref AWS::Region
         - ":"
@@ -1131,68 +1176,68 @@ Outputs:
         - !Ref RDSAuroraServerlessCluster
     Description: Amazon RDS Cluster Arn
   APIEndpoint:
-    Value: 
-      Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev'
+    Value:
+      Fn::Sub: "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev"
     Description: WebAuthn Starter Kit API Gateway Regional Endpoint
-  AWSConfiguration: 
-    Value: !Join 
-      - ''
-      - - "{\"CognitoUserPool\": {\"Default\": {\"PoolId\""
+  AWSConfiguration:
+    Value: !Join
+      - ""
+      - - '{"CognitoUserPool": {"Default": {"PoolId"'
         - ":"
-        - "\""
+        - '"'
         - !Ref UserPool
-        - "\""
-        - ",\"AppClientId\":"
-        - "\""
+        - '"'
+        - ',"AppClientId":'
+        - '"'
         - !Ref UserPoolClient
-        - "\""
-        - ",\"Region\":"
-        - "\""
+        - '"'
+        - ',"Region":'
+        - '"'
         - !Ref AWS::Region
-        - "\""
-        - "}},\"Auth\": {\"Default\": {\"authenticationFlowType\": \"CUSTOM_AUTH\"}}}"
+        - '"'
+        - '}},"Auth": {"Default": {"authenticationFlowType": "CUSTOM_AUTH"}}}'
     Description: AWS constants used for Mobile iOS and Android clients
   AWSExports:
-    Value: !Join 
-      - ''
-      - - "const awsmobile = {\"aws_project_region\""
+    Value: !Join
+      - ""
+      - - 'const awsmobile = {"aws_project_region"'
         - ":"
-        - "\""
+        - '"'
         - !Ref AWS::Region
-        - "\""
-        - ", \"Auth\":"
-        - " {\"region\":"
-        - "\""
+        - '"'
+        - ', "Auth":'
+        - ' {"region":'
+        - '"'
         - !Ref AWS::Region
-        - "\""
-        - ", \"userPoolId\":"
-        - "\""
+        - '"'
+        - ', "userPoolId":'
+        - '"'
         - !Ref UserPool
-        - "\""
-        - ", \"userPoolWebClientId\":"
-        - "\""
+        - '"'
+        - ', "userPoolWebClientId":'
+        - '"'
         - !Ref UserPoolClient
-        - "\""
-        - ", \"authenticationFlowType\": \"CUSTOM_AUTH\"}"
-        - ", \"apiEndpoint\":"
-        - "\""
-        - Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev'
-        - "\""
-        - ", \"authenticationFlowType\": \"CUSTOM_AUTH\"};"
-        - ''
-        - ' export default awsmobile;'
+        - '"'
+        - ', "authenticationFlowType": "CUSTOM_AUTH"}'
+        - ', "apiEndpoint":'
+        - '"'
+        - Fn::Sub: "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev"
+        - '"'
+        - ', "authenticationFlowType": "CUSTOM_AUTH"};'
+        - ""
+        - " export default awsmobile;"
     Description: aws-exports.js configuration for deploying React client to AWS Amplify hosting
   # AWS Amplify Hosting - Endpoint
   AmplifyHostingEndpoint:
     Description: AWS Amplify hosting endpoint for React Web Client
-    Value: !Join 
-      - ''
-      - - 'https://'
+    Value: !Join
+      - ""
+      - - "https://"
         - !Ref AmplifyHostingBranchName
-        - '.'
-        - Fn::GetAtt: 
-          - "AWSAmplifyHostingApp"
-          - "DefaultDomain"
+        - "."
+        - Fn::GetAtt:
+            - "AWSAmplifyHostingApp"
+            - "DefaultDomain"
   # AWS Amplify Hosting - App Id
   AmplifyHostingAppId:
     Description: AWS Amplify hosting app id

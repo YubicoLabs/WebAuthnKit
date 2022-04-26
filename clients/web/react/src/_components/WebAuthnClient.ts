@@ -186,11 +186,14 @@ async function getAuthChallegeResponse(cognitoChallenge) {
     );
 
     const assertionResponse = await get(publicKey);
+    // This needs to be done as Apple sets userHandle to "", preventing the user from logging in
+    if (assertionResponse.response.userHandle === "")
+      assertionResponse.response.userHandle = null;
     console.info(
       t("console.info", {
         COMPONENT: "WebAuthnClient",
         METHOD: "getAuthChallegeResponse()",
-        LOG_REASON: t("console.reason.webauthnClient3"),
+        LOG_REASON: t("console.reason.webauthnClient4"),
       }),
       assertionResponse
     );

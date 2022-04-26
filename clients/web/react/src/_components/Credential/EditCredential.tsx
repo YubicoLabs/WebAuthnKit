@@ -40,7 +40,7 @@ const EditCredential = function ({ credential }) {
   const handleDelete = () => {
     setShow(false);
     dispatch(
-      credentialActions.delete(credential.credential.credentialId.base64)
+      credentialActions.delete(credential.credential.credentialId.base64url)
     );
   };
   const constraints = {
@@ -134,6 +134,39 @@ const EditCredential = function ({ credential }) {
           ) : null}
           &nbsp;&nbsp;
           <br />
+          <h4>{t("credential.yubico-att-label")}</h4>
+          {credential?.attestationMetadata?.value?.description && (
+            <p>
+              <em>{t("credential.att-device-name")}</em>{" "}
+              {credential.attestationMetadata.value.description}
+            </p>
+          )}
+          {credential?.attestationMetadata?.value?.aaguid && (
+            <p>
+              <em>{t("credential.att-aaguid")}</em>{" "}
+              {credential.attestationMetadata.value.aaguid}
+            </p>
+          )}
+          {credential?.attestationMetadata?.value?.aaid && (
+            <p>
+              <em>{t("credential.att-aaid")}</em>{" "}
+              {credential.attestationMetadata.value.aaid}
+            </p>
+          )}
+          {credential?.attestationMetadata?.value?.authenticatorTransport &&
+            credential?.attestationMetadata?.value?.authenticatorTransport
+              .length > 0 && (
+              <p>
+                <em>{t("credential.att-device-interfaces")}</em>{" "}
+                <ul>
+                  {credential.attestationMetadata.value.authenticatorTransport.map(
+                    (transport, index) => (
+                      <li key={index}>{transport.id}</li>
+                    )
+                  )}
+                </ul>
+              </p>
+            )}
           <label>
             <em>{t("credential.edit-usernameless")}</em>{" "}
             {credential.registrationRequest
@@ -168,41 +201,6 @@ const EditCredential = function ({ credential }) {
               : ""}
           </label>
           <br />
-          <br />
-          {checkAttestation(credential) && (
-            <>
-              <h4 style={{ color: "#9aca3c" }}>
-                {t("credential.yubico-att-label")}
-              </h4>
-              <p>
-                <em>{t("credential.att-device-name")}</em>{" "}
-                {
-                  credential.attestationMetadata.value.deviceProperties
-                    .displayName
-                }{" "}
-                -{" "}
-                <a
-                  href={
-                    credential.attestationMetadata.value.deviceProperties
-                      .deviceUrl
-                  }
-                  target="_blank"
-                  rel="noreferrer">
-                  {t("credential.att-device-info")}
-                </a>
-              </p>
-              <div>
-                <em>{t("credential.att-device-interfaces")}</em>{" "}
-                <ul>
-                  {credential.attestationMetadata.value.transports.map(
-                    (transport, index) => (
-                      <li key={index}>{transport}</li>
-                    )
-                  )}
-                </ul>
-              </div>
-            </>
-          )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

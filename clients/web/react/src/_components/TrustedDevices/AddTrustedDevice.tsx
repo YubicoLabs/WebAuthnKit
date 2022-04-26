@@ -102,6 +102,11 @@ const AddTrustedDevice = function ({ continueStep }) {
     }
   };
 
+  function handleAndroidAuthenticator() {
+    if (DetectBrowser.getPlatform().id === "ANDROID_BIOMETRICS") return false;
+    return true;
+  }
+
   /**
    * Primary logic of this method
    * Calls to the register API, and creates the credential on the authenticator
@@ -118,7 +123,7 @@ const AddTrustedDevice = function ({ continueStep }) {
        */
       await WebAuthnClient.registerNewCredential(
         nickname,
-        true,
+        handleAndroidAuthenticator(),
         "PLATFORM",
         null
       );

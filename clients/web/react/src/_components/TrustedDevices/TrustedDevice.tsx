@@ -1,8 +1,8 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { Button, Image } from "react-bootstrap";
-import { credentialActions } from "../../_actions";
 import { useTranslation } from "react-i18next";
+import { credentialActions } from "../../_actions";
 
 const styles = require("../component.module.css");
 
@@ -22,15 +22,27 @@ const TrustedDevice = function ({ credential }) {
    */
   const handleDelete = () => {
     dispatch(
-      credentialActions.delete(credential.credential.credentialId.base64)
+      credentialActions.delete(credential.credential.credentialId.base64url)
     );
     if (
-      credential.credential.credentialId.base64 ===
+      credential.credential.credentialId.base64url ===
       localStorage.getItem("trustedDeviceID")
     ) {
       localStorage.removeItem("trustedDevice");
       localStorage.removeItem("trustedDeviceID");
     }
+  };
+
+  /**
+   * Takes the image URL provided by the credential after attestation
+   * If no image is found, then a default is set
+   * @param credential
+   * @returns URL from the attestation response, or a default image if no icon is present
+   */
+  const getAttestationImage = (credential) => {
+    const imgUrl = credential.attestationMetadata?.value?.icon;
+    if (imgUrl) return imgUrl;
+    return "https://www.yubico.com/wp-content/uploads//2021/02/illus-shield-lock-r1-dkteal.svg";
   };
 
   return (
@@ -39,12 +51,15 @@ const TrustedDevice = function ({ credential }) {
         <div className="p-2">
           <Image
             className={styles.default["security-key-image"]}
-            src="https://www.yubico.com/wp-content/uploads/2021/01/illus-fingerprint-r1-dk-teal-1.svg"
+            src={getAttestationImage(credential)}
             roundedCircle
           />
         </div>
         <div className="p-2 flex-grow-1">
           <h5>{credential.credentialNickname.value}</h5>
+          {credential?.attestationMetadata?.value?.description && (
+            <h6>{credential.attestationMetadata.value.description}</h6>
+          )}
           <p>
             {t("trusted-device.date-last-used")}{" "}
             {new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()}

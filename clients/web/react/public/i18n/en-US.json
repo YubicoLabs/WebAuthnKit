@@ -88,10 +88,12 @@
     "last-time-used": "Last used time:",
     "last-update-time": "Last updates time:",
     "registration-time": "Registration time:",
-    "yubico-att-label": "Yubico Device Information:",
+    "yubico-att-label": "Device Information:",
     "att-device-name": "Device name:",
     "att-device-info": "Device info",
     "att-device-interfaces": "Available interfaces:",
+    "att-aaguid": "Device AAGUID:",
+    "att-aaid": "Device AAID:",
     "edit-cancel-button": "Cancel",
     "edit-delete-button": "Delete",
     "edit-save-button": "Save changes"
@@ -184,7 +186,7 @@
         "If prompted, select Use Face ID",
         "Allow your device to scan your face"
       ],
-      "HELLO": [
+      "WINDOWS_HELLO": [
         "In the prompt, select Built in Authenticator",
         "Scan your Fingerprint or enter your PIN"
       ]
