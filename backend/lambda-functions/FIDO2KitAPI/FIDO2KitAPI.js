@@ -289,18 +289,11 @@ async function startUsernamelessAuthentication() {
 async function startRegisterFIDO2Credential(profile, body, uid) {
     console.log("startRegisterFIDO2Credential userId: "+profile.id+" body:",body);
     const jsonBody = JSON.parse(body);
-
-    let invalidResult = validate({nickname: jsonBody.nickname}, constraints);
-    console.log("nickname invalidResult: ", invalidResult);
-    if(invalidResult && invalidResult.nickname) {
-        return error(invalidResult.nickname.join(". "));
-    }
     
     const payload = JSON.stringify({
         "type": "startRegistration",
         "username": profile.username,
         "displayName": profile.username,
-        "credentialNickname": jsonBody.nickname,
         "requireResidentKey": jsonBody.requireResidentKey,
         "requireAuthenticatorAttachment": jsonBody.requireAuthenticatorAttachment,
         "uid": uid

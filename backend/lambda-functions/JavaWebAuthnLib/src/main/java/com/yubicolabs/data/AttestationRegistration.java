@@ -15,15 +15,15 @@ import lombok.With;
 @With
 public class AttestationRegistration {
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  String aaguid;
+  public String aaguid;
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  String aaid;
+  public String aaid;
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  Set<AttachmentHint> attachmentHint;
+  public Set<AttachmentHint> attachmentHint;
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  String icon;
+  public String icon;
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  String description;
+  public String description;
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  Set<AuthenticatorTransport> authenticatorTransport;
+  public Set<AuthenticatorTransport> authenticatorTransport;
 }

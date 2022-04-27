@@ -78,27 +78,20 @@ const AddTrustedDevice = function ({ continueStep }) {
    */
   const handleSaveAdd = async () => {
     setSubmitted(true);
-
-    const result = validate({ nickname }, constraints);
-    if (result) {
-      setInvalidNickname(result.nickname.join(". "));
-    } else {
-      setInvalidNickname(undefined);
-      setLoading(true);
-      try {
-        await register();
-        continueStep();
-      } catch (error) {
-        console.error(
-          t("console.error", {
-            COMPONENT: "AddTrustedDevice",
-            METHOD: "handleSaveAdd()",
-            REASON: t("console.reason.addTrustedDevice0"),
-          }),
-          error
-        );
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      await register();
+      continueStep();
+    } catch (error) {
+      console.error(
+        t("console.error", {
+          COMPONENT: "AddTrustedDevice",
+          METHOD: "handleSaveAdd()",
+          REASON: t("console.reason.addTrustedDevice0"),
+        }),
+        error
+      );
+      setLoading(false);
     }
   };
 
@@ -122,7 +115,7 @@ const AddTrustedDevice = function ({ continueStep }) {
        * true required to force discoverable credentials to be created on the platform authenticator, which is required
        */
       await WebAuthnClient.registerNewCredential(
-        nickname,
+        // nickname,
         handleAndroidAuthenticator(),
         "PLATFORM",
         null
@@ -160,27 +153,6 @@ const AddTrustedDevice = function ({ continueStep }) {
             <></>
           )}
           <AddTrustedDeviceGuidance PLAT_AUTH={PLAT_AUTH} />
-          <label>{t("trusted-device.add-form-label")}</label>
-          <input
-            type="text"
-            name="nickname"
-            autoFocus
-            value={nickname}
-            ref={inputRef}
-            onChange={handleChange}
-            className={`form-control${
-              submitted && invalidNickname ? " is-invalid" : ""
-            }`}
-            onKeyPress={(ev) => {
-              if (ev.key === "Enter") {
-                ev.preventDefault();
-                handleSaveAdd();
-              }
-            }}
-          />
-          {invalidNickname ? (
-            <Alert variant="danger">{invalidNickname}</Alert>
-          ) : null}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

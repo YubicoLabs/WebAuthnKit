@@ -43,6 +43,9 @@ import com.yubico.webauthn.data.AuthenticatorAttachment;
 import com.yubicolabs.data.CredentialRegistration;
 import com.yubicolabs.data.RegistrationRequest;
 import com.yubicolabs.data.RegistrationResponse;
+
+import org.checkerframework.checker.nullness.Opt;
+
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.cert.PKIXRevocationChecker.Option;
@@ -183,7 +186,6 @@ public class App implements RequestHandler<Object, Object> {
 
         String username = jsonRequest.get("username").getAsString();
         String displayName = jsonRequest.get("displayName").getAsString();
-        String credentialNickname = jsonRequest.get("credentialNickname").getAsString();
         boolean requireResidentKey = jsonRequest.get("requireResidentKey").getAsBoolean();
         AuthenticatorAttachment requireAuthenticatorAttachment = (jsonRequest.has("requireAuthenticatorAttachment"))
                 ? (resolveAuthenticatorAttachment(jsonRequest.get("requireAuthenticatorAttachment").getAsString()))
@@ -191,8 +193,8 @@ public class App implements RequestHandler<Object, Object> {
         String uid = jsonRequest.get("uid").getAsString();
 
         log.trace(
-                "startRegistration username: {}, displayName: {}, credentialNickname: {}, requireResidentKey: {}, uid {}",
-                username, displayName, credentialNickname, requireResidentKey, uid);
+                "startRegistration username: {}, displayName: {}, requireResidentKey: {}, uid {}",
+                username, displayName, requireResidentKey, uid);
 
         ByteArray id;
         try {
@@ -216,7 +218,7 @@ public class App implements RequestHandler<Object, Object> {
                 "startRegistration",
                 username,
                 displayName,
-                credentialNickname,
+                "New Credential",
                 requireResidentKey,
                 generateRandom(32),
                 rp.startRegistration(
@@ -253,7 +255,6 @@ public class App implements RequestHandler<Object, Object> {
         log.debug("finishRegistration responseJson: {}", responseJson);
 
         RegistrationResponse response;
-
         try {
             response = jsonMapper.readValue(responseJson.toString(), RegistrationResponse.class);
         } catch (Exception e) {
@@ -282,7 +283,6 @@ public class App implements RequestHandler<Object, Object> {
 
                 return addRegistration(
                         request.getPublicKeyCredentialCreationOptions().getUser(),
-                        Optional.of(request.getCredentialNickname()),
                         response,
                         registration,
                         request);
@@ -461,11 +461,33 @@ public class App implements RequestHandler<Object, Object> {
 
     private CredentialRegistration addRegistration(
             UserIdentity userIdentity,
-            Optional<String> nickname,
             RegistrationResponse response,
             RegistrationResult result,
             RegistrationRequest request) {
         Optional<AttestationRegistration> attestationMetadata = buildAttestationResult(result);
+        Optional<String> nickname = Optional.empty();
+        if (attestationMetadata.isPresent()) {
+            if (attestationMetadata.get().description != null) {
+                nickname = Optional.ofNullable(attestationMetadata.get().description);
+            }
+        }
+        if (!nickname.isPresent()) {
+            log.debug("addRegistration Evaluate AuthSelection: No attestation found");
+            Optional<AuthenticatorSelectionCriteria> evaluate = request.publicKeyCredentialCreationOptions
+                    .getAuthenticatorSelection();
+            log.debug("addRegistration Evaluate AuthSelection publicKeyCreate: {}", gson.toJson(evaluate));
+
+            if (evaluate.isPresent() && evaluate.get().getAuthenticatorAttachment().isPresent()) {
+                log.debug("addRegistration Evaluate AuthSelection found, checking authattachment value2: {}",
+                        gson.toJson(evaluate.get().getAuthenticatorAttachment().get()));
+                if (evaluate.get().getAuthenticatorAttachment().get() == AuthenticatorAttachment.PLATFORM) {
+                    nickname = Optional.ofNullable("My Trusted Device");
+                }
+            }
+        }
+        if (!nickname.isPresent()) {
+            nickname = Optional.ofNullable("My Security Key");
+        }
         return addRegistration(
                 userIdentity,
                 nickname,

@@ -70,26 +70,19 @@ const AddCredential = function () {
    */
   const handleSaveAdd = async () => {
     setSubmitted(true);
-
-    const result = validate({ keyName: nickname }, constraints);
-    if (result) {
-      setInvalidNickname(result.keyName.join(". "));
-    } else {
-      setInvalidNickname(undefined);
-      setLoading(true);
-      try {
-        await register();
-      } catch (error) {
-        console.error(
-          t("console.error", {
-            COMPONENT: "AddCredential",
-            METHOD: "handleSaveAdd()",
-            REASON: t("console.reason.addCredential0"),
-          }),
-          error
-        );
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      await register();
+    } catch (error) {
+      console.error(
+        t("console.error", {
+          COMPONENT: "AddCredential",
+          METHOD: "handleSaveAdd()",
+          REASON: t("console.reason.addCredential0"),
+        }),
+        error
+      );
+      setLoading(false);
     }
   };
 
@@ -158,7 +151,6 @@ const AddCredential = function () {
        * More information can be found here: https://www.w3.org/TR/webauthn-2/#enum-attachment
        */
       await WebAuthnClient.registerNewCredential(
-        nickname,
         isResidentKey,
         "CROSS_PLATFORM",
         registerUV
@@ -200,28 +192,6 @@ const AddCredential = function () {
           )}
           <AddCredentialGuidance />
 
-          <label>{t("credential.add-form-label")}</label>
-          <input
-            type="text"
-            name="nickname"
-            autoFocus
-            value={nickname}
-            ref={inputRef}
-            onChange={handleChange}
-            className={`form-control${
-              submitted && invalidNickname ? " is-invalid" : ""
-            }`}
-            onKeyPress={(ev) => {
-              if (ev.key === "Enter") {
-                handleSaveAdd();
-                ev.preventDefault();
-              }
-            }}
-          />
-          {invalidNickname ? (
-            <Alert variant="danger">{invalidNickname}</Alert>
-          ) : null}
-          <br />
           {handleAndroidResidentKey() && (
             <label>
               <input

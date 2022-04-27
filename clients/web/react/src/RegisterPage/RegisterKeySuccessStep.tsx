@@ -91,6 +91,10 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
     dispatch(credentialActions.validateCredentialNickname(nickname));
   }
 
+  function skipStep() {
+    history.push("/");
+  }
+
   return (
     <>
       <div className={styles.default["textCenter"]}>
@@ -124,6 +128,9 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
             onClick={() => continueStep()}
             variant="primary btn-block mt-3">
             {t("registration.primary-button")}{" "}
+          </Button>
+          <Button onClick={() => skipStep()} variant="secondary btn-block mt-3">
+            {t("registration.secondary-button")}{" "}
           </Button>
         </div>
       </div>
