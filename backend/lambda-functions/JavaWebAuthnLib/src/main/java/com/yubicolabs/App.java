@@ -33,6 +33,7 @@ import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import com.yubico.webauthn.data.ResidentKeyRequirement;
 import com.yubico.webauthn.data.UserIdentity;
+import com.yubico.webauthn.data.UserVerificationRequirement;
 import com.yubico.webauthn.data.exception.Base64UrlException;
 import com.yubico.webauthn.exception.AssertionFailedException;
 import com.yubico.webauthn.exception.RegistrationFailedException;
@@ -109,7 +110,7 @@ public class App implements RequestHandler<Object, Object> {
                     .useDefaultBlob()
                     .useBlobCacheFile(new File("/tmp/fido-mds-blob-cache.bin"))
                     .build()
-                    .loadBlob();
+                    .loadCachedBlob();
 
             FidoMetadataService mds = FidoMetadataService.builder()
                     .useBlob(downloader)
@@ -225,12 +226,12 @@ public class App implements RequestHandler<Object, Object> {
                         StartRegistrationOptions.builder()
                                 .user(registrationUserId)
                                 .authenticatorSelection(AuthenticatorSelectionCriteria.builder()
-                                        .residentKey(requireResidentKey ? ResidentKeyRequirement.REQUIRED
-                                                : ResidentKeyRequirement.DISCOURAGED)
+                                        .residentKey(ResidentKeyRequirement.PREFERRED)
                                         .authenticatorAttachment(
                                                 requireAuthenticatorAttachment != null
                                                         ? requireAuthenticatorAttachment
                                                         : null)
+                                        .userVerification(UserVerificationRequirement.PREFERRED)
                                         .build())
                                 .build()));
         log.debug("request: {}", request);
@@ -311,6 +312,7 @@ public class App implements RequestHandler<Object, Object> {
                     rp.startAssertion(
                             StartAssertionOptions.builder()
                                     .username(username)
+                                    .userVerification(UserVerificationRequirement.PREFERRED)
                                     .build()));
 
             log.debug("request: {}", request);
@@ -537,19 +539,24 @@ public class App implements RequestHandler<Object, Object> {
         // Find MDS entries based on both the AAGUID and TrustRootCert provided during
         // Attestation
         Set<MetadataBLOBPayloadEntry> entries = mds.findEntries(result);
+        log.debug("buildAttestationResult() number of entries found in entries: {}", entries.size());
+        log.debug("buildAttestationResult() entries found in entries: {}", gson.toJson(entries));
 
         // If entries is empty, try through only the AAGUID, this allows Windows Hello
         // to work
         if (entries.size() == 0) {
+            log.debug("buildAttestationResult() No entries found, attempting by AAGUID only");
             entries = mds.findEntries(new AAGUID(result.getAaguid()));
+            log.debug("buildAttestationResult() number of entries found  in entries AAGUID: {}", entries.size());
+            log.debug("buildAttestationResult() entries found  in entries AAGUID: {}", gson.toJson(entries));
         }
-        log.debug("buildAttestationResult() number of entries found for result: {}", entries.size());
-        log.debug("buildAttestationResult() entries found for result: {}", gson.toJson(entries));
 
         List<MetadataBLOBPayloadEntry> entriesAaguid = entries.stream()
                 .filter(ent -> ent.getAaguid().isPresent()
                         && ent.getAaguid().get().asHexString().equals(result.getAaguid().getHex()))
                 .collect(Collectors.toList());
+
+        log.debug("buildAttestationResult() entries found in filter for AAGUID: {}", entriesAaguid.size());
 
         Optional<MetadataStatement> entriesFinal;
         if (entriesAaguid.size() == 0) {
