@@ -24,6 +24,10 @@ const RecoveryCodes = function ({ credentials }) {
   // Indicates if all codes have been consumed by login
   const { allRecoveryCodesUsed } = credentials;
 
+  const [ignoreModal, setIgnoreMoral] = useState(
+    localStorage.getItem("recoveryCodesModal") === "true"
+  );
+
   const recoveryCodes = useSelector(
     (state: RootStateOrAny) => state.recoveryCodes
   );
@@ -54,15 +58,34 @@ const RecoveryCodes = function ({ credentials }) {
     dispatch(credentialActions.generateRecoveryCodes());
   };
 
+  const handleIgnore = () => {
+    console.warn("This method did get called");
+    localStorage.setItem("recoveryCodesModal", "true");
+    setShowCodes(false);
+  };
+
   /**
    * The modal will continue to appear on the parent component if the user has not generated new credentials
    * OR if all the codes have been consumed
    */
   useEffect(() => {
-    if (!recoveryCodesViewed || allRecoveryCodesUsed) {
+    if ((!recoveryCodesViewed || allRecoveryCodesUsed) && !ignoreModal) {
+      console.warn("we in here: ", {
+        recoveryCodesViewed,
+        allRecoveryCodesUsed,
+        ignoreModal,
+      });
+
       handleShow();
     }
   }, [recoveryCodesViewed, allRecoveryCodesUsed]);
+
+  useEffect(() => {
+    if (localStorage.getItem("recoveryCodesModal") === "true") {
+      console.warn("ignore modal is true");
+      setIgnoreMoral(true);
+    }
+  }, []);
 
   return (
     <>
@@ -134,8 +157,11 @@ const RecoveryCodes = function ({ credentials }) {
           </Button>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleClose}>
+          <Button onClick={handleClose} variant="primary btn-block mt-3">
             {t("recovery-codes.close-button")}
+          </Button>
+          <Button onClick={handleIgnore} variant="light btn-block mt-3">
+            {t("recovery-codes.ignore")}
           </Button>
         </Modal.Footer>
       </Modal>

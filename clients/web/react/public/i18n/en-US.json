@@ -149,7 +149,8 @@
     "generate-codes": "Generate new recovery codes",
     "generate-codes-text": "When you generate new recovery codes, you must copy them to a safe spot. Your old codes will not work anymore.",
     "generate-codes-button": "Generate",
-    "close-button": "Close"
+    "close-button": "Not now, ask me again later",
+    "ignore": "Ignore, and don't ask again"
   },
   "sv-pin": {
     "enter-pin": "Enter U2F Password",
