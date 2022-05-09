@@ -1,4 +1,11 @@
-== Version 2.0.0 RC ==
+== Version 2.1.0 ==
+
+- Integration with FIDO MDS
+- Automatic nicknames given to authenticators through MDS
+- New Edit modal for Trusted Devices
+- Various bug fixes for internationalization, Android resident key settings, and Safari user handle default values
+
+== Version 2.0.0 ==
 
 - Updated look and feel of UI
 - Attestation data now displayed to the user (if they are using a YubiKey)
