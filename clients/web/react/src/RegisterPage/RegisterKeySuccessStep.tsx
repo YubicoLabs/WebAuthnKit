@@ -64,7 +64,7 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
       const credentialToUpdate = {
         credential: {
           credentialId: {
-            base64: ls_credential.id,
+            base64url: ls_credential.id,
           },
         },
         credentialNickname: {
@@ -89,6 +89,10 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
 
   function continueStep() {
     dispatch(credentialActions.validateCredentialNickname(nickname));
+  }
+
+  function skipStep() {
+    history.push("/");
   }
 
   return (
@@ -124,6 +128,9 @@ const RegisterKeySuccessStep = function ({ setForm, formData, navigation }) {
             onClick={() => continueStep()}
             variant="primary btn-block mt-3">
             {t("registration.primary-button")}{" "}
+          </Button>
+          <Button onClick={() => skipStep()} variant="secondary btn-block mt-3">
+            {t("registration.secondary-button")}{" "}
           </Button>
         </div>
       </div>

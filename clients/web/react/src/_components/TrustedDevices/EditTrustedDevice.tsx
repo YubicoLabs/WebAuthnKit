@@ -12,7 +12,7 @@ import { credentialActions } from "../../_actions";
  * @param credential Data related to a specific credential
  * @returns
  */
-const EditCredential = function ({ credential }) {
+const EditTrustedDevice = function ({ credential }) {
   const { t } = useTranslation();
 
   const [show, setShow] = useState(false);
@@ -34,15 +34,6 @@ const EditCredential = function ({ credential }) {
     setShow(true);
   };
 
-  /**
-   * Handles the deletion of a credential if triggered by a user using the method in credentialActions
-   */
-  const handleDelete = () => {
-    setShow(false);
-    dispatch(
-      credentialActions.delete(credential.credential.credentialId.base64url)
-    );
-  };
   const constraints = {
     nickname: {
       length: {
@@ -50,6 +41,24 @@ const EditCredential = function ({ credential }) {
         maximum: 20,
       },
     },
+  };
+  /**
+   * Handles the pressing of the delete button
+   * IF the ID of the deleted device matches the ID of the Trusted Device locally stored
+   * then it removes any local information related to the trusted device
+   */
+  const handleDelete = () => {
+    setShow(false);
+    dispatch(
+      credentialActions.delete(credential.credential.credentialId.base64url)
+    );
+    if (
+      credential.credential.credentialId.base64url ===
+      localStorage.getItem("trustedDeviceID")
+    ) {
+      localStorage.removeItem("trustedDevice");
+      localStorage.removeItem("trustedDeviceID");
+    }
   };
 
   /**
@@ -89,15 +98,15 @@ const EditCredential = function ({ credential }) {
   return (
     <>
       <Button variant="secondary" onClick={handleShow}>
-        {t("credential.edit-button")}
+        {t("trusted-device.edit-button")}
       </Button>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>{t("credential.edit-header")}</Modal.Title>
+          <Modal.Title>{t("trusted-device.edit-header")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <label>
-            {t("credential.edit-form-label")}{" "}
+            {t("trusted-device.edit-form-label")}{" "}
             <input
               type="text"
               name="nickname"
@@ -122,7 +131,7 @@ const EditCredential = function ({ credential }) {
           ) : null}
           &nbsp;&nbsp;
           <br />
-          <h4>{t("credential.yubico-att-label")}</h4>
+          <h4>{t("trusted-device.yubico-att-label")}</h4>
           {credential?.attestationMetadata?.value?.description && (
             <p>
               <em>{t("credential.att-device-name")}</em>{" "}
@@ -131,13 +140,13 @@ const EditCredential = function ({ credential }) {
           )}
           {credential?.attestationMetadata?.value?.aaguid && (
             <p>
-              <em>{t("credential.att-aaguid")}</em>{" "}
+              <em>{t("trusted-device.att-aaguid")}</em>{" "}
               {credential.attestationMetadata.value.aaguid}
             </p>
           )}
           {credential?.attestationMetadata?.value?.aaid && (
             <p>
-              <em>{t("credential.att-aaid")}</em>{" "}
+              <em>{t("trusted-device.att-aaid")}</em>{" "}
               {credential.attestationMetadata.value.aaid}
             </p>
           )}
@@ -145,7 +154,7 @@ const EditCredential = function ({ credential }) {
             credential?.attestationMetadata?.value?.authenticatorTransport
               .length > 0 && (
               <p>
-                <em>{t("credential.att-device-interfaces")}</em>{" "}
+                <em>{t("trusted-device.att-device-interfaces")}</em>{" "}
                 <ul>
                   {credential.attestationMetadata.value.authenticatorTransport.map(
                     (transport, index) => (
@@ -156,14 +165,14 @@ const EditCredential = function ({ credential }) {
               </p>
             )}
           <label>
-            <em>{t("credential.edit-usernameless")}</em>{" "}
+            <em>{t("trusted-device.edit-usernameless")}</em>{" "}
             {credential.registrationRequest
               ? credential.registrationRequest.requireResidentKey.toString()
               : ""}
           </label>
           <br />
           <label>
-            <em>{t("credential.last-time-used")}</em>{" "}
+            <em>{t("trusted-device.last-time-used")}</em>{" "}
             {credential.lastUsedTime
               ? new Date(
                   credential.lastUsedTime.seconds * 1000
@@ -172,7 +181,7 @@ const EditCredential = function ({ credential }) {
           </label>
           <br />
           <label>
-            <em>{t("credential.last-update-time")}</em>{" "}
+            <em>{t("trusted-device.last-update-time")}</em>{" "}
             {credential.lastUpdatedTime
               ? new Date(
                   credential.lastUpdatedTime.seconds * 1000
@@ -181,7 +190,7 @@ const EditCredential = function ({ credential }) {
           </label>
           <br />
           <label>
-            <em>{t("credential.registration-time")}</em>{" "}
+            <em>{t("trusted-device.registration-time")}</em>{" "}
             {credential.registrationTime
               ? new Date(
                   credential.registrationTime.seconds * 1000
@@ -192,13 +201,13 @@ const EditCredential = function ({ credential }) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            {t("credential.edit-cancel-button")}
+            {t("trusted-device.edit-cancel-button")}
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            {t("credential.edit-delete-button")}
+            {t("trusted-device.edit-delete-button")}
           </Button>
           <Button variant="primary" onClick={handleSave}>
-            {t("credential.edit-save-button")}
+            {t("trusted-device.edit-save-button")}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -206,4 +215,4 @@ const EditCredential = function ({ credential }) {
   );
 };
 
-export default EditCredential;
+export default EditTrustedDevice;

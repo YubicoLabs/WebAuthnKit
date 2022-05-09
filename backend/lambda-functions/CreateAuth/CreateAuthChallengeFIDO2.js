@@ -131,9 +131,9 @@ async function getCreateCredentialsOptions(event, creds) {
         
         const coseLookup = {"ES256": -7, "EdDSA": -8, "RS256": -257};
         
-        startRegisterPayload.requestId = startRegisterPayload.requestId.base64;
-        startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64;
-        startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64;
+        startRegisterPayload.requestId = startRegisterPayload.requestId.base64url;
+        startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64url;
+        startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64url;
         startRegisterPayload.publicKeyCredentialCreationOptions.attestation = startRegisterPayload.publicKeyCredentialCreationOptions.attestation.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
         startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment = authSelectorResolve[startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment];
@@ -179,14 +179,14 @@ async function getCredentialsOptions(username) {
         let startAuthPayload = JSON.parse(JSON.parse(response.Payload));
         console.log("startAuthPayload: ", startAuthPayload);
 
-        startAuthPayload.requestId = startAuthPayload.requestId.base64;
+        startAuthPayload.requestId = startAuthPayload.requestId.base64url;
         console.log("requestId: ", startAuthPayload.requestId);
         startAuthPayload.publicKeyCredentialRequestOptions.userVerification = startAuthPayload.publicKeyCredentialRequestOptions.userVerification.toLowerCase();
-        startAuthPayload.publicKeyCredentialRequestOptions.challenge = startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64;
+        startAuthPayload.publicKeyCredentialRequestOptions.challenge = startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64url;
         console.log("challenge: ", startAuthPayload.publicKeyCredentialRequestOptions.challenge);
         startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials = startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials.map( (cred) => { 
             cred.type = cred.type.toLowerCase().replace('_','-');
-            cred.id = cred.id.base64;
+            cred.id = cred.id.base64url;
             return cred
         });
         console.log("response payload: ", startAuthPayload);

@@ -42,7 +42,20 @@
     "add-form-label": "Nickname",
     "date-last-used": "Date last used:",
     "delete-button": "Delete",
-    "trusted-devices": "Trusted Devices"
+    "trusted-devices": "Trusted Devices",
+    "edit-button": "Edit",
+    "edit-header": "Edit your Trusted Device",
+    "edit-form-label": "Nickname",
+    "edit-usernameless": "Usernameless a.k.a. Client-Side Discoverable Credential:",
+    "edit-cancel-button": "Cancel",
+    "edit-delete-button": "Delete",
+    "edit-save-button": "Save changes",
+    "att-device-name": "Device name:",
+    "att-device-info": "Device info",
+    "att-device-interfaces": "Available interfaces:",
+    "att-aaguid": "Device AAGUID:",
+    "att-aaid": "Device AAID:",
+    "yubico-att-label": "Device Information:"
   },
   "logout": "Thank you for joining us!",
   "registration": {
@@ -54,6 +67,7 @@
     "add-key-2": "Follow the steps in the browser",
     "add-key-3": "Give your Security Key a nickname to easily identify it later",
     "primary-button": "Continue",
+    "secondary-button": "Continue without editing credential nickname",
     "primary-button-loading": "Creating your account",
     "success-header": "Security Key added",
     "success-prompt": "You have successfully registered your Security Key",
@@ -88,10 +102,12 @@
     "last-time-used": "Last used time:",
     "last-update-time": "Last updates time:",
     "registration-time": "Registration time:",
-    "yubico-att-label": "Yubico Device Information:",
+    "yubico-att-label": "Device Information:",
     "att-device-name": "Device name:",
     "att-device-info": "Device info",
     "att-device-interfaces": "Available interfaces:",
+    "att-aaguid": "Device AAGUID:",
+    "att-aaid": "Device AAID:",
     "edit-cancel-button": "Cancel",
     "edit-delete-button": "Delete",
     "edit-save-button": "Save changes"
@@ -133,7 +149,8 @@
     "generate-codes": "Generate new recovery codes",
     "generate-codes-text": "When you generate new recovery codes, you must copy them to a safe spot. Your old codes will not work anymore.",
     "generate-codes-button": "Generate",
-    "close-button": "Close"
+    "close-button": "Not now, ask me again later",
+    "ignore": "Ignore, and don't ask again"
   },
   "sv-pin": {
     "enter-pin": "Enter U2F Password",
@@ -184,7 +201,7 @@
         "If prompted, select Use Face ID",
         "Allow your device to scan your face"
       ],
-      "HELLO": [
+      "WINDOWS_HELLO": [
         "In the prompt, select Built in Authenticator",
         "Scan your Fingerprint or enter your PIN"
       ]

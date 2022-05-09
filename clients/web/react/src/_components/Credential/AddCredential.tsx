@@ -11,6 +11,7 @@ import AddCredentialGuidance from "./AddCredentialGuidance";
 // eslint-disable-next-line camelcase
 import aws_exports from "../../aws-exports";
 import { WebAuthnClient } from "..";
+import DetectBrowser from "../../_helpers/DetectBrowser";
 
 // eslint-disable-next-line camelcase
 axios.defaults.baseURL = aws_exports.apiEndpoint;
@@ -69,26 +70,19 @@ const AddCredential = function () {
    */
   const handleSaveAdd = async () => {
     setSubmitted(true);
-
-    const result = validate({ keyName: nickname }, constraints);
-    if (result) {
-      setInvalidNickname(result.keyName.join(". "));
-    } else {
-      setInvalidNickname(undefined);
-      setLoading(true);
-      try {
-        await register();
-      } catch (error) {
-        console.error(
-          t("console.error", {
-            COMPONENT: "AddCredential",
-            METHOD: "handleSaveAdd()",
-            REASON: t("console.reason.addCredential0"),
-          }),
-          error
-        );
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      await register();
+    } catch (error) {
+      console.error(
+        t("console.error", {
+          COMPONENT: "AddCredential",
+          METHOD: "handleSaveAdd()",
+          REASON: t("console.reason.addCredential0"),
+        }),
+        error
+      );
+      setLoading(false);
     }
   };
 
@@ -134,6 +128,16 @@ const AddCredential = function () {
   }
 
   /**
+   * Android will not allow for a ResidentKey to be created - and will return an error during the WebAuthn ceremony if RequireResidentKey is True and ResidentKey is set to required
+   * This method will hide the checkbox to create a resident key from the UI on android device
+   * @returns false to hide if on android, true if otherwise
+   */
+  function handleAndroidResidentKey() {
+    if (DetectBrowser.getPlatform().id === "ANDROID_BIOMETRICS") return false;
+    return true;
+  }
+
+  /**
    * Primary logic of this method
    * Calls to the register API, and creates the credential on the security key
    * Removing requireAuthenticatorAttachment will allow for the registration of both roaming authenticator and platform
@@ -147,7 +151,6 @@ const AddCredential = function () {
        * More information can be found here: https://www.w3.org/TR/webauthn-2/#enum-attachment
        */
       await WebAuthnClient.registerNewCredential(
-        nickname,
         isResidentKey,
         "CROSS_PLATFORM",
         registerUV
@@ -189,41 +192,21 @@ const AddCredential = function () {
           )}
           <AddCredentialGuidance />
 
-          <label>{t("credential.add-form-label")}</label>
-          <input
-            type="text"
-            name="nickname"
-            autoFocus
-            value={nickname}
-            ref={inputRef}
-            onChange={handleChange}
-            className={`form-control${
-              submitted && invalidNickname ? " is-invalid" : ""
-            }`}
-            onKeyPress={(ev) => {
-              if (ev.key === "Enter") {
-                handleSaveAdd();
-                ev.preventDefault();
-              }
-            }}
-          />
-          {invalidNickname ? (
-            <Alert variant="danger">{invalidNickname}</Alert>
-          ) : null}
-          <br />
-          <label>
-            <input
-              name="isResidentKey"
-              type="checkbox"
-              checked={isResidentKey}
-              onChange={handleCheckboxChange}
-            />{" "}
-            {t("credential.usernameless-label")}
-            <br />
-            <em>
-              <small>{t("credential.usernameless-note")}</small>
-            </em>
-          </label>
+          {handleAndroidResidentKey() && (
+            <label>
+              <input
+                name="isResidentKey"
+                type="checkbox"
+                checked={isResidentKey}
+                onChange={handleCheckboxChange}
+              />{" "}
+              {t("credential.usernameless-label")}
+              <br />
+              <em>
+                <small>{t("credential.usernameless-note")}</small>
+              </em>
+            </label>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

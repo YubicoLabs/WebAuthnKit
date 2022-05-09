@@ -186,11 +186,14 @@ async function getAuthChallegeResponse(cognitoChallenge) {
     );
 
     const assertionResponse = await get(publicKey);
+    // This needs to be done as Apple sets userHandle to "", preventing the user from logging in
+    if (assertionResponse.response.userHandle === "")
+      assertionResponse.response.userHandle = null;
     console.info(
       t("console.info", {
         COMPONENT: "WebAuthnClient",
         METHOD: "getAuthChallegeResponse()",
-        LOG_REASON: t("console.reason.webauthnClient3"),
+        LOG_REASON: t("console.reason.webauthnClient4"),
       }),
       assertionResponse
     );
@@ -734,7 +737,6 @@ async function signUp(name, requestUV, registerWebKit) {
  * @param requestUV callback used to trigger modal if UV is not present on the authenticator allowing the user to provide a U2F Password
  */
 async function registerNewCredential(
-  nickname,
   isResidentKey,
   authenticatorAttachment = "CROSS_PLATFORM",
   requestUV
@@ -747,7 +749,6 @@ async function registerNewCredential(
         LOG_REASON: t("console.reason.webauthnClient16"),
       }),
       {
-        nickname,
         isResidentKey,
         authenticatorAttachment,
       }
@@ -755,7 +756,6 @@ async function registerNewCredential(
     const startRegistrationResponse = await axios.post(
       "/users/credentials/fido2/register",
       {
-        nickname,
         requireResidentKey: isResidentKey,
         requireAuthenticatorAttachment: authenticatorAttachment,
       }
@@ -805,7 +805,6 @@ async function registerNewCredential(
       requestId,
       pinSet: startRegistrationResponse.data.pinSet,
       pinCode: defaultInvalidPIN,
-      nickname,
     };
     console.info(
       t("console.info", {

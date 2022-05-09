@@ -24,8 +24,7 @@ const checkAttestation = (credential) => {
  * @returns
  */
 const getAttestationImage = (credential) => {
-  const imgUrl =
-    credential.attestationMetadata?.value?.deviceProperties?.imageUrl;
+  const imgUrl = credential.attestationMetadata?.value?.icon;
   if (imgUrl) return imgUrl;
   return "https://www.yubico.com/wp-content/uploads//2021/02/illus-shield-lock-r1-dkteal.svg";
 };
@@ -52,14 +51,11 @@ const Credential = function ({ credential }) {
         </div>
         <div className="p-2 flex-grow-1">
           <h5>{credential.credentialNickname.value}</h5>
-          {checkAttestation(credential) && (
-            <h6>
-              {
-                credential.attestationMetadata.value.deviceProperties
-                  .displayName
-              }
-            </h6>
-          )}
+          {credential?.attestationMetadata?.value?.description &&
+            credential.attestationMetadata.value.description !==
+              credential.credentialNickname.value && (
+              <h6>{credential.attestationMetadata.value.description}</h6>
+            )}
           <p>
             {t("credential.date-last-used")}:{" "}
             {new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()}

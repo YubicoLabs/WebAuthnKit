@@ -3,7 +3,6 @@ package com.yubicolabs.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yubico.webauthn.RegisteredCredential;
-import com.yubico.webauthn.attestation.Attestation;
 import com.yubico.webauthn.data.UserIdentity;
 import java.time.Instant;
 import java.util.Optional;
@@ -13,7 +12,7 @@ import lombok.With;
 
 @Value
 @Builder
-@With 
+@With
 public class CredentialRegistration {
 
     long signatureCount;
@@ -33,7 +32,7 @@ public class CredentialRegistration {
 
     RegisteredCredential credential;
 
-    Optional<Attestation> attestationMetadata;
+    Optional<AttestationRegistration> attestationMetadata;
 
     RegistrationRequest registrationRequest;
 
@@ -57,4 +56,3 @@ public class CredentialRegistration {
     }
 
 }
-
