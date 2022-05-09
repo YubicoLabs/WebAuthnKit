@@ -59,7 +59,6 @@ const RecoveryCodes = function ({ credentials }) {
   };
 
   const handleIgnore = () => {
-    console.warn("This method did get called");
     localStorage.setItem("recoveryCodesModal", "true");
     setShowCodes(false);
   };
@@ -70,19 +69,12 @@ const RecoveryCodes = function ({ credentials }) {
    */
   useEffect(() => {
     if ((!recoveryCodesViewed || allRecoveryCodesUsed) && !ignoreModal) {
-      console.warn("we in here: ", {
-        recoveryCodesViewed,
-        allRecoveryCodesUsed,
-        ignoreModal,
-      });
-
       handleShow();
     }
   }, [recoveryCodesViewed, allRecoveryCodesUsed]);
 
   useEffect(() => {
     if (localStorage.getItem("recoveryCodesModal") === "true") {
-      console.warn("ignore modal is true");
       setIgnoreMoral(true);
     }
   }, []);
