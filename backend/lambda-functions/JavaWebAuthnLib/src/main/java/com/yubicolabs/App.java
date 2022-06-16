@@ -19,6 +19,7 @@ import com.yubico.fido.metadata.FidoMetadataService;
 import com.yubico.fido.metadata.MetadataBLOB;
 import com.yubico.internal.util.JacksonCodecs;
 import com.yubico.webauthn.AssertionResult;
+import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.FinishAssertionOptions;
 import com.yubico.webauthn.FinishRegistrationOptions;
 import com.yubico.webauthn.RegisteredCredential;
@@ -31,6 +32,7 @@ import com.yubico.webauthn.data.AuthenticatorSelectionCriteria;
 import com.yubico.webauthn.data.AuthenticatorTransport;
 import com.yubico.webauthn.data.ByteArray;
 import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
+import com.yubico.webauthn.data.RelyingPartyIdentity;
 import com.yubico.webauthn.data.ResidentKeyRequirement;
 import com.yubico.webauthn.data.UserIdentity;
 import com.yubico.webauthn.data.UserVerificationRequirement;
@@ -122,18 +124,32 @@ public class App implements RequestHandler<Object, Object> {
         }
     }
 
-    private final RelyingParty rp = RelyingParty.builder()
-            .identity(Config.getRpIdentity())
-            .credentialRepository(this.userStorage)
-            .origins(Config.getOrigins())
-            .attestationConveyancePreference(Optional.of(AttestationConveyancePreference.DIRECT))
-            .attestationTrustSource(mds)
-            .allowUntrustedAttestation(true)
-            .validateSignatureCounter(true)
-            .build();
+    private RelyingParty rp;
 
     public App() {
         jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        rp = RelyingParty.builder()
+                .identity(Config.getRpIdentity())
+                .credentialRepository(this.userStorage)
+                .origins(Config.getOrigins())
+                .attestationConveyancePreference(Optional.of(AttestationConveyancePreference.DIRECT))
+                .attestationTrustSource(mds)
+                .allowUntrustedAttestation(true)
+                .validateSignatureCounter(true)
+                .build();
+    }
+
+    public App(RelyingPartyIdentity rpId, CredentialRepository credRepo, Set<String> origins) {
+        jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        rp = RelyingParty.builder()
+                .identity(rpId)
+                .credentialRepository(credRepo)
+                .origins(origins)
+                .attestationConveyancePreference(Optional.of(AttestationConveyancePreference.DIRECT))
+                .attestationTrustSource(mds)
+                .allowUntrustedAttestation(true)
+                .validateSignatureCounter(true)
+                .build();
     }
 
     @Override
@@ -235,6 +251,7 @@ public class App implements RequestHandler<Object, Object> {
                                         .build())
                                 .build()));
         log.debug("request: {}", request);
+
         registerRequestStorage.put(request.getRequestId(), request);
 
         String registerRequestJson = gson.toJson(request, RegistrationRequest.class);
@@ -593,4 +610,17 @@ public class App implements RequestHandler<Object, Object> {
         }
         return Optional.ofNullable(attResult);
     }
+
+    boolean invalidateRegistrationRequest(ByteArray requestID) {
+        if (registerRequestStorage.invalidate(requestID))
+            return true;
+        return false;
+    }
+
+    boolean addNewRegistrationRequest(ByteArray requestID, RegistrationRequest request) {
+        if (registerRequestStorage.put(requestID, request))
+            return true;
+        return false;
+    }
+
 }
