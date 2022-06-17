@@ -1,0 +1,99 @@
+import React, { useState, useEffect, useCallback } from "react";
+
+import { WebAuthnClient } from "../_components";
+import { history } from "../_helpers";
+import { Auth } from "aws-amplify";
+import { get, create } from "@github/webauthn-json";
+import { Spinner } from "react-bootstrap";
+
+const styles = require("../_components/component.module.css");
+
+/**
+ * Step used to login the user with a username
+ * This component will also allow the user to transition to other auth steps if needed
+ */
+const PasskeyLogin = function ({ navigation }) {
+  const [autoComplete, setAC] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const mediationAvailable = () => {
+    const pubKeyCred = PublicKeyCredential;
+    // Check if the function exists on the browser - Not safe to assume as the page will crash if the function is not available
+    if (
+      typeof pubKeyCred.isConditionalMediationAvailable === "function" &&
+      pubKeyCred.isConditionalMediationAvailable()
+    ) {
+      console.log("Mediation is available");
+      return true;
+    }
+    console.log("Mediation is not available");
+    return false;
+  };
+
+  const cO = (event) => {
+    event.preventDefault();
+  };
+
+  const passkeySignIn = useCallback(async () => {
+    console.log("In passkeySignIn");
+
+    try {
+      // Reaching out to Cognito for auth challenge
+      let requestOptions = await WebAuthnClient.getPublicKeyRequestOptions();
+      setAC("username webuathn");
+      console.log("Printing response from Cognito: ", requestOptions);
+
+      // Good news, webauthn-json still works with mediation (praise be for loose typing in JS)
+      const credential = await get({
+        publicKey: requestOptions.publicKeyCredentialRequestOptions,
+        mediation: "conditional",
+      });
+      setLoading(true);
+
+      console.log("Credential found for: ", credential.response.userHandle);
+      const name = credential.response.userHandle;
+      const cognitoUser = await Auth.signIn(name);
+      console.log("cognitoUser: ", cognitoUser);
+
+      const challengeResponse = {
+        credential: credential,
+        requestId: requestOptions.requestId,
+        pinCode: "-1",
+      };
+      const userData = await WebAuthnClient.sendChallengeAnswer(
+        cognitoUser,
+        challengeResponse,
+        "-1"
+      );
+      console.log(userData);
+      setLoading(false);
+      navigation.go("InitUserStep");
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    setAC("");
+    passkeySignIn().catch(console.error);
+  }, [passkeySignIn]);
+
+  return (
+    <>
+      <h3>Passkey Demo</h3>
+      <form onSubmit={cO}>
+        <input type="text" id="username-field" autoComplete={autoComplete} />
+        <br />
+      </form>
+      <br />
+      {loading && (
+        <>
+          <Spinner animation="border" role="status" variant="primary" />
+          <h4>Authenticating</h4>
+        </>
+      )}
+    </>
+  );
+};
+
+export default PasskeyLogin;
