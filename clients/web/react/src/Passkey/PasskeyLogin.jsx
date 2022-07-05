@@ -9,8 +9,7 @@ import { Spinner } from "react-bootstrap";
 const styles = require("../_components/component.module.css");
 
 /**
- * Step used to login the user with a username
- * This component will also allow the user to transition to other auth steps if needed
+ * Step used to login the user with the autofill mechanism from Apple devices for Passkeys
  */
 const PasskeyLogin = function ({ navigation }) {
   const [autoComplete, setAC] = useState("");
@@ -19,6 +18,7 @@ const PasskeyLogin = function ({ navigation }) {
   const mediationAvailable = () => {
     const pubKeyCred = PublicKeyCredential;
     // Check if the function exists on the browser - Not safe to assume as the page will crash if the function is not available
+    //typeof check is used as browsers that do not support mediation will not have the 'isConditionalMediationAvailable' method available
     if (
       typeof pubKeyCred.isConditionalMediationAvailable === "function" &&
       pubKeyCred.isConditionalMediationAvailable()
@@ -30,6 +30,10 @@ const PasskeyLogin = function ({ navigation }) {
     return false;
   };
 
+  /**
+   * Function meant to prevent the form below from triggering a page refresh on submit
+   * @param event event triggered from the UI
+   */
   const cO = (event) => {
     event.preventDefault();
   };
@@ -74,8 +78,12 @@ const PasskeyLogin = function ({ navigation }) {
   }, []);
 
   useEffect(() => {
-    setAC("");
-    passkeySignIn().catch(console.error);
+    if (!mediationAvailable()) {
+      history.push("/login");
+    } else {
+      setAC("");
+      passkeySignIn().catch(console.error);
+    }
   }, [passkeySignIn]);
 
   return (
