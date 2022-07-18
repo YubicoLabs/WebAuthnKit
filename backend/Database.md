@@ -58,7 +58,7 @@ CREATE TABLE registrationRequests (
 CREATE TABLE credentialRegistrations (
     username TEXT,
     userHandle TEXT,
-    credentialId TEXT,
+    credentialId NVARCHAR(1023),
     registration TEXT,
     creationDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     lastUsedDate DATETIME,

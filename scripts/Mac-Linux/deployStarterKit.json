@@ -1,9 +1,9 @@
 {
-  "AWS_CLI_PROFILE": "yubico-dev",
+  "AWS_CLI_PROFILE": "",
   "AWS_REGION": "",
   "S3_BUCKET_NAME": "",
   "CF_STACK_NAME": "",
-  "SUFFIX": "rcdemo",
+  "SUFFIX": "",
   "USER_POOL_NAME": "",
   "DATABASE_NAME": "",
   "DATABASE_MASTER_USERNAME": "",
