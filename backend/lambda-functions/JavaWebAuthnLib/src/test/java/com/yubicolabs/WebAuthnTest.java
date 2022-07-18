@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.Console;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -60,7 +61,7 @@ public class WebAuthnTest {
     String regReq = String.class.cast(reg);
     JsonObject jsonRegReq = JsonParser.parseString(regReq).getAsJsonObject();
     RegistrationRequest finalReq = gson.fromJson(jsonRegReq, RegistrationRequest.class);
-    assertEquals(finalReq.getClass(), RegistrationRequest.class);
+    assertEquals(RegistrationRequest.class, finalReq.getClass());
     assertEquals("unittest", finalReq.username);
     assertEquals("unittest", finalReq.publicKeyCredentialCreationOptions.getUser().getName());
 
@@ -82,8 +83,9 @@ public class WebAuthnTest {
     JsonObject jsonRegReq = JsonParser.parseString(regReq).getAsJsonObject();
     RegistrationRequest finalReq = gson.fromJson(jsonRegReq, RegistrationRequest.class);
 
-    assertEquals(finalReq.publicKeyCredentialCreationOptions.getAuthenticatorSelection().get()
-        .getAuthenticatorAttachment().get(), AuthenticatorAttachment.CROSS_PLATFORM);
+    assertEquals(AuthenticatorAttachment.CROSS_PLATFORM,
+        finalReq.publicKeyCredentialCreationOptions.getAuthenticatorSelection().get()
+            .getAuthenticatorAttachment().get());
 
     // Clear registration request from the registration request storage
     app.invalidateRegistrationRequest(finalReq.requestId);
@@ -102,8 +104,9 @@ public class WebAuthnTest {
     JsonObject jsonRegReq = JsonParser.parseString(regReq).getAsJsonObject();
     RegistrationRequest finalReq = gson.fromJson(jsonRegReq, RegistrationRequest.class);
 
-    assertEquals(finalReq.publicKeyCredentialCreationOptions.getAuthenticatorSelection().get()
-        .getAuthenticatorAttachment().get(), AuthenticatorAttachment.PLATFORM);
+    assertEquals(AuthenticatorAttachment.PLATFORM,
+        finalReq.publicKeyCredentialCreationOptions.getAuthenticatorSelection().get()
+            .getAuthenticatorAttachment().get());
 
     // Clear registration request from the registration request storage
     app.invalidateRegistrationRequest(finalReq.requestId);
@@ -177,7 +180,7 @@ public class WebAuthnTest {
 
     CredentialRegistration finalRes = CredentialRegistration.class.cast(res);
 
-    assertEquals(finalRes.getClass(), CredentialRegistration.class);
+    assertEquals(CredentialRegistration.class, finalRes.getClass());
 
     JsonObject deleteObj = new JsonObject();
     deleteObj.addProperty("username", finalRes.getUsername());
@@ -266,7 +269,7 @@ public class WebAuthnTest {
         registrationResultSamples.create_sampleRegistrationResult_noAT_pass(finalReq.requestId.getBase64Url()));
     Exception result = Exception.class.cast(res);
 
-    assertEquals(result.getClass(), RegistrationFailedException.class);
+    assertEquals(RegistrationFailedException.class, result.getClass());
 
   }
 
@@ -311,7 +314,7 @@ public class WebAuthnTest {
     JsonObject jsonAssertionReq = JsonParser.parseString(assertionReq).getAsJsonObject();
     AssertionRequestWrapper finalAssertionReq = gson.fromJson(jsonAssertionReq, AssertionRequestWrapper.class);
 
-    assertEquals(finalAssertionReq.getClass(), AssertionRequestWrapper.class);
+    assertEquals(AssertionRequestWrapper.class, finalAssertionReq.getClass());
 
     /**
      * Test to ensure the allow list only includes the one credential belonging to
@@ -323,6 +326,11 @@ public class WebAuthnTest {
 
     // Clear registration request from the registration request storage
     app.invalidateRegistrationRequest(finalReq.requestId);
+
+    JsonObject deleteObj = new JsonObject();
+    deleteObj.addProperty("username", finalReq.getUsername());
+    app.removeAllRegistrations(deleteObj);
+
   }
 
   /**
@@ -330,10 +338,11 @@ public class WebAuthnTest {
    * registration object
    */
   @Test
-  // @Disabled
+  @Disabled
   public void testStartAuthentication_pass_usernameless() {
     /**
-     * This should be empty to simulate a usernaless flow where a username field is
+     * This should be empty to simulate a usernameless flow where a username field
+     * is
      * NOT included
      * Sending an empty username will result in a "user does not exist" error
      */
@@ -343,15 +352,30 @@ public class WebAuthnTest {
     JsonObject jsonAssertionReq = JsonParser.parseString(assertionReq).getAsJsonObject();
     AssertionRequestWrapper finalAssertionReq = gson.fromJson(jsonAssertionReq, AssertionRequestWrapper.class);
 
-    assertEquals(finalAssertionReq.getClass(), AssertionRequestWrapper.class);
+    assertEquals(AssertionRequestWrapper.class, finalAssertionReq.getClass(), );
 
     /**
-     * Test to ensure the allow list only includes the one credential belonging to
-     * the user
+     * Test to ensure the allow list is not present
      */
-    List<PublicKeyCredentialDescriptor> allowCredentials = finalAssertionReq.getPublicKeyCredentialRequestOptions()
-        .getAllowCredentials().get();
-    System.out.println(allowCredentials);
+    System.out.println(finalAssertionReq);
+    boolean allowCredentials = finalAssertionReq.getPublicKeyCredentialRequestOptions()
+        .getAllowCredentials().isPresent();
+    assertEquals(false, allowCredentials);
+
   }
 
+  /**
+   * Test to ensure that finishRegistration creates and stores a valid
+   * registration object
+   */
+  @Test
+  // @Disabled
+  public void testStartAuthentication_fail_invalidUsername() {
+
+    JsonObject authObj = new JsonObject();
+    authObj.addProperty("username", "unittest");
+    Object authResult = app.startAuthentication(authObj);
+
+    assertEquals(Exception.class, authResult.getClass());
+  }
 }
