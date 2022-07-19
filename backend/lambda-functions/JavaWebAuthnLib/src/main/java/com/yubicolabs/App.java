@@ -617,8 +617,20 @@ public class App implements RequestHandler<Object, Object> {
         return false;
     }
 
+    boolean invalidateAssertionRequest(ByteArray requestID) {
+        if (assertRequestStorage.invalidate(requestID))
+            return true;
+        return false;
+    }
+
     boolean addNewRegistrationRequest(ByteArray requestID, RegistrationRequest request) {
         if (registerRequestStorage.put(requestID, request))
+            return true;
+        return false;
+    }
+
+    boolean addNewAssertionRequest(ByteArray requestID, AssertionRequestWrapper request) {
+        if (assertRequestStorage.put(requestID, request))
             return true;
         return false;
     }

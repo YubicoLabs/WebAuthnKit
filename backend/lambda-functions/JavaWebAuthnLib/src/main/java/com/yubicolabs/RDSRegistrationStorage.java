@@ -40,7 +40,6 @@ public class RDSRegistrationStorage implements RegistrationStorage, CredentialRe
 
         public RDSRegistrationStorage() {
                 AWSRDSData rdsData = AWSRDSDataClient.builder()
-                                .withCredentials(new ProfileCredentialsProvider())
                                 .build();
                 client = RdsDataClient.builder()
                                 .rdsDataService(rdsData)

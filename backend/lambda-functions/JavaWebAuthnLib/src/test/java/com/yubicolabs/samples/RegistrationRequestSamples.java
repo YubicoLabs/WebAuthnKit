@@ -9,7 +9,7 @@ public class RegistrationRequestSamples {
   private String requireResidentKey = "false";
   private String authAttachment_Plat = "PLATFORM";
   private String authAttachment_CP = "CROSS_PLATFORM";
-  private String uid = "5c7eb364-ddd2-11ec-9d64-0242ac120002";
+  private String uid = "ddd2-11ec-9d64-0242ac120002";
 
   public JsonObject create_sampleStartRegistration_pass() {
     JsonObject sampleObject = new JsonObject();
