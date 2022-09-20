@@ -86,20 +86,40 @@ const PasskeyLogin = function ({ navigation }) {
     }
   }, [passkeySignIn]);
 
+  const signInStep = () => {
+    history.push("/login");
+  };
+
+  const signUpStep = () => {
+    history.push("/register");
+  };
+
   return (
     <>
-      <h3>Passkey Demo</h3>
+      <h3>Login with passkey</h3>
       <form onSubmit={cO}>
         <input type="text" id="username-field" autoComplete={autoComplete} />
         <br />
       </form>
       <br />
       {loading && (
-        <>
+        <div className={styles.default["textCenter"]}>
           <Spinner animation="border" role="status" variant="primary" />
           <h4>Authenticating</h4>
-        </>
+        </div>
       )}
+      <div className={styles.default["textCenter"]}>
+        Don't see a passkey?{" "}
+        <span onClick={signInStep} className="btn-link">
+          Login another way
+        </span>
+      </div>
+      <div className={styles.default["textCenter"]}>
+        Don't have an account?{" "}
+        <span onClick={signUpStep} className="btn-link">
+          Sign Up
+        </span>
+      </div>
     </>
   );
 };
