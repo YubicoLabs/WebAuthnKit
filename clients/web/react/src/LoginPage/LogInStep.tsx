@@ -1,4 +1,4 @@
-import React, { useState, ReactElement } from "react";
+import React, { useState, ReactElement, useEffect, useCallback } from "react";
 import { Button, InputGroup, Form, Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 
@@ -8,6 +8,8 @@ import { WebAuthnClient } from "../_components";
 import U2FPassword from "../_components/u2fPassword/u2fPassword";
 import { history } from "../_helpers";
 import { credentialActions, alertActions } from "../_actions";
+import { Auth } from "aws-amplify";
+import { get } from "@github/webauthn-json";
 
 const styles = require("../_components/component.module.css");
 
@@ -40,6 +42,16 @@ const LogInStep = function ({ navigation }) {
 
   // detects if the user has put any info in the username field, used to stop the red outline from occurring on initial load
   const [initialInput, setInitialInput] = useState(false);
+
+  //Used to determine if a autofill menu should be used in the input
+  const [autoComplete, setAC] = useState("");
+
+  const [authAbortController, setAuthAbortController] = useState(
+    new AbortController()
+  );
+
+  //const authAbortController = new AbortController();
+  //const authAbortSignal = authAbortController.signal;
 
   const constraints = {
     username: {
@@ -93,6 +105,11 @@ const LogInStep = function ({ navigation }) {
    * If successful the user will proceed to the init user step
    */
   async function signIn(username) {
+    // If autofill is currently running, end the process to make way for modal auth session
+    if (mediationAvailable()) {
+      authAbortController.abort();
+    }
+
     console.info(
       t("console.info", {
         COMPONENT: "LoginStep",
@@ -152,6 +169,11 @@ const LogInStep = function ({ navigation }) {
       if (error.code === "UserNotFoundException") {
         signUpStep();
       }
+
+      if (mediationAvailable()) {
+        // Create a new abortcontroller, signaling that new autofill ceremony should be invoked
+        setAuthAbortController(new AbortController());
+      }
     }
   }
 
@@ -165,7 +187,12 @@ const LogInStep = function ({ navigation }) {
   /**
    * Routes the user to the first step of the register step
    */
-  const signUpStep = () => {
+  const signUpStep = async () => {
+    // You only need to kill the autofill process if mediation is available
+    if (mediationAvailable()) {
+      // The active webauthn ceremony needs to be aborted, otherwise the registration ceremony cannot be invoked
+      authAbortController.abort();
+    }
     history.push("/register");
   };
 
@@ -272,6 +299,90 @@ const LogInStep = function ({ navigation }) {
     return true;
   };
 
+  /**
+   * Method to determine if conditional mediation (autofill) is available on the browser
+   * This method will be used in multiple flows on this page to determine if actions should be taken
+   * to trigger an autofill flow, or abort an existing practice
+   * @returns True if autofill is available, false otherwise
+   */
+  const mediationAvailable = () => {
+    // Need to add any as the used version of TS does not include isConditionalMediationAvailable
+    const pubKeyCred: any = PublicKeyCredential;
+    // Check if the function exists on the browser - Not safe to assume as the page will crash if the function is not available
+    //typeof check is used as browsers that do not support mediation will not have the 'isConditionalMediationAvailable' method available
+    if (
+      typeof pubKeyCred.isConditionalMediationAvailable === "function" &&
+      pubKeyCred.isConditionalMediationAvailable()
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * Sign in flow that utilizes the conditional mediation flow of the get() method
+   */
+  const passkeySignIn = useCallback(async (authAbortControllerValue) => {
+    try {
+      // Reaching out to Cognito for auth challenge
+      let requestOptions = await WebAuthnClient.getPublicKeyRequestOptions();
+      setAC("username webuathn");
+      console.log("Printing response from Cognito: ", requestOptions);
+
+      const credential = await get({
+        publicKey: requestOptions.publicKeyCredentialRequestOptions,
+        // @ts-ignore
+        mediation: "conditional",
+        signal: authAbortControllerValue.signal,
+      });
+      setUsernamelessSubmitted(true);
+      setContinueSubmitted(true);
+
+      console.log("Credential found for: ", credential.response.userHandle);
+      const name = credential.response.userHandle;
+      const cognitoUser = await Auth.signIn(name);
+      console.log("cognitoUser: ", cognitoUser);
+
+      const challengeResponse = {
+        credential: credential,
+        requestId: requestOptions.requestId,
+        pinCode: "-1",
+      };
+      const userData = await WebAuthnClient.sendChallengeAnswer(
+        cognitoUser,
+        challengeResponse,
+        "-1"
+      );
+      console.log(userData);
+      setUsernamelessSubmitted(false);
+      setContinueSubmitted(false);
+      navigation.go("InitUserStep");
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  /**
+   * On initial page load, attempt to see if autofill is available
+   * If available, begin a conditional mediation WebAuthn call
+   */
+  useEffect(() => {
+    if (mediationAvailable()) {
+      console.log("Allowing for mediation request to process");
+      setAC("");
+      passkeySignIn(authAbortController).catch(console.error);
+    }
+  }, [passkeySignIn]);
+
+  /**
+   * Attempt to retrigger the passkeysignin method if a new abort controller was created
+   */
+  useEffect(() => {
+    if (mediationAvailable() && authAbortController.signal.aborted === false) {
+      passkeySignIn(authAbortController).catch(console.error);
+    }
+  }, [authAbortController]);
+
   return (
     <>
       <div className={styles.default["textCenter"]}>
@@ -294,7 +405,16 @@ const LogInStep = function ({ navigation }) {
               isInvalid={!isUsernameValid() && initialInput}
               isValid={isUsernameValid()}
               required
+              autoComplete="username webauthn"
             />
+            {/**Chrome has a requirement that a password field be present, will remove once it's no longer needed**/}
+            <input
+              id="password"
+              value=""
+              required
+              type="password"
+              autoComplete="current-password webauthn"
+              hidden></input>
             <Form.Control.Feedback type="invalid">
               {errors.username}
             </Form.Control.Feedback>
