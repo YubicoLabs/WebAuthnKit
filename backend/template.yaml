@@ -389,7 +389,7 @@ Resources:
         Ref: DefineAuthChallengeFuncName
       CodeUri: lambda-functions/DefineAuth/
       Handler: DefineAuthChallengeFIDO2.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
   # Create Auth Challenge
   CreateAuthChallenge:
     Type: AWS::Serverless::Function
@@ -398,7 +398,7 @@ Resources:
         Ref: CreateAuthChallengeFuncName
       CodeUri: lambda-functions/CreateAuth/
       Handler: CreateAuthChallengeFIDO2.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       # Environment variables for connecting to RDS
       Environment:
         Variables:
@@ -421,7 +421,7 @@ Resources:
         Ref: VerifyAuthChallengeFuncName
       CodeUri: lambda-functions/VerifyAuth/
       Handler: VerifyAuthChallengeFIDO2.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       # Environment variables for connecting to RDS
       Environment:
         Variables:
@@ -445,7 +445,7 @@ Resources:
         Ref: PreSignUpFuncName
       CodeUri: lambda-functions/PreSignUp/
       Handler: PreSignUpFIDO2.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
 
   # WebAuthn Starter Kit - API Lambda Function
   WebAuthnKitAPIFunction:
@@ -455,7 +455,7 @@ Resources:
         Ref: WebAuthnKitAPIFuncName
       CodeUri: lambda-functions/FIDO2KitAPI/
       Handler: FIDO2KitAPI.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       # Environment variables for connecting to RDS
       Environment:
         Variables:
@@ -479,7 +479,7 @@ Resources:
         Ref: CreateDBSchemaFuncName
       CodeUri: lambda-functions/CreateDBSchema/
       Handler: CreateDBSchema.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       # Environment variables for connecting to RDS
       Environment:
         Variables:
@@ -657,7 +657,7 @@ Resources:
           });
         };
       Handler: index.handler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       Description: Invokes the database schema creation function.
       MemorySize: 128
       Timeout: 20
