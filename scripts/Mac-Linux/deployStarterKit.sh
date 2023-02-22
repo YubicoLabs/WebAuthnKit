@@ -143,18 +143,18 @@ aws s3 mb s3://$S3_BUCKET_NAME --region $AWS_REGION --endpoint-url https://s3.$A
 #3 |*************************** SAM Build ********************************************|
 echo "Step 3 [Deployment] Running SAM build...(~1 minute) "
 docker run -w /webauthnkit/backend --volume=$STARTER_KIT_DIR:/webauthnkit starterkit:dev \
-/home/developer/.local/bin/sam build > /dev/null 2>&1
+/usr/local/bin/sam build > /dev/null 2>&1
 
 #4 |***************************** SAM Package ****************************************|
 echo "Step 4 [Deployment] Running SAM package..."
 docker run -w /webauthnkit/backend --volume=$STARTER_KIT_DIR:/webauthnkit starterkit:dev \
-/home/developer/.local/bin/sam package > /dev/null 2>&1
+/usr/local/bin/sam package > /dev/null 2>&1
 
 #5 |**************************** SAM Deploy ******************************************|
 echo "Step 5 [Deployment] Running SAM deploy..."
 docker run -w /webauthnkit/backend --volume=$STARTER_KIT_DIR:/webauthnkit \
 --volume=${HOME}/.aws:/home/developer/.aws:ro starterkit:dev \
-/home/developer/.local/bin/sam deploy \
+/usr/local/bin/sam deploy \
 --s3-bucket $S3_BUCKET_NAME \
 --stack-name $CF_STACK_NAME \
 --profile $AWS_CLI_PROFILE \
