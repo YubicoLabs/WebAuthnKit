@@ -593,7 +593,7 @@ Resources:
       FunctionName:
         Ref: JavaWebAuthnFuncName
       CodeUri: lambda-functions/JavaWebAuthnLib/
-      Runtime: java8.al2
+      Runtime: java11
       Handler: com.yubicolabs.App::handleRequest
       Timeout: 30
       MemorySize: 1408

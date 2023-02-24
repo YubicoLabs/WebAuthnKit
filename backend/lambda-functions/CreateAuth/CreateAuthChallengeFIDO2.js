@@ -129,7 +129,7 @@ async function getCreateCredentialsOptions(event, creds) {
         let startRegisterPayload = JSON.parse(JSON.parse(response.Payload));
         console.log("response payload jsonparse2: "+startRegisterPayload);
         
-        const coseLookup = {"ES256": -7, "EdDSA": -8, "RS256": -257};
+        const coseLookup = {"ES256": -7, "EdDSA": -8, "ES384": -35, "ES512": -36, "RS256": -257};
         
         startRegisterPayload.requestId = startRegisterPayload.requestId.base64url;
         startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64url;

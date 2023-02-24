@@ -1,7 +1,7 @@
 # Pull in base image that already has Java, MVN, and Node pre-installed
 FROM openkbs/jdk-mvn-py3
 # The above Docker base image has the following pre-installed/configured:
-# node: v15.1.0 | npm: v7.0.8 | java: OpenJDK v1.8.0_265 | python: v3.6.9
+# node: v16.4.1 | npm: v7.20.0 | java: OpenJDK v11.0.11 | python: v3.6.9
 
 # Terminal interaction
 ENV TERM linux

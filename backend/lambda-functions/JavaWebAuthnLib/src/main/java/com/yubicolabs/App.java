@@ -542,15 +542,6 @@ public class App implements RequestHandler<Object, Object> {
         log.debug("buildAttestationResult() number of entries found in entries: {}", entries.size());
         log.debug("buildAttestationResult() entries found in entries: {}", gson.toJson(entries));
 
-        // If entries is empty, try through only the AAGUID, this allows Windows Hello
-        // to work
-        if (entries.size() == 0) {
-            log.debug("buildAttestationResult() No entries found, attempting by AAGUID only");
-            entries = mds.findEntries(new AAGUID(result.getAaguid()));
-            log.debug("buildAttestationResult() number of entries found  in entries AAGUID: {}", entries.size());
-            log.debug("buildAttestationResult() entries found  in entries AAGUID: {}", gson.toJson(entries));
-        }
-
         List<MetadataBLOBPayloadEntry> entriesAaguid = entries.stream()
                 .filter(ent -> ent.getAaguid().isPresent()
                         && ent.getAaguid().get().asHexString().equals(result.getAaguid().getHex()))
