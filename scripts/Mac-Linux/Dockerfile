@@ -13,7 +13,7 @@ RUN curl -S "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscl
 
 #2 - Install AWS SAM CLI via Python3 (https://github.com/aws/aws-sam-cli/issues/1424)
 RUN echo "Installing AWS SAM CLI..."
-RUN pip3 install --user --upgrade aws-sam-cli --no-warn-script-location --quiet > /dev/null 2>&1
+RUN curl -L https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip -o aws-sam-cli-linux-x86_64.zip && unzip aws-sam-cli-linux-x86_64.zip -d sam-installation && sudo ./sam-installation/install
 
 #3 - Install webpack
 RUN echo "Installing Webpack..."
