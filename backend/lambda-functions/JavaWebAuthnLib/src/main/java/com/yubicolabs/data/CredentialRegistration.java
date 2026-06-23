@@ -32,8 +32,6 @@ public class CredentialRegistration {
 
     RegisteredCredential credential;
 
-    Optional<AttestationRegistration> attestationMetadata;
-
     RegistrationRequest registrationRequest;
 
     @JsonProperty("registrationTime")

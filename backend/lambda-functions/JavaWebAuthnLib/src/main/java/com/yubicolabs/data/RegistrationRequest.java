@@ -14,7 +14,7 @@ public class RegistrationRequest {
     public String username;
     public String displayName;
     public String credentialNickname;
-    public boolean requireResidentKey;
+    public String residentKey;
     public ByteArray requestId;
     public PublicKeyCredentialCreationOptions publicKeyCredentialCreationOptions;
 }

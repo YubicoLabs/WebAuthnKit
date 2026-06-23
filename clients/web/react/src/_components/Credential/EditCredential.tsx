@@ -158,7 +158,9 @@ const EditCredential = function ({ credential }) {
           <label>
             <em>{t("credential.edit-usernameless")}</em>{" "}
             {credential.registrationRequest
-              ? credential.registrationRequest.requireResidentKey.toString()
+              ? (credential.registrationRequest.requireResidentKey?.toString()
+                  || credential.registrationRequest.residentKey
+                  || "")
               : ""}
           </label>
           <br />

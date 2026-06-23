@@ -5,7 +5,6 @@ import com.amazonaws.services.rdsdata.AWSRDSData;
 import com.amazonaws.services.rdsdata.AWSRDSDataClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.yubico.internal.util.CollectionUtil;
 import com.yubico.webauthn.AssertionResult;
 import com.yubico.webauthn.CredentialRepository;
 import com.yubico.webauthn.RegisteredCredential;
@@ -14,9 +13,7 @@ import com.yubico.webauthn.data.PublicKeyCredentialDescriptor;
 import com.yubicolabs.data.CredentialRegistration;
 import com.yubicolabs.data.RegistrationDTO;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +31,10 @@ public class RDSRegistrationStorage implements RegistrationStorage, CredentialRe
     private static final String DATABASE = System.getenv("DatabaseName");
 
     private final Clock clock = Clock.systemDefaultZone();
-    private final Gson gson = new GsonBuilder().create();
+    private final Gson gson = new GsonBuilder()
+        .registerTypeAdapter(java.time.Instant.class, InstantTypeAdapter.INSTANCE)
+        .registerTypeAdapterFactory(OptionalTypeAdapterFactory.INSTANCE)
+        .create();
 
     private final RdsDataClient client;
 
@@ -232,7 +232,7 @@ public class RDSRegistrationStorage implements RegistrationStorage, CredentialRe
 
     @Override
     public Set<RegisteredCredential> lookupAll(ByteArray credentialId) {
-        return CollectionUtil.immutableSet(
+        return Set.copyOf(
             getByCredentialId(credentialId).stream()
                 .map(reg -> RegisteredCredential.builder()
                     .credentialId(reg.getCredential().getCredentialId())

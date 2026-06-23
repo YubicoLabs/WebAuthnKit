@@ -58,7 +58,9 @@ const Credential = function ({ credential }) {
             )}
           <p>
             {t("credential.date-last-used")}:{" "}
-            {new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()}
+            {credential.lastUsedTime
+              ? new Date(credential.lastUsedTime.seconds * 1000).toLocaleString()
+              : ""}
           </p>
         </div>
         <div className="m-2">

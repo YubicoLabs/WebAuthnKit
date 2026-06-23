@@ -10,14 +10,13 @@ const steps = [
   { id: "InitUserStep" },
 ];
 
-const defaultData = {
-  username: localStorage.getItem("username"),
-  pin: -1,
-  nickname: "Security Key",
-  credential: localStorage.getItem("credential"),
-};
-
 function IdentifierFirstSignUpFlow() {
+  const defaultData = {
+    username: localStorage.getItem("username"),
+    pin: -1,
+    nickname: "Security Key",
+    credential: localStorage.getItem("credential"),
+  };
   const [formData, setForm] = useForm(defaultData);
   const _initialStep = defaultData.credential == null ? 0 : 2;
   const { step, navigation } = useStep({ initialStep: _initialStep, steps });

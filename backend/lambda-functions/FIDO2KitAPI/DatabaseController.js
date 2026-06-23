@@ -5,7 +5,7 @@
 module.exports = { getUserIdFromUserName, getUserProfile, getUserCredentials, updateFIDO2CredentialNickname, deleteFIDO2Credential, getPin, createRecoveryCodes, listRecoveryCodes, disableRecoveryCode, deleteRecoveryCodes, updatePin, getServerVerifiedPin, insertPin, deleteUser };
 
 // Using npmjs.com/package/data-api-client package for accessing an Aurora Serverless Database with Data API enabled
-const dbConfig = require('data-api-client')({
+const dbConfig = require('./db-client')({
     secretArn: process.env.DBSecretsStoreArn,
     resourceArn: process.env.DBAuroraClusterArn,
     database: process.env.DatabaseName
@@ -20,9 +20,9 @@ async function getUserIdFromUserName(userName) {
 
 // Get current user profile details from [user] table in database 
 async function getUserProfile(userId) {
-    let userProfile = await dbConfig.query('SELECT id, username, lastLoginDate, challenge FROM user WHERE cognito_id = :userId', { userId: userId });
+    let userProfile = await dbConfig.query('SELECT id, userName, lastLoginDate, challenge FROM user WHERE cognito_id = :userId', { userId: userId });
     let id = userProfile.records[0].id;
-    let un = userProfile.records[0].username;
+    let un = userProfile.records[0].userName;
     let logdate = userProfile.records[0].lastLoginDate;
     let challenge = userProfile.records[0].challenge;
     return { "id": id, "username": un,  "lastLoginDate": logdate, "challenge": challenge};

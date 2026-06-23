@@ -1,5 +1,5 @@
 // Using npmjs.com/package/data-api-client package for accessing an Aurora Serverless Database with Data API enabled
-const dbConfig = require('data-api-client')({
+const dbConfig = require('./db-client')({
     secretArn: process.env.DBSecretsStoreArn,
     resourceArn: process.env.DBAuroraClusterArn,
     database: process.env.DatabaseName

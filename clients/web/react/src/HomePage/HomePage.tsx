@@ -93,7 +93,7 @@ const HomePage = function () {
     if (credentials?.error) {
       dispatch(userActions.getCurrentAuthenticatedUser());
     }
-    if (credentials === {} || credentials.loading) {
+    if (Object.keys(credentials).length === 0 || credentials.loading) {
       setCredentialsLoading(true);
     } else {
       if (credentials.items) {
@@ -183,7 +183,7 @@ const HomePage = function () {
       const itemAuthAttach =
         credList[i].registrationRequest.publicKeyCredentialCreationOptions
           .authenticatorSelection?.authenticatorAttachment;
-      if (itemAuthAttach === "PLATFORM") {
+      if (itemAuthAttach?.toLowerCase() === "platform") {
         regDevice.push(credList[i]);
       } else {
         secKeys.push(credList[i]);

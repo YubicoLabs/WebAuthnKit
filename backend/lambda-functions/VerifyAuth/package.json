@@ -13,7 +13,6 @@
     "bcryptjs": "^2.4.3",
     "cbor": "^5.1.0",
     "crypto": "^1.0.1",
-    "data-api-client": "^1.1.0",
     "validate.js": "^0.13.1"
   }
 }

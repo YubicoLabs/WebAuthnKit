@@ -1,0 +1,20 @@
+{
+  "name": "webauthnkit-e2e-tests",
+  "version": "3.0.0",
+  "private": true,
+  "description": "End-to-end BDD tests for WebAuthnKit using Cucumber.js and Playwright",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:dry": "cucumber-js --dry-run",
+    "test:registration": "cucumber-js tests/features/registration.feature",
+    "test:auth": "cucumber-js tests/features/authentication.feature",
+    "test:usernameless": "cucumber-js tests/features/usernameless-login.feature",
+    "test:recovery": "cucumber-js tests/features/recovery-codes.feature",
+    "test:credentials": "cucumber-js tests/features/credential-management.feature",
+    "test:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.9.0",
+    "playwright": "^1.49.0"
+  }
+}

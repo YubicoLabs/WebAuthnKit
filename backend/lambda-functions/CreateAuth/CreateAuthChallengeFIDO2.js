@@ -13,9 +13,10 @@
 'use strict';
 
 var crypto = require('crypto');
-var AWS = require('aws-sdk');
-AWS.config.region = process.env.Region;
-var lambda = new AWS.Lambda();
+const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda');
+const { CognitoIdentityProviderClient, AdminUpdateUserAttributesCommand } = require('@aws-sdk/client-cognito-identity-provider');
+const lambdaClient = new LambdaClient({ region: process.env.Region });
+const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.Region });
 const validate  = require('validate.js');
 var constraints = {
     username: {
@@ -31,13 +32,9 @@ var constraints = {
         }
     }
 };
-const authSelectorResolve = {
-    "PLATFORM": "platform",
-    "CROSS_PLATFORM": "cross-platform"
-};
 
 // Using npmjs.com/package/data-api-client package for accessing an Aurora Serverless Database with Data API enabled
-const data = require('data-api-client')({
+const data = require('./db-client')({
     secretArn: process.env.DBSecretsStoreArn,
     resourceArn: process.env.DBAuroraClusterArn,
     database: process.env.DatabaseName
@@ -46,71 +43,58 @@ const data = require('data-api-client')({
 
 // Main async handler - Only called by Cognito User Pools for Custom Auth Flow
 exports.handler = async (event = {}) => {
-    console.log('RECEIVED Event: ', JSON.stringify(event, null, 2));
 
     const result = validate({username: event.userName}, constraints)
     if(result){
-        console.error("invalid username: ", result);
         return;
     }
 
     // Get known credentials for user. Always set username to lowerCase
     let creds = await getAllowedCredentialsForUser(event.userName, event.request.userAttributes.sub);
-    console.log('User creds found: ' + creds.length);
-    console.log('User creds: ', + creds);
     
     // IF credentials exist, authenticate...else register and return pinCode
-    if (creds.userCredentials === undefined || creds.userCredentials.length == 0) {
+    if (creds.userCredentials === undefined || creds.userCredentials.length === 0) {
         // Registration params
-        console.log('Entered registration ceremony');
         var publicKeyCredentialCreationOptions = await getCreateCredentialsOptions(event, creds);
         event.response.privateChallengeParameters = { "type": "webauthn.create" };
         event.response.publicChallengeParameters = { "type": "webauthn.create", publicKeyCredentialCreationOptions, "pinCode": creds.pinCode };
         
     } else  {
         // Authentication params
-        console.log('Entered authentication ceremony');
         var publicKeyCredentialRequestOptions = await getCredentialsOptions(event.request.userAttributes.name);
         event.response.privateChallengeParameters = { "type": "webauthn.get" };
         event.response.publicChallengeParameters = { "type": "webauthn.get", publicKeyCredentialRequestOptions };
     }
 
-    console.log('Returned event: ', JSON.stringify(event, null, 2));
     return event;
 };
 
 // REGISTRATION
 async function getCreateCredentialsOptions(event, creds) {
-    
-    const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
-        apiVersion: '2016-04-18'
-      });
-    cognitoidentityserviceprovider.adminUpdateUserAttributes(
-      {
-        UserAttributes: [
-          {
-            Name: 'preferred_username',
-            Value: event.request.userAttributes.sub
-          }
-        ],
-        UserPoolId: event.userPoolId,
-        Username: event.userName
-      },
-      function(err, data) {
-        console.log("err: ", err);
-        console.log("data: ", data);
-      }
-    );
+
+    try {
+        await cognitoClient.send(new AdminUpdateUserAttributesCommand({
+            UserAttributes: [
+                {
+                    Name: 'preferred_username',
+                    Value: event.request.userAttributes.sub
+                }
+            ],
+            UserPoolId: event.userPoolId,
+            Username: event.userName
+        }));
+    } catch (err) {
+        console.error('Failed to update user attributes:', err);
+    }
 
     const payload = JSON.stringify({
         "type": "startRegistration",
         "username": event.request.userAttributes.name,
         "displayName": event.request.userAttributes.name,
         "credentialNickname": "Security Key",
-        "requireResidentKey": false,
+        "residentKey": "preferred",
         "uid": event.request.userAttributes.sub
     });
-    console.log("getCreateCredentialsOptions request payload: "+payload);
 
     var params = {
         FunctionName: process.env.WebAuthnLibFunction, 
@@ -120,36 +104,33 @@ async function getCreateCredentialsOptions(event, creds) {
     };
 
     try {
-        console.log("invoking java-webauthn-server");
-        let response = await lambda.invoke(params).promise();
-        console.log("response: "+response);
-        console.log("response payload: "+response.Payload);
-        console.log("response payload jsonparse: "+JSON.parse(response.Payload));
+        let response = await lambdaClient.send(new InvokeCommand(params));
+        const payloadString = new TextDecoder().decode(response.Payload);
 
-        let startRegisterPayload = JSON.parse(JSON.parse(response.Payload));
-        console.log("response payload jsonparse2: "+startRegisterPayload);
+        let startRegisterPayload = JSON.parse(JSON.parse(payloadString));
         
-        const coseLookup = {"ES256": -7, "EdDSA": -8, "RS256": -257};
-        
-        startRegisterPayload.requestId = startRegisterPayload.requestId.base64url;
-        startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64url;
-        startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64url;
+        const coseLookup = {"ES256": -7, "EdDSA": -8, "RS256": -257, "ES384": -35, "ES512": -36, "Ed448": -9, "RS384": -258, "RS512": -259};
+
+        startRegisterPayload.requestId = startRegisterPayload.requestId.base64url || startRegisterPayload.requestId.base64;
+        startRegisterPayload.publicKeyCredentialCreationOptions.user.id = startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64url || startRegisterPayload.publicKeyCredentialCreationOptions.user.id.base64;
+        startRegisterPayload.publicKeyCredentialCreationOptions.challenge = startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64url || startRegisterPayload.publicKeyCredentialCreationOptions.challenge.base64;
         startRegisterPayload.publicKeyCredentialCreationOptions.attestation = startRegisterPayload.publicKeyCredentialCreationOptions.attestation.toLowerCase();
-        startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
-        startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment = authSelectorResolve[startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment];
-        startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams = startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams.map( (cred) => { 
+        if (startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification) {
+            startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.userVerification.toLowerCase();
+        }
+        if (startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey) {
+            startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey = startRegisterPayload.publicKeyCredentialCreationOptions.authenticatorSelection.residentKey.toLowerCase();
+        }
+        startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams = startRegisterPayload.publicKeyCredentialCreationOptions.pubKeyCredParams.map( (cred) => {
             cred.type = cred.type.toLowerCase().replace('_','-');
             cred.alg = coseLookup[cred.alg];
-            console.log("cred: "+ JSON.stringify(cred));
             return cred;
-        });
-        console.log("response payload: ", startRegisterPayload);
+        }).filter(cred => cred.alg !== undefined);
         
         return JSON.stringify(startRegisterPayload);
     } catch (err) {
-        //context.fail(err);
-        console.log("error"+ err);
-        return "error";
+        console.error('Failed to create registration options:', err);
+        throw new Error('Failed to create registration options: ' + err.message);
     }
 }
 
@@ -160,7 +141,6 @@ async function getCredentialsOptions(username) {
         "type": "startAuthentication",
         "username": username
     });
-    console.log("getCredentialsOptions request payload: "+payload);
 
     var params = {
         FunctionName: process.env.WebAuthnLibFunction, 
@@ -170,32 +150,26 @@ async function getCredentialsOptions(username) {
     };
 
     try {
-        console.log("invoking java-webauthn-server");
-        let response = await lambda.invoke(params).promise();
-        console.log("response: "+response);
-        console.log("response payload: "+response.Payload);
-        console.log("response payload jsonparse: "+JSON.parse(response.Payload));
+        let response = await lambdaClient.send(new InvokeCommand(params));
+        const payloadString = new TextDecoder().decode(response.Payload);
 
-        let startAuthPayload = JSON.parse(JSON.parse(response.Payload));
-        console.log("startAuthPayload: ", startAuthPayload);
+        let startAuthPayload = JSON.parse(JSON.parse(payloadString));
 
-        startAuthPayload.requestId = startAuthPayload.requestId.base64url;
-        console.log("requestId: ", startAuthPayload.requestId);
-        startAuthPayload.publicKeyCredentialRequestOptions.userVerification = startAuthPayload.publicKeyCredentialRequestOptions.userVerification.toLowerCase();
-        startAuthPayload.publicKeyCredentialRequestOptions.challenge = startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64url;
-        console.log("challenge: ", startAuthPayload.publicKeyCredentialRequestOptions.challenge);
-        startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials = startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials.map( (cred) => { 
+        startAuthPayload.requestId = startAuthPayload.requestId.base64url || startAuthPayload.requestId.base64;
+        if (startAuthPayload.publicKeyCredentialRequestOptions.userVerification) {
+            startAuthPayload.publicKeyCredentialRequestOptions.userVerification = startAuthPayload.publicKeyCredentialRequestOptions.userVerification.toLowerCase();
+        }
+        startAuthPayload.publicKeyCredentialRequestOptions.challenge = startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64url || startAuthPayload.publicKeyCredentialRequestOptions.challenge.base64;
+        startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials = startAuthPayload.publicKeyCredentialRequestOptions.allowCredentials.map( (cred) => {
             cred.type = cred.type.toLowerCase().replace('_','-');
-            cred.id = cred.id.base64url;
+            cred.id = cred.id.base64url || cred.id.base64;
             return cred
         });
-        console.log("response payload: ", startAuthPayload);
         
         return JSON.stringify(startAuthPayload);
     } catch (err) {
-        //context.fail(err);
-        console.log("error"+ err);
-        return "error";
+        console.error('Failed to create authentication options:', err);
+        throw new Error('Failed to create authentication options: ' + err.message);
     }
 }
 
@@ -211,7 +185,6 @@ async function getAllowedCredentialsForUser(userName, cognitoId){
         "type": "getCredentialIdsForUsername",
         "username": userName,
     });
-    console.log("getCredentialIdsForUsername payload: "+payload);
     
     var params = {
         FunctionName: process.env.WebAuthnLibFunction, 
@@ -221,37 +194,35 @@ async function getAllowedCredentialsForUser(userName, cognitoId){
     };
     
     try {
-        console.log("invoking java-webauthn-server");
-        let response = await lambda.invoke(params).promise();
+        let response = await lambdaClient.send(new InvokeCommand(params));
 
-        let payload = JSON.parse(JSON.parse(response.Payload));
-        console.log("response payload: ", payload);
+        const payloadString = new TextDecoder().decode(response.Payload);
+        let payload = JSON.parse(JSON.parse(payloadString));
         userCreds.records = payload;
     } catch (err) {
-        console.log("error"+ err);
-        return "error";
+        console.error('Failed to get credentials for user:', err);
+        throw new Error('Failed to get credentials for user: ' + err.message);
     }
     
-    console.log('userCreds: ', userCreds.records);
     
     // Return empty credentials if none defined in db
-    if (userCreds.records === undefined || userCreds.records == 0) {
+    if (userCreds.records === undefined || userCreds.records.length === 0) {
         // Create new user with empty credentials
         await data.query('INSERT IGNORE INTO user (userName, cognito_id) VALUES(:userName, :cognito_id)', { userName: userName, cognito_id: cognitoId });
-        
+
         let userCredentialObject = {
             userName: userName,
             cognitoId: cognitoId,
             userCredentials: (userCredentials)
         };
-        
+
         return userCredentialObject;
     }
-    
+
     let userCredentialObject = {
         userName: userName,
         cognitoId: cognitoId,
-        userCredentials: (payload)
+        userCredentials: (userCreds.records)
     };
 
     return userCredentialObject;

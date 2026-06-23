@@ -167,7 +167,9 @@ const EditTrustedDevice = function ({ credential }) {
           <label>
             <em>{t("trusted-device.edit-usernameless")}</em>{" "}
             {credential.registrationRequest
-              ? credential.registrationRequest.requireResidentKey.toString()
+              ? (credential.registrationRequest.requireResidentKey?.toString()
+                  || credential.registrationRequest.residentKey
+                  || "")
               : ""}
           </label>
           <br />

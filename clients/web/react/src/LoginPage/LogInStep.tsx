@@ -288,6 +288,7 @@ const LogInStep = function ({ navigation }) {
               name="username"
               placeholder="Username"
               aria-label="Username"
+              autoComplete="username webauthn"
               defaultValue={inputs.username}
               aria-describedby="basic-addon1"
               onChange={handleChange}

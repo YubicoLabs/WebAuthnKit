@@ -11,6 +11,7 @@ import HomePage from "../HomePage/HomePage";
 import IdentifierFirstLoginFlowPage from "../LoginPage/IdentifierFirstLoginFlowPage";
 import IdentifierFirstSignUpFlowPage from "../RegisterPage/IdentifierFirstSignUpFlowPage";
 import LogoutPage from "../LogoutPage/LogoutPage";
+import PasskeyLoginPage from "../PasskeyLoginPage/PasskeyLoginPage";
 
 import aws_exports from "../aws-exports";
 
@@ -59,6 +60,7 @@ const App = function () {
                       path="/register"
                       component={IdentifierFirstSignUpFlowPage}
                     />
+                    <Route path="/passkey" component={PasskeyLoginPage} />
                     <Route path="/logout" component={LogoutPage} />
                     <Redirect from="*" to="/" />
                   </Switch>

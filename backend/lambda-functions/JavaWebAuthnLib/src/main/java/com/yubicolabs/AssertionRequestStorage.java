@@ -19,7 +19,10 @@ public class AssertionRequestStorage {
     private static final String SECRET_ARN = System.getenv("DBSecretsStoreArn");
     private static final String DATABASE = System.getenv("DatabaseName");
 
-    private final Gson gson = new GsonBuilder().create();
+    private final Gson gson = new GsonBuilder()
+        .registerTypeAdapter(java.time.Instant.class, InstantTypeAdapter.INSTANCE)
+        .registerTypeAdapterFactory(OptionalTypeAdapterFactory.INSTANCE)
+        .create();
 
     private final RdsDataClient client;
 
@@ -37,7 +40,7 @@ public class AssertionRequestStorage {
 
         String keyJsonOutput = gson.toJson(key);
         String valueJsonOutput = gson.toJson(value);
- 
+
         final String SQL = "INSERT INTO assertionRequests (_key, _value) VALUES( :keyJsonOutput, :valueJsonOutput)";
 
         client.forSql(SQL)
@@ -82,15 +85,15 @@ public class AssertionRequestStorage {
         return gson.fromJson(result._value, AssertionRequestWrapper.class);
     }
 
-    @Value 
+    @Value
     private static class PutParams {
         public final String keyJsonOutput;
         public final String valueJsonOutput;
     }
 
-    @Value 
+    @Value
     private static class KeyParams {
         public final String keyJsonOutput;
     }
-    
+
 }
